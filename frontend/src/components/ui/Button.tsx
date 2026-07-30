@@ -27,11 +27,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantStyles = {
-    primary: 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 focus:ring-blue-500',
-    secondary: 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 focus:ring-slate-500',
-    outline: 'bg-transparent hover:bg-slate-800/60 text-slate-300 border border-slate-700 focus:ring-slate-500',
+    primary: 'bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:from-amber-400 hover:via-[#d4b26a] hover:to-yellow-300 text-black font-semibold shadow-lg shadow-[#C8A45D]/25 focus:ring-[#C8A45D]',
+    secondary: 'bg-white/[0.05] hover:bg-white/[0.08] text-slate-100 border border-white/[0.08] focus:ring-white/20',
+    outline: 'bg-transparent hover:bg-white/[0.04] text-slate-300 border border-white/[0.08] focus:ring-white/10',
     danger: 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-500/25 focus:ring-rose-500',
-    glass: 'glass-card hover:bg-slate-800/80 text-slate-200 border-white/10 hover:border-white/20',
+    glass: 'glass-card hover:bg-white/[0.06] text-slate-200 border-white/10 hover:border-white/20',
   };
 
   return (

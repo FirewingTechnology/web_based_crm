@@ -47,19 +47,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
   };
 
   return (
-    <header className="glass-card sticky top-0 z-20 h-16 border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between">
+    <header className="glass-card sticky top-0 z-20 h-16 border-b border-[#C8A45D]/12 px-4 sm:px-6 flex items-center justify-between">
       <div className="flex items-center gap-2.5">
         {onToggleMobileMenu && (
           <button
             onClick={onToggleMobileMenu}
-            className="md:hidden text-slate-300 hover:text-white p-2 rounded-xl hover:bg-slate-800/60 transition"
+            className="md:hidden text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/[0.05] transition"
             title="Open Menu"
           >
             <Menu className="h-5 w-5" />
           </button>
         )}
         <h2 className="text-base font-semibold text-white tracking-wide truncate">BrokerOS CRM</h2>
-        <span className="text-slate-600 hidden sm:inline">|</span>
+        <span className="text-slate-700 hidden sm:inline">|</span>
         <div className="hidden sm:block">
           <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{role}</Badge>
         </div>
@@ -72,11 +72,11 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
             playReminderChime();
             speakReminderVoice(`Hello ${user?.name || 'User'}, BrokerOS voice alert system is active.`);
           }}
-          className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5 text-xs font-medium"
+          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.05] transition flex items-center gap-1.5 text-xs font-medium"
           title="Test Voice & Ringtone Alert"
         >
-          <Volume2 className="h-5 w-5 text-blue-400 shrink-0" />
-          <span className="hidden md:inline text-blue-400">Test Voice</span>
+          <Volume2 className="h-5 w-5 text-[#C8A45D] shrink-0" />
+          <span className="hidden md:inline text-[#C8A45D]">Test Voice</span>
         </button>
 
         {/* Notifications Dropdown */}
@@ -86,24 +86,24 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               setShowNotifications(!showNotifications);
               setShowUserMenu(false);
             }}
-            className="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+            className="relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.05] transition"
           >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-blue-500 text-[10px] font-bold text-white flex items-center justify-center animate-pulse">
+              <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-[#C8A45D] text-[10px] font-bold text-black flex items-center justify-center animate-pulse">
                 {unreadCount}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="glass-modal absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl p-4 shadow-2xl z-50 border border-slate-800 text-slate-200">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
+            <div className="glass-modal absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl p-4 shadow-2xl z-50 border border-white/[0.08] text-slate-200">
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.06] mb-2">
                 <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
                   Notifications ({unreadCount})
                 </h4>
                 {unreadCount > 0 && (
-                  <button onClick={markAllRead} className="text-[11px] text-blue-400 hover:underline">
+                  <button onClick={markAllRead} className="text-[11px] text-[#C8A45D] hover:underline">
                     Mark all read
                   </button>
                 )}
@@ -115,15 +115,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                       key={n.id}
                       className={`p-2.5 rounded-xl border text-xs transition ${
                         n.is_read
-                          ? 'bg-slate-900/40 border-slate-800/60 opacity-60'
-                          : 'bg-blue-500/10 border-blue-500/20 text-slate-100'
+                          ? 'bg-white/[0.02] border-white/[0.05] opacity-60'
+                          : 'bg-[#C8A45D]/08 border-[#C8A45D]/20 text-slate-100'
                       }`}
                     >
                       <div className="flex items-start gap-2">
                         {n.type === 'success' ? (
                           <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                         ) : (
-                          <AlertCircle className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                          <AlertCircle className="h-4 w-4 text-[#C8A45D] shrink-0 mt-0.5" />
                         )}
                         <div>
                           <p className="font-semibold">{n.title}</p>
@@ -141,10 +141,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
         </div>
 
         {/* User Profile Dropdown Menu */}
-        <div className="relative flex items-center gap-2.5 border-l border-slate-800 pl-3 sm:pl-4">
+        <div className="relative flex items-center gap-2.5 border-l border-white/[0.06] pl-3 sm:pl-4">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-semibold text-white">{user?.name}</p>
-            <p className="text-[10px] text-slate-400">{user?.email}</p>
+            <p className="text-[10px] text-slate-500">{user?.email}</p>
           </div>
           <button
             onClick={() => {
@@ -152,14 +152,14 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               setShowNotifications(false);
             }}
             title="User Profile Menu"
-            className="h-9 w-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center transition focus:outline-none"
+            className="h-9 w-9 rounded-xl bg-[#C8A45D]/15 hover:bg-[#C8A45D]/25 text-[#C8A45D] border border-[#C8A45D]/30 flex items-center justify-center transition focus:outline-none"
           >
-            <UserCircle className="h-5 w-5 text-blue-400" />
+            <UserCircle className="h-5 w-5" />
           </button>
 
           {showUserMenu && (
-            <div className="glass-modal absolute right-0 top-12 w-64 rounded-2xl p-4 shadow-2xl z-50 border border-slate-800 text-slate-200 space-y-3">
-              <div className="pb-3 border-b border-slate-800">
+            <div className="glass-modal absolute right-0 top-12 w-64 rounded-2xl p-4 shadow-2xl z-50 border border-[#C8A45D]/20 text-slate-200 space-y-3">
+              <div className="pb-3 border-b border-white/[0.06]">
                 <p className="text-xs font-bold text-white">{user?.name}</p>
                 <p className="text-[11px] text-slate-400">{user?.email}</p>
                 <div className="mt-2">

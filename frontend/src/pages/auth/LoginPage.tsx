@@ -39,35 +39,36 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Animated Glows */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 relative overflow-hidden selection:bg-[#C8A45D] selection:text-black">
+      {/* Background Animated Gold Glows */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#C8A45D]/08 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/06 rounded-full blur-3xl pointer-events-none animate-pulse" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#C8A45D]/05 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="glass-modal max-w-md w-full rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 border border-slate-800"
+        className="glass-modal max-w-md w-full rounded-3xl p-7 sm:p-9 shadow-2xl relative z-10 border border-[#C8A45D]/15"
       >
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white mx-auto mb-3 shadow-lg shadow-blue-500/30">
-            <Sparkles className="h-6 w-6" />
+        <div className="text-center mb-7">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-600 via-[#C8A45D] to-yellow-300 flex items-center justify-center text-black mx-auto mb-4 shadow-xl shadow-[#C8A45D]/30">
+            <Sparkles className="h-7 w-7" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">BrokerOS CRM</h1>
-          <p className="text-xs text-slate-400 mt-1">Authorized Portal Access & Authentication</p>
+          <p className="text-xs text-slate-400 mt-1.5">Authorized Portal Access & Authentication</p>
         </div>
 
         {/* Portal Login Type Selector */}
-        <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-900/80 border border-slate-800 mb-6 text-xs">
+        <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-6 text-xs">
           <button
             type="button"
             onClick={() => handleTabSwitch('admin')}
-            className={`py-2 px-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${
+            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
               loginType === 'admin'
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 text-black shadow-md shadow-[#C8A45D]/30'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <ShieldCheck className="h-4 w-4" /> Admin Login
@@ -75,10 +76,10 @@ export const LoginPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabSwitch('sales')}
-            className={`py-2 px-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${
+            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
               loginType === 'sales'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 text-black shadow-md shadow-[#C8A45D]/30'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <UserCheck className="h-4 w-4" /> Sales Login
@@ -123,9 +124,9 @@ export const LoginPage: React.FC = () => {
         </form>
 
         {/* Provisioning Notice */}
-        <div className="mt-6 pt-4 border-t border-slate-800 text-center">
-          <p className="text-[10px] text-slate-500 flex items-center justify-center gap-1">
-            <LockKeyhole className="h-3 w-3 text-slate-400 shrink-0" />
+        <div className="mt-6 pt-4 border-t border-white/[0.06] text-center">
+          <p className="text-[10px] text-slate-600 flex items-center justify-center gap-1">
+            <LockKeyhole className="h-3 w-3 text-slate-500 shrink-0" />
             Public self-registration is disabled. Accounts are provisioned exclusively by System Admin.
           </p>
         </div>

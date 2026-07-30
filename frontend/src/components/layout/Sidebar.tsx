@@ -64,22 +64,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     <div className="flex flex-col justify-between h-full text-slate-300">
       <div>
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/80">
+        <div className="h-16 flex items-center justify-between px-5 border-b border-[#C8A45D]/15">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-amber-600 via-[#C8A45D] to-yellow-300 flex items-center justify-center text-black shadow-lg shadow-[#C8A45D]/25">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <h1 className="font-bold text-white tracking-wide text-base leading-none">
-                BrokerOS <span className="text-xs text-blue-400 font-medium">LITE</span>
+                BrokerOS <span className="text-xs text-[#C8A45D] font-medium">LITE</span>
               </h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Real Estate CRM</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Real Estate CRM</p>
             </div>
           </div>
           {onMobileClose && (
             <button
               onClick={onMobileClose}
-              className="md:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition"
+              className="md:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition"
             >
               <X className="h-5 w-5" />
             </button>
@@ -87,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
         </div>
 
         {/* Navigation Items */}
-        <nav className="p-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-140px)]">
+        <nav className="p-3 space-y-0.5 overflow-y-auto max-h-[calc(100vh-140px)]">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -98,12 +98,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30 shadow-sm'
-                      : 'hover:bg-slate-800/60 hover:text-slate-100 text-slate-400'
+                      ? 'bg-[#C8A45D]/15 text-[#C8A45D] border border-[#C8A45D]/30 shadow-sm'
+                      : 'hover:bg-white/[0.04] hover:text-slate-100 text-slate-400'
                   }`
                 }
               >
-                <Icon className="h-4.5 w-4.5 shrink-0" />
+                <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.label}</span>
               </NavLink>
             );
@@ -112,21 +112,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
       </div>
 
       {/* Footer User & Logout */}
-      <div className="p-4 border-t border-slate-800/80">
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+      <div className="p-4 border-t border-[#C8A45D]/10">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-8 w-8 rounded-lg bg-blue-600/30 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-[#C8A45D]/20 text-[#C8A45D] border border-[#C8A45D]/30 flex items-center justify-center font-bold text-xs uppercase shrink-0">
               {user?.name?.[0] || 'U'}
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-              <p className="text-[10px] text-blue-400 truncate font-medium">{role}</p>
+              <p className="text-[10px] text-[#C8A45D]/80 truncate font-medium">{role}</p>
             </div>
           </div>
           <button
             onClick={logout}
             title="Logout"
-            className="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition shrink-0"
+            className="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition shrink-0"
           >
             <LogOut className="h-4 w-4" />
           </button>
@@ -151,14 +151,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onMobileClose}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="glass-sidebar fixed top-0 left-0 bottom-0 w-72 z-50 flex flex-col justify-between text-slate-300 shadow-2xl border-r border-slate-800"
+              className="glass-sidebar fixed top-0 left-0 bottom-0 w-72 z-50 flex flex-col justify-between text-slate-300 shadow-2xl border-r border-[#C8A45D]/15"
             >
               {SidebarContent}
             </motion.aside>
