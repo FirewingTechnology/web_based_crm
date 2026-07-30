@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin } from 'lucide-react';
 
 export const WebsiteFooter: React.FC = () => {
   const navigate = useNavigate();
@@ -9,11 +9,13 @@ export const WebsiteFooter: React.FC = () => {
     <footer className="bg-[#040404] border-t border-white/[0.08] text-xs text-slate-400 pt-16 pb-12 px-6 lg:px-12">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
         <div className="space-y-4">
-          <div className="flex items-center gap-2" onClick={() => navigate('/')}>
-            <div className="h-8 w-8 rounded-lg bg-[#C8A45D] text-black flex items-center justify-center font-bold">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <span className="text-white font-bold text-base tracking-tight">BrokerOS</span>
+          <div className="cursor-pointer" onClick={() => navigate('/')}>
+            <img
+              src="/logo.png"
+              alt="BrokerOS"
+              className="h-16 w-auto object-contain"
+              style={{ maxWidth: '200px' }}
+            />
           </div>
           <p className="text-slate-400 text-xs font-light leading-relaxed">
             The official operating system for Real Estate Channel Partners, Brokerage Firms, and Sales Agencies.
