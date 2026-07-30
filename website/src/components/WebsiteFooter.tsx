@@ -53,7 +53,7 @@ export const WebsiteFooter: React.FC = () => {
             <li><button onClick={() => navigate('/blog')} className="hover:text-white transition">Industry Insights & Blog</button></li>
             <li><button onClick={() => navigate('/faq')} className="hover:text-white transition">Frequently Asked Questions</button></li>
             <li><button onClick={() => navigate('/contact')} className="hover:text-white transition">Contact Sales Team</button></li>
-            <li><a href="https://web-based-crm.onrender.com/login" target="_blank" rel="noreferrer" className="hover:text-[#C8A45D] transition">Authorized System Login</a></li>
+            <li><a href="https://brokeros-frontend.onrender.com/login" target="_blank" rel="noreferrer" className="hover:text-[#C8A45D] transition">Authorized System Login</a></li>
           </ul>
         </div>
       </div>
