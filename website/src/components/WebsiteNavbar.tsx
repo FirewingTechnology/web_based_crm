@@ -26,7 +26,7 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
           src="/logo.png"
           alt="BrokerOS"
           className="h-20 w-auto object-contain"
-          style={{ maxWidth: '320px' }}
+          style={{ maxWidth: '360px' }}
         />
       </div>
 

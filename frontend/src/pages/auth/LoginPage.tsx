@@ -58,7 +58,7 @@ export const LoginPage: React.FC = () => {
               src="/logo.png"
               alt="BrokerOS"
               className="w-full h-auto object-contain"
-              style={{ maxHeight: '180px' }}
+              style={{ maxHeight: '200px' }}
             />
           </div>
           <p className="text-xs text-slate-400">Authorized Portal Access & Authentication</p>

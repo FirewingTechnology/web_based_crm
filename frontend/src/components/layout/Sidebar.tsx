@@ -63,13 +63,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     <div className="flex flex-col justify-between h-full text-slate-300">
       <div>
         {/* Brand Header */}
-        <div className="h-24 flex items-center justify-between px-3 border-b border-[#C8A45D]/15">
-          <div className="flex items-center">
+        <div className="py-4 px-3 flex items-center justify-between border-b border-[#C8A45D]/15">
+          <div className="flex items-center w-full">
             <img
               src="/logo.png"
               alt="BrokerOS"
-              className="h-20 w-auto object-contain"
-              style={{ maxWidth: '220px' }}
+              className="w-full h-auto object-contain"
+              style={{ maxHeight: '64px' }}
             />
           </div>
           {onMobileClose && (
