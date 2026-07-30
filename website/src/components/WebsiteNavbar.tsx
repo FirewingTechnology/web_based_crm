@@ -25,8 +25,8 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
         <img
           src="/logo.png"
           alt="BrokerOS"
-          className="h-12 w-auto object-contain"
-          style={{ maxWidth: '200px' }}
+          className="h-16 w-auto object-contain"
+          style={{ maxWidth: '260px' }}
         />
       </div>
 
