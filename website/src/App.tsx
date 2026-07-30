@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { WebsiteNavbar } from './components/WebsiteNavbar';
 import { WebsiteFooter } from './components/WebsiteFooter';
 import { DemoModal } from './components/DemoModal';
@@ -38,7 +39,11 @@ export const App: React.FC = () => {
           </Routes>
         </main>
         <WebsiteFooter />
-        <DemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
+        <AnimatePresence>
+          {isDemoModalOpen && (
+            <DemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
+          )}
+        </AnimatePresence>
       </div>
     </BrowserRouter>
   );
