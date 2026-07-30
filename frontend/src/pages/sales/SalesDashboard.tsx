@@ -1,0 +1,171 @@
+import React, { useState, useEffect } from 'react';
+import { Target, Users, CalendarCheck, FileCheck2, Plus, ArrowUpRight, Trophy } from 'lucide-react';
+import { StatCard } from '../../components/ui/StatCard';
+import { Card } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { useAuth } from '../../context/AuthContext';
+import { leadsApi } from '../../api/leads';
+import { followupsApi } from '../../api/followups';
+import { bookingsApi } from '../../api/bookings';
+import { salesApi } from '../../api/sales';
+import { Lead } from '../../types/lead';
+import { Followup } from '../../types/followup';
+import { Booking } from '../../types/booking';
+import { SalesTarget } from '../../types/sales';
+import { LeadModal } from '../../components/modals/LeadModal';
+
+export const SalesDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [followups, setFollowups] = useState<Followup[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [myTarget, setMyTarget] = useState<SalesTarget | null>(null);
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+
+  useEffect(() => {
+    leadsApi.getLeads({ my_leads_only: true }).then((data) => setLeads(data.slice(0, 5))).catch(console.error);
+    followupsApi.getFollowups({ my_followups_only: true, filter_period: 'today' }).then(setFollowups).catch(console.error);
+    bookingsApi.getBookings({ my_bookings_only: true }).then((data) => setBookings(data.slice(0, 5))).catch(console.error);
+    
+    const currMonth = new Date().toISOString().slice(0, 7);
+    salesApi.getSalesTargets(currMonth).then((data) => {
+      if (data.length > 0) setMyTarget(data[0]);
+    }).catch(console.error);
+  }, []);
+
+  const handleCreateLead = async (data: any) => {
+    await leadsApi.createLead(data);
+    leadsApi.getLeads({ my_leads_only: true }).then((d) => setLeads(d.slice(0, 5)));
+  };
+
+  const targetPct = myTarget?.achievement_percentage || 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Welcome back, {user?.name}!</h1>
+          <p className="text-xs text-slate-400 mt-1">Here is your daily performance summary & scheduled followups</p>
+        </div>
+
+        <Button
+          size="sm"
+          variant="primary"
+          icon={<Plus className="h-4 w-4" />}
+          onClick={() => setIsLeadModalOpen(true)}
+        >
+          Add New Lead
+        </Button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="My Assigned Leads"
+          value={leads.length}
+          subtext="Active in your pipeline"
+          icon={<Users className="h-6 w-6" />}
+          color="blue"
+        />
+        <StatCard
+          title="Today's Followups"
+          value={followups.length}
+          subtext="Calls & site visits"
+          icon={<CalendarCheck className="h-6 w-6" />}
+          color="purple"
+        />
+        <StatCard
+          title="My Closed Bookings"
+          value={bookings.length}
+          subtext="Confirmed property deals"
+          icon={<FileCheck2 className="h-6 w-6" />}
+          color="emerald"
+        />
+        <StatCard
+          title="Monthly Target Progress"
+          value={`${targetPct}%`}
+          subtext={`₹${myTarget?.achieved_amount || 0}L of ₹${myTarget?.target_amount || 300}L`}
+          icon={<Target className="h-6 w-6" />}
+          color="amber"
+        />
+      </div>
+
+      {/* Target Progress Card */}
+      {myTarget && (
+        <Card className="space-y-3 bg-gradient-to-r from-blue-950/40 to-slate-900 border-blue-500/20">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-amber-400" /> Current Month Target ({myTarget.month_year})
+            </h3>
+            <Badge variant="amber">{targetPct}% Goal Reached</Badge>
+          </div>
+          <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-500"
+              style={{ width: `${Math.min(targetPct, 100)}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-slate-400 font-medium">
+            <span>Closed: ₹{myTarget.achieved_amount} Lakhs ({myTarget.achieved_bookings} Deals)</span>
+            <span>Goal: ₹{myTarget.target_amount} Lakhs ({myTarget.target_bookings} Deals)</span>
+          </div>
+        </Card>
+      )}
+
+      {/* Grid: My Leads & Today's Followups */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">Recent Assigned Leads</h3>
+            <Badge variant="blue">{leads.length} Leads</Badge>
+          </div>
+          <div className="divide-y divide-slate-800/80">
+            {leads.map((l) => (
+              <div key={l.id} className="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <p className="font-semibold text-white">{l.name}</p>
+                  <p className="text-slate-400 text-[11px]">{l.phone} • {l.preferred_location}</p>
+                </div>
+                <Badge variant={l.status === 'Booked' ? 'emerald' : 'blue'} size="sm">
+                  {l.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">Today's Scheduled Tasks</h3>
+            <Badge variant="purple">{followups.length} Tasks</Badge>
+          </div>
+          <div className="divide-y divide-slate-800/80">
+            {followups.length > 0 ? (
+              followups.map((f) => (
+                <div key={f.id} className="py-2.5 flex items-center justify-between text-xs">
+                  <div>
+                    <p className="font-semibold text-white">{f.title}</p>
+                    <p className="text-slate-400 text-[11px]">Lead: {f.lead_name}</p>
+                  </div>
+                  <Badge variant={f.status === 'Completed' ? 'emerald' : 'amber'} size="sm">
+                    {f.type}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <p className="py-4 text-xs text-slate-500 text-center">No tasks scheduled for today.</p>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      <LeadModal
+        isOpen={isLeadModalOpen}
+        onClose={() => setIsLeadModalOpen(false)}
+        onSubmit={handleCreateLead}
+      />
+    </div>
+  );
+};

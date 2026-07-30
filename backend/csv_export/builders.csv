@@ -1,0 +1,7 @@
+id,name,company,contact_person,phone,email,address,commission_rate,notes,created_at,updated_at,is_deleted
+1,Godrej Properties,Godrej Properties Ltd,Vikram Ahuja,+91 98765 43210,vikram@godrejproperties.com,"Godrej One, Vikhroli East, Mumbai",3.5,Tier 1 Developer. Prompt payouts within 30 days of booking.,2026-07-30 06:41:32.146527,2026-07-30 06:41:32.146527,0
+2,Lodha Group,Macrotech Developers,Sunita Sharma,+91 98123 45678,sunita@lodhagroup.com,"Lodha Excelus, NM Joshi Marg, Mumbai",4.0,Special incentive scheme for 3BHK and 4BHK luxury units.,2026-07-30 06:41:32.146527,2026-07-30 06:41:32.146527,0
+3,DLF Limited,DLF Home Developers,Rajesh Verma,+91 97111 22334,verma-rajesh@dlf.in,"DLF Shopping Mall, Arjun Nagar, Gurugram",3.0,High demand NRI preferred projects in NCR region.,2026-07-30 06:41:32.146527,2026-07-30 06:41:32.146527,0
+4,Prestige Group,Prestige Estates Projects Ltd,Ananya Rao,+91 99000 11223,ananya@prestigeconstructions.com,"Prestige Falcon Towers, MG Road, Bengaluru",3.5,Strong presence in South India & upcoming NCR expansion.,2026-07-30 06:41:32.146527,2026-07-30 06:41:32.146527,0
+5,string,string,string,string,string,string,3.0,string,2026-07-30 06:55:56.736328,2026-07-30 06:55:56.736328,0
+6,Avinash developers,av group,shubham kad,9658965898,avinash@gmial.com,navle bridge khali,300.0,fkt ratri available,2026-07-30 06:58:02.073950,2026-07-30 06:58:02.073950,0

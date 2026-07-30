@@ -1,0 +1,6 @@
+id,name,email,hashed_password,role,phone,firm_name,is_active,avatar_url,created_at,updated_at,is_deleted
+1,Aman Sharma,admin@brokeros.com,$2b$12$SweTHBbrSCkIq72Ts1WTYeoQn91gctZUtfIjLu5sL4K7FoAbTXxwy,ADMIN,+91 98100 11223,BrokerOS Corporate HQ,1,,2026-07-30 06:41:32.145336,2026-07-30 06:41:32.145336,0
+2,Priya Patel,manager@brokeros.com,$2b$12$2tPve6HTXwz531HU0BZjB.l22.1egvgsifRHNQnAPN.3BiEY16w/S,MANAGER,+91 98200 22334,BrokerOS Corporate HQ,1,,2026-07-30 06:41:32.145336,2026-07-30 06:41:32.145336,0
+3,Rohan Gupta,sales@brokeros.com,$2b$12$dxAzMWuvOYqGP/HsX1HNE.iMm4Sba1ie99pFgfUpYWoZ07qg3VKZa,SALES_EXECUTIVE,+91 98300 33445,BrokerOS Corporate HQ,1,,2026-07-30 06:41:32.145336,2026-07-30 06:41:32.145336,0
+4,Neha Singh,rahul@brokeros.com,$2b$12$4FSDzPsjgmxs2R1.wEHH3ebjyeMetTOYWA2uXNfhjCkBCNjPpnr16,SALES_EXECUTIVE,+91 98400 44556,BrokerOS Corporate HQ,1,,2026-07-30 06:41:32.145336,2026-07-30 06:41:32.145336,0
+5,Karan Malhotra,broker@brokeros.com,$2b$12$KSMmXQYjoYbaK4HYODqXS.g9VWhNe.qHndzALQ/YhVu8Xrf8Nb.ca,BROKER,+91 98500 55667,Apex Realty Advisors,1,,2026-07-30 06:41:32.145336,2026-07-30 06:41:32.145336,0

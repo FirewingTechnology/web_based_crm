@@ -1,0 +1,91 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models.broker import BrokerProfile
+from app.models.user import User, UserRole
+from app.schemas.broker import BrokerCreate, BrokerUpdate, BrokerResponse
+from app.utils.security import get_password_hash
+from app.middleware.auth_middleware import get_current_user, RequireRole
+
+router = APIRouter(prefix="/brokers", tags=["Brokers"])
+
+@router.get("", response_model=list[BrokerResponse])
+def get_brokers(
+    search: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(BrokerProfile).filter(BrokerProfile.is_deleted == False)
+    if search:
+        query = query.filter(
+            (BrokerProfile.firm_name.ilike(f"%{search}%")) | (BrokerProfile.contact_person.ilike(f"%{search}%"))
+        )
+    return query.order_by(BrokerProfile.firm_name).all()
+
+@router.post("", response_model=BrokerResponse, status_code=status.HTTP_201_CREATED)
+def create_broker(
+    broker_in: BrokerCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(RequireRole([UserRole.ADMIN, UserRole.MANAGER]))
+):
+    existing_user = db.query(User).filter(User.email == broker_in.email, User.is_deleted == False).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User with this email already exists")
+
+    # Create User account for broker
+    user = User(
+        name=broker_in.contact_person,
+        email=broker_in.email,
+        hashed_password=get_password_hash(broker_in.password),
+        role=UserRole.BROKER,
+        phone=broker_in.phone,
+        firm_name=broker_in.firm_name
+    )
+    db.add(user)
+    db.flush()
+
+    broker = BrokerProfile(
+        user_id=user.id,
+        firm_name=broker_in.firm_name,
+        contact_person=broker_in.contact_person,
+        phone=broker_in.phone,
+        email=broker_in.email,
+        address=broker_in.address,
+        commission_rate=broker_in.commission_rate
+    )
+    db.add(broker)
+    db.commit()
+    db.refresh(broker)
+
+    return broker
+
+@router.put("/{broker_id}", response_model=BrokerResponse)
+def update_broker(
+    broker_id: int,
+    broker_in: BrokerUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(RequireRole([UserRole.ADMIN, UserRole.MANAGER]))
+):
+    broker = db.query(BrokerProfile).filter(BrokerProfile.id == broker_id, BrokerProfile.is_deleted == False).first()
+    if not broker:
+        raise HTTPException(status_code=404, detail="Broker profile not found")
+
+    for field, value in broker_in.model_dump(exclude_unset=True).items():
+        setattr(broker, field, value)
+
+    db.commit()
+    db.refresh(broker)
+    return broker
+
+@router.delete("/{broker_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_broker(
+    broker_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(RequireRole([UserRole.ADMIN]))
+):
+    broker = db.query(BrokerProfile).filter(BrokerProfile.id == broker_id, BrokerProfile.is_deleted == False).first()
+    if not broker:
+        raise HTTPException(status_code=404, detail="Broker profile not found")
+
+    broker.is_deleted = True
+    db.commit()

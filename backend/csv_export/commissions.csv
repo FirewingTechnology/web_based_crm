@@ -1,0 +1,2 @@
+id,booking_id,builder_commission_rate,builder_commission_amount,executive_commission_rate,executive_commission_amount,broker_commission_rate,broker_commission_amount,company_margin_amount,payout_status,remarks,created_at,updated_at,is_deleted
+1,1,3.5,525000.0,0.5,75000.0,1.5,225000.0,225000.0,PENDING,Invoice #INV-2026-881 raised to Godrej Properties.,2026-07-30 06:41:32.196634,2026-07-30 06:41:32.196634,0

@@ -1,0 +1,3 @@
+id,user_id,month_year,target_amount,achieved_amount,target_bookings,achieved_bookings,created_at,updated_at,is_deleted
+1,3,2026-07,300.0,150.0,4,1,2026-07-30 06:41:32.196634,2026-07-30 06:41:32.196634,0
+2,4,2026-07,250.0,0.0,3,0,2026-07-30 06:41:32.196634,2026-07-30 06:41:32.196634,0

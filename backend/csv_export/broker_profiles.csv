@@ -1,0 +1,2 @@
+id,user_id,firm_name,contact_person,phone,email,address,commission_rate,total_deals,total_revenue_generated,performance_score,created_at,updated_at,is_deleted
+1,5,Apex Realty Advisors,Karan Malhotra,+91 98500 55667,broker@brokeros.com,"Suite 402, Signature Towers, Gurugram",1.5,1,15000000.0,4.8,2026-07-30 06:41:32.146527,2026-07-30 06:41:32.146527,0

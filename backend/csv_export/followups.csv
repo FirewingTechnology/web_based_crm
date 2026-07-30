@@ -1,0 +1,4 @@
+id,lead_id,assigned_to_id,type,status,title,scheduled_at,completed_at,notes,outcome,created_at,updated_at,is_deleted
+1,1,3,SITE_VISIT,PENDING,Chauffeur pickup site visit to Godrej Woods,2026-07-30 09:41:32.162269,,Driver Ramesh assigned. Pickup from Radisson Blu Noida.,,2026-07-30 06:41:32.181286,2026-07-30 06:41:32.181286,0
+2,3,4,CALL,OVERDUE,Discuss 10:90 subvention scheme details for Lodha Trump Tower,2026-07-29 06:41:32.162269,,Client requested updated price sheet with GST breakdown.,,2026-07-30 06:41:32.181286,2026-07-30 06:41:32.181286,0
+3,4,3,WHATSAPP,COMPLETED,Send floor plans & RERA allotment document PDF,2026-07-30 01:41:32.162269,2026-07-30 02:41:32.162269,Brochure sent via WhatsApp Business.,Client acknowledged and requested face-to-face meeting.,2026-07-30 06:41:32.181286,2026-07-30 06:41:32.181286,0

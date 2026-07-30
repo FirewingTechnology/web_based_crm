@@ -1,0 +1,2 @@
+id,user_id,user_name,action,module,details,created_at,updated_at,is_deleted
+1,1,Aman Sharma,SYSTEM_INIT,System,BrokerOS Lite database initialized with enterprise master records.,2026-07-30 06:41:32.208534,2026-07-30 06:41:32.208534,0

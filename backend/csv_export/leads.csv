@@ -1,0 +1,6 @@
+id,name,phone,email,source,status,priority,budget_min,budget_max,preferred_location,preferred_configuration,assigned_to_id,created_by_id,tags,created_at,updated_at,is_deleted
+1,Amitabh Mehra,+91 98111 99887,amitabh.m@gmail.com,99acres,SITE_VISIT,HIGH,150.0,250.0,"Sector 43, Noida",3 BHK,3,1,"VIP, NRI, High Intent",2026-07-30 06:41:32.162269,2026-07-30 06:41:32.162269,0
+2,Siddharth Kapoor,+91 97222 88776,sid.kapoor@techcorp.io,Referral,BOOKED,URGENT,120.0,160.0,"Sector 43, Noida",3 BHK,3,3,"Ready Buyer, Instant Token",2026-07-30 06:41:32.162269,2026-07-30 06:41:32.162269,0
+3,Dr. Suniti Deshmukh,+91 99333 77665,suniti.d@hospital.org,Facebook Ads,NEGOTIATION,HIGH,400.0,600.0,"Lower Parel, Mumbai",3 BHK Super Luxury,4,2,"Doctor, Cash Buyer",2026-07-30 06:41:32.162269,2026-07-30 06:41:32.162269,0
+4,Rajiv Singhania,+91 98444 66554,singhania.r@textiles.com,Direct Walk-in,QUALIFIED,MEDIUM,200.0,350.0,Central Delhi,4 BHK,3,1,Investor,2026-07-30 06:41:32.162269,2026-07-30 06:41:32.162269,0
+5,Vikramaditya Rao,+91 97555 55443,vikram.rao@fintech.co,Website,NEW,MEDIUM,90.0,140.0,Bangalore South,2 BHK,4,4,First Time Buyer,2026-07-30 06:41:32.162269,2026-07-30 06:41:32.162269,0

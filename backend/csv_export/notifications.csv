@@ -1,0 +1,3 @@
+id,user_id,title,message,type,is_read,created_at,updated_at,is_deleted
+1,3,New High-Priority Lead Assigned,Lead 'Amitabh Mehra' looking for 3 BHK in Noida assigned to you.,info,0,2026-07-30 06:41:32.210538,2026-07-30 06:41:32.210538,0
+2,1,New Booking Token Received,Booking BK-2026-1001 for ₹1.50 Cr created by Rohan Gupta.,success,0,2026-07-30 06:41:32.210538,2026-07-30 06:41:32.210538,0
