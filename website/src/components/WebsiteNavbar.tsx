@@ -49,7 +49,7 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
 
       <div className="hidden lg:flex items-center gap-3">
         <a
-          href="https://brokeros-frontend.onrender.com/login"
+          href="https://web-based-crm-1.onrender.com/login"
           target="_blank"
           rel="noreferrer"
           className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-1.5 border border-white/10"
@@ -87,7 +87,7 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
           ))}
           <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
             <a
-              href="https://brokeros-frontend.onrender.com/login"
+              href="https://web-based-crm-1.onrender.com/login"
               target="_blank"
               rel="noreferrer"
               className="w-full py-3 rounded-xl border border-white/10 text-xs font-semibold text-slate-200 text-center"
