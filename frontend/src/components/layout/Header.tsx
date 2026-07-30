@@ -14,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
   const { user, role, logout } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -81,7 +82,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
         {/* Notifications Dropdown */}
         <div className="relative">
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowUserMenu(false);
+            }}
             className="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
           >
             <Bell className="h-5 w-5" />
@@ -136,19 +140,46 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
           )}
         </div>
 
-        {/* User Info */}
-        <div className="flex items-center gap-2.5 border-l border-slate-800 pl-3 sm:pl-4">
+        {/* User Profile Dropdown Menu */}
+        <div className="relative flex items-center gap-2.5 border-l border-slate-800 pl-3 sm:pl-4">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-semibold text-white">{user?.name}</p>
             <p className="text-[10px] text-slate-400">{user?.email}</p>
           </div>
           <button
-            onClick={logout}
-            title="Account Menu / Logout"
-            className="h-9 w-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center transition"
+            onClick={() => {
+              setShowUserMenu(!showUserMenu);
+              setShowNotifications(false);
+            }}
+            title="User Profile Menu"
+            className="h-9 w-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center transition focus:outline-none"
           >
-            <UserCircle className="h-5 w-5" />
+            <UserCircle className="h-5 w-5 text-blue-400" />
           </button>
+
+          {showUserMenu && (
+            <div className="glass-modal absolute right-0 top-12 w-64 rounded-2xl p-4 shadow-2xl z-50 border border-slate-800 text-slate-200 space-y-3">
+              <div className="pb-3 border-b border-slate-800">
+                <p className="text-xs font-bold text-white">{user?.name}</p>
+                <p className="text-[11px] text-slate-400">{user?.email}</p>
+                <div className="mt-2">
+                  <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{role}</Badge>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition flex items-center gap-2"
+                >
+                  🚪 Sign Out of BrokerOS
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
