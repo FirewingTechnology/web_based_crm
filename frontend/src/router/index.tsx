@@ -3,18 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RoleGuard } from './RoleGuard';
 
-// Official Website Layout & Pages
-import { WebsiteLayout } from '../website/WebsiteLayout';
-import { HomePage } from '../website/pages/HomePage';
-import { AboutPage } from '../website/pages/AboutPage';
-import { SolutionsPage } from '../website/pages/SolutionsPage';
-import { FeaturesPage } from '../website/pages/FeaturesPage';
-import { IndustriesPage } from '../website/pages/IndustriesPage';
-import { PricingPage } from '../website/pages/PricingPage';
-import { BlogPage } from '../website/pages/BlogPage';
-import { FaqPage } from '../website/pages/FaqPage';
-import { ContactPage } from '../website/pages/ContactPage';
-
 // Layouts
 import { AdminLayout } from '../components/layout/AdminLayout';
 import { SalesLayout } from '../components/layout/SalesLayout';
@@ -47,17 +35,7 @@ export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Official Company Website Multi-Page Routes */}
-        <Route path="/" element={<WebsiteLayout><HomePage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/about" element={<WebsiteLayout><AboutPage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/solutions" element={<WebsiteLayout><SolutionsPage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/features" element={<WebsiteLayout><FeaturesPage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/industries" element={<WebsiteLayout><IndustriesPage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/pricing" element={<WebsiteLayout><PricingPage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/blog" element={<WebsiteLayout><BlogPage onOpenDemo={() => {}} /></WebsiteLayout>} />
-        <Route path="/faq" element={<WebsiteLayout><FaqPage /></WebsiteLayout>} />
-        <Route path="/contact" element={<WebsiteLayout><ContactPage /></WebsiteLayout>} />
-
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* Admin Portal Routes */}
@@ -92,7 +70,7 @@ export const AppRouter: React.FC = () => {
           </Route>
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
