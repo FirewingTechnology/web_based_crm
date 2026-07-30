@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, Lock, ArrowRight, Menu, X } from 'lucide-react';
+import { Lock, ArrowRight, Menu, X } from 'lucide-react';
 
 export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) => {
   const navigate = useNavigate();
@@ -21,16 +21,13 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
 
   return (
     <nav className="fixed top-0 inset-x-0 z-40 h-20 border-b border-white/[0.08] bg-[#050505]/85 backdrop-blur-xl px-6 lg:px-12 flex items-center justify-between">
-      <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-amber-600 via-[#C8A45D] to-yellow-300 flex items-center justify-center text-black font-black shadow-lg shadow-[#C8A45D]/20">
-          <Sparkles className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
-            BrokerOS <span className="text-[#C8A45D] text-xs px-2 py-0.5 rounded-full border border-[#C8A45D]/30 bg-[#C8A45D]/10">LITE</span>
-          </h1>
-          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono">Real Estate Operating System</p>
-        </div>
+      <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+        <img
+          src="/logo.png"
+          alt="BrokerOS"
+          className="h-12 w-auto object-contain"
+          style={{ maxWidth: '200px' }}
+        />
       </div>
 
       <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">

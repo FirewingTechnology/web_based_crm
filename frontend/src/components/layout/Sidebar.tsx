@@ -17,7 +17,6 @@ import {
   UserCircle,
   Building,
   LogOut,
-  Sparkles,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -64,17 +63,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     <div className="flex flex-col justify-between h-full text-slate-300">
       <div>
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-[#C8A45D]/15">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-amber-600 via-[#C8A45D] to-yellow-300 flex items-center justify-center text-black shadow-lg shadow-[#C8A45D]/25">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="font-bold text-white tracking-wide text-base leading-none">
-                BrokerOS <span className="text-xs text-[#C8A45D] font-medium">LITE</span>
-              </h1>
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Real Estate CRM</p>
-            </div>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#C8A45D]/15">
+          <div className="flex items-center">
+            <img
+              src="/logo.png"
+              alt="BrokerOS"
+              className="h-10 w-auto object-contain"
+              style={{ maxWidth: '170px' }}
+            />
           </div>
           {onMobileClose && (
             <button

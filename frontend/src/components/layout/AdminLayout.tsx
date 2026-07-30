@@ -8,7 +8,7 @@ export const AdminLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex">
+    <div className="min-h-screen bg-[#050505] text-slate-100 flex">
       <Sidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
       <div className="flex-1 md:ml-64 flex flex-col min-w-0">
         <Header onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)} />

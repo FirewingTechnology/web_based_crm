@@ -53,10 +53,14 @@ export const LoginPage: React.FC = () => {
       >
         {/* Header */}
         <div className="text-center mb-7">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-amber-600 via-[#C8A45D] to-yellow-300 flex items-center justify-center text-black mx-auto mb-4 shadow-xl shadow-[#C8A45D]/30">
-            <Sparkles className="h-7 w-7" />
+          <div className="flex justify-center mb-4">
+            <img
+              src="/logo.png"
+              alt="BrokerOS"
+              className="h-20 w-auto object-contain"
+              style={{ maxWidth: '260px' }}
+            />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">BrokerOS CRM</h1>
           <p className="text-xs text-slate-400 mt-1.5">Authorized Portal Access & Authentication</p>
         </div>
 
