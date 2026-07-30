@@ -96,7 +96,16 @@ export const ReportManagement: React.FC = () => {
                 <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
                 <YAxis stroke="#64748b" fontSize={11} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    borderColor: '#334155',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    color: '#f8fafc',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                  }}
+                  itemStyle={{ color: '#38bdf8', fontWeight: 600 }}
+                  labelStyle={{ color: '#f8fafc', fontWeight: 700 }}
                 />
                 <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -126,7 +135,16 @@ export const ReportManagement: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    borderColor: '#334155',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    color: '#f8fafc',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                  }}
+                  itemStyle={{ color: '#f8fafc', fontWeight: 600 }}
+                  labelStyle={{ color: '#f8fafc', fontWeight: 700 }}
                 />
               </PieChart>
             </ResponsiveContainer>

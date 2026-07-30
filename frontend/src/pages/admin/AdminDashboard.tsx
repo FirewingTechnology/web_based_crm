@@ -124,7 +124,16 @@ export const AdminDashboard: React.FC = () => {
                 <XAxis dataKey="month" stroke="#64748b" fontSize={11} />
                 <YAxis stroke="#64748b" fontSize={11} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    borderColor: '#334155',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    color: '#f8fafc',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                  }}
+                  itemStyle={{ color: '#38bdf8', fontWeight: 600 }}
+                  labelStyle={{ color: '#f8fafc', fontWeight: 700 }}
                 />
                 <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" />
               </AreaChart>
@@ -145,7 +154,16 @@ export const AdminDashboard: React.FC = () => {
                 <XAxis dataKey="source" stroke="#64748b" fontSize={10} />
                 <YAxis stroke="#64748b" fontSize={11} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{
+                    backgroundColor: '#0f172a',
+                    borderColor: '#334155',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    color: '#f8fafc',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)'
+                  }}
+                  itemStyle={{ color: '#a78bfa', fontWeight: 600 }}
+                  labelStyle={{ color: '#f8fafc', fontWeight: 700 }}
                 />
                 <Bar dataKey="count" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
               </BarChart>
