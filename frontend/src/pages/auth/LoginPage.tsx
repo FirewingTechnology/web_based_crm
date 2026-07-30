@@ -52,16 +52,16 @@ export const LoginPage: React.FC = () => {
         className="glass-modal max-w-md w-full rounded-3xl p-7 sm:p-9 shadow-2xl relative z-10 border border-[#C8A45D]/15"
       >
         {/* Header */}
-        <div className="text-center mb-7">
-          <div className="flex justify-center mb-4">
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-3">
             <img
               src="/logo.png"
               alt="BrokerOS"
-              className="h-32 w-auto object-contain"
-              style={{ maxWidth: '320px' }}
+              className="w-full h-auto object-contain"
+              style={{ maxHeight: '180px' }}
             />
           </div>
-          <p className="text-xs text-slate-400 mt-1.5">Authorized Portal Access & Authentication</p>
+          <p className="text-xs text-slate-400">Authorized Portal Access & Authentication</p>
         </div>
 
         {/* Portal Login Type Selector */}
