@@ -57,11 +57,11 @@ def create_project(
         if not builder:
             builder = Builder(
                 name=b_name,
+                company=b_name,
                 contact_person="Admin",
                 email=f"info@{b_name.lower().replace(' ', '')}.com",
                 phone="+91 98100 00000",
-                city="Noida",
-                state="Uttar Pradesh",
+                address="Noida, Uttar Pradesh",
                 commission_rate=3.5,
                 notes="Registered via Project Creation"
             )
@@ -75,11 +75,11 @@ def create_project(
     if not builder:
         builder = Builder(
             name="General Real Estate Developer",
+            company="General Real Estate Developer",
             contact_person="Admin",
             email="developer@brokeros.com",
             phone="+91 98100 00000",
-            city="Noida",
-            state="Uttar Pradesh",
+            address="Noida, Uttar Pradesh",
             commission_rate=3.5,
             notes="Default Developer"
         )
