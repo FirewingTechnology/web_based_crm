@@ -13,6 +13,22 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs"
 )
 
+@app.on_event("startup")
+def startup_db_seed():
+    Base.metadata.create_all(bind=engine)
+    try:
+        from app.database import SessionLocal
+        from app.models.user import User
+        from app.seed import seed_db
+        db = SessionLocal()
+        user_count = db.query(User).count()
+        if user_count == 0:
+            print("[RENDER STARTUP] Database empty. Seeding initial admin and sales accounts...")
+            seed_db()
+        db.close()
+    except Exception as e:
+        print(f"[RENDER STARTUP] Seeding check: {e}")
+
 # CORS Middleware setup
 origins = [
     "http://localhost:5173",
