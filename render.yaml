@@ -34,4 +34,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://brokeros-backend.onrender.com/api/v1
+        value: https://web-based-crm.onrender.com/api/v1
