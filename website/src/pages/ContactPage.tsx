@@ -25,16 +25,16 @@ export const ContactPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-bold text-white">BrokerOS Technologies Pvt. Ltd.</p>
-                    <p className="text-slate-400 font-light">DLF Cyber City, Tower 10B, 8th Floor, Sector 24, Gurugram, Haryana 122002, India</p>
+                    <p className="font-bold text-white">Firewing Technologies</p>
+                    <p className="text-slate-400 font-light">1st Floor, Navale Icon, Narhe Gaon, Katraj, Pune, Maharashtra, India</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-[#C8A45D] shrink-0" />
                   <div>
-                    <p className="font-bold text-white">Sales & VIP Demos</p>
-                    <p className="text-slate-400 font-light">+91 98100 00000 / +91 98765 43210</p>
+                    <p className="font-bold text-white">Sales & Support Hotline</p>
+                    <p className="text-slate-400 font-light">+91 95299 88152 / +91 89996 24212</p>
                   </div>
                 </div>
 
@@ -42,7 +42,7 @@ export const ContactPage: React.FC = () => {
                   <Mail className="h-5 w-5 text-[#C8A45D] shrink-0" />
                   <div>
                     <p className="font-bold text-white">Official Email</p>
-                    <p className="text-slate-400 font-light">contact@brokeros.com / sales@brokeros.com</p>
+                    <p className="text-slate-400 font-light">firewingtechnologiesindia@gmail.com</p>
                   </div>
                 </div>
               </div>

@@ -19,9 +19,9 @@ export const WebsiteFooter: React.FC = () => {
             The official operating system for Real Estate Channel Partners, Brokerage Firms, and Sales Agencies.
           </p>
           <div className="pt-2 text-[11px] text-slate-500 space-y-1">
-            <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#C8A45D]" /> Cyber City, Sector 24, Gurugram, India</p>
-            <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-[#C8A45D]" /> +91 98100 00000</p>
-            <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-[#C8A45D]" /> contact@brokeros.com</p>
+            <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#C8A45D]" /> 1st Floor, Navale Icon, Narhe Gaon, Katraj, Pune, Maharashtra</p>
+            <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-[#C8A45D]" /> +91 95299 88152 / +91 89996 24212</p>
+            <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-[#C8A45D]" /> firewingtechnologiesindia@gmail.com</p>
           </div>
         </div>
 
