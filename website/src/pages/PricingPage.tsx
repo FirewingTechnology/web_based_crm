@@ -5,7 +5,7 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }
   const plans = [
     {
       name: "Starter CP",
-      price: "₹2,499",
+      price: "₹999",
       period: "/ month",
       desc: "Perfect for independent single brokers & small agencies.",
       features: [
@@ -19,7 +19,7 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }
     },
     {
       name: "Professional Agency",
-      price: "₹6,999",
+      price: "₹4,999",
       period: "/ month",
       desc: "For growing channel partner firms and brokerage teams.",
       features: [
