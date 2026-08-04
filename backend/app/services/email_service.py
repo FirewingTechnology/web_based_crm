@@ -1,5 +1,7 @@
 import os
 import smtplib
+import ssl
+import socket
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -7,17 +9,17 @@ from typing import Optional
 
 logger = logging.getLogger("email_service")
 
-# SMTP Credentials & Config (Can be configured via env)
+# SMTP Credentials & Config
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "firewingtechnologiesindia@gmail.com")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "xlswimkesmlnrlnq").replace(" ", "")
 EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "REALVION Platform")
 
-
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Send an email via SMTP. Falls back to mock logger if SMTP password is not configured.
+    Send an email via SMTP.
+    Uses SSL Port 465 with IPv4 resolution for Cloud/Render Container Compatibility.
+    Falls back to Port 587 TLS if required.
     """
     if not SMTP_PASSWORD:
         logger.info(f"[EMAIL SERVICE - SIMULATED LOG] To: {to_email} | Subject: '{subject}'")
@@ -27,24 +29,36 @@ def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
         print(f"==================================================")
         return True
 
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"{EMAIL_FROM_NAME} <{SMTP_USER}>"
+    msg["To"] = to_email
+    part_html = MIMEText(html_content, "html")
+    msg.attach(part_html)
+
+    # Method 1: Try Port 465 (SSL - Container Recommended)
     try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"{EMAIL_FROM_NAME} <{SMTP_USER}>"
-        msg["To"] = to_email
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_HOST, 465, context=context, timeout=12) as server:
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_USER, to_email, msg.as_string())
+        logger.info(f"Email successfully sent to {to_email} via SSL:465")
+        print(f"[EMAIL SUCCESS] Delivered to {to_email} via Port 465 SSL")
+        return True
+    except Exception as ssl_err:
+        logger.warning(f"Port 465 SSL failed: {ssl_err}. Attempting Port 587 TLS fallback...")
 
-        part_html = MIMEText(html_content, "html")
-        msg.attach(part_html)
-
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+    # Method 2: Fallback to Port 587 (TLS)
+    try:
+        with smtplib.SMTP(SMTP_HOST, 587, timeout=12) as server:
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
-        
-        logger.info(f"Email successfully sent to {to_email}")
+        logger.info(f"Email successfully sent to {to_email} via TLS:587")
+        print(f"[EMAIL SUCCESS] Delivered to {to_email} via Port 587 TLS")
         return True
-    except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {str(e)}")
+    except Exception as tls_err:
+        logger.error(f"Failed to send email to {to_email} via both SSL and TLS: {tls_err}")
         return False
 
 def send_otp_email(to_email: str, otp_code: str) -> bool:
@@ -75,7 +89,7 @@ def send_otp_email(to_email: str, otp_code: str) -> bool:
     """
     return send_email_smtp(to_email, subject, html_content)
 
-def send_welcome_credentials_email(to_email: str, name: str, password: str, login_url: str, plan_name: str) -> bool:
+def send_welcome_credentials_email(to_email: str, name: str, password: str, login_url: str, plan_name: str = "Professional") -> bool:
     subject = f"Welcome to REALVION — Account Activated ({plan_name} Plan)"
     html_content = f"""
     <!DOCTYPE html>
