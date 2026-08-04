@@ -94,7 +94,58 @@ def register_demo(req: RegisterDemoRequest, db: Session = Depends(get_db)):
     # Check if user already exists
     existing_user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="An account with this email address already exists. Please log in.")
+        # Update existing user's password to match what they entered
+        existing_user.hashed_password = get_password_hash(req.password)
+        existing_user.name = req.full_name
+        existing_user.phone = req.phone
+        existing_user.firm_name = req.company_name
+        existing_user.is_active = True
+        
+        # Reset 1-Hour Free Trial for existing user's workspace
+        org = db.query(Organization).filter(Organization.name == req.company_name).order_by(Organization.id.desc()).first()
+        if not org:
+            org = db.query(Organization).order_by(Organization.id.desc()).first()
+            
+        now = datetime.utcnow()
+        one_hour_later = now + timedelta(hours=1)
+        if org:
+            sub = db.query(Subscription).filter(Subscription.organization_id == org.id).order_by(Subscription.id.desc()).first()
+            if sub:
+                sub.status = "Trial"
+                sub.start_date = now
+                sub.end_date = one_hour_later
+            else:
+                sub = Subscription(
+                    organization_id=org.id,
+                    status="Trial",
+                    start_date=now,
+                    end_date=one_hour_later,
+                    auto_renew=False
+                )
+                db.add(sub)
+        db.commit()
+        db.refresh(existing_user)
+        
+        token_data = {"user_id": existing_user.id, "email": existing_user.email, "role": existing_user.role.value, "is_demo": True}
+        access_token = create_access_token(data=token_data)
+        refresh_token = create_refresh_token(data=token_data)
+
+        return RegisterDemoResponse(
+            success=True,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            is_demo_mode=True,
+            user={
+                "id": existing_user.id,
+                "email": existing_user.email,
+                "name": existing_user.name,
+                "role": existing_user.role.value,
+                "firm_name": req.company_name
+            },
+            workspace_name=f"{req.company_name} Workspace",
+            message="Workspace password updated successfully! Please log in."
+        )
+
     
     # Create Organization
     slug = req.company_name.lower().replace(" ", "-").replace("&", "and") + "-" + "".join(random.choices(string.digits, k=4))
