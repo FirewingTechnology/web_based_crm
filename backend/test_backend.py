@@ -32,11 +32,15 @@ def test_get_me():
     assert user["email"] == "admin@brokeros.com"
     assert user["role"] == "Admin"
 
-def test_saas_otp_and_demo_register():
+from unittest.mock import patch
+
+@patch("app.routes.registration.send_otp_email", return_value=True)
+def test_saas_otp_and_demo_register(mock_send_email):
     # 1. Send OTP
-    send_res = client.post("/api/v1/saas/send-otp", json={"email": "firewingtechnologiesindia@gmail.com"})
+    send_res = client.post("/api/v1/saas/send-otp", json={"email": "user.test@example.com"})
     assert send_res.status_code == 200
     assert send_res.json()["success"] == True
+
 
 
     # 2. Get Plans
