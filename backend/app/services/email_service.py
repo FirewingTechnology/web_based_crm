@@ -10,9 +10,10 @@ logger = logging.getLogger("email_service")
 # SMTP Credentials & Config (Can be configured via env)
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "notifications@realvion.com")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+SMTP_USER = os.getenv("SMTP_USER", "firewingtechnologiesindia@gmail.com")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "xlswimkesmlnrlnq").replace(" ", "")
 EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "REALVION Platform")
+
 
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     """
