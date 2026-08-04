@@ -27,9 +27,9 @@ RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "whsec_REALVIONWe
 
 
 PLAN_PRICES = {
-    "starter": {"name": "Starter Plan", "subtotal": 1999.0, "platform_fee": 499.0},
-    "professional": {"name": "Professional Plan", "subtotal": 4999.0, "platform_fee": 499.0},
-    "enterprise": {"name": "Enterprise Plan", "subtotal": 14999.0, "platform_fee": 999.0},
+    "starter": {"name": "Starter CP Plan", "subtotal": 999.0},
+    "professional": {"name": "Professional Agency Plan", "subtotal": 4999.0},
+    "enterprise": {"name": "Enterprise Plan", "subtotal": 14999.0},
 }
 
 @router.post("/create-order", response_model=CreateOrderResponse)
@@ -37,14 +37,13 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
     plan_info = PLAN_PRICES.get(req.plan_code.lower(), PLAN_PRICES["professional"])
     
     subtotal = plan_info["subtotal"]
-    platform_fee = plan_info["platform_fee"]
     
     if req.coupon_code and req.coupon_code.upper() == "REALVION20":
         subtotal = round(subtotal * 0.8, 2) # 20% Discount
         
-    taxable_amount = subtotal + platform_fee
-    gst_amount = round(taxable_amount * 0.18, 2) # 18% GST
-    total_amount = round(taxable_amount + gst_amount, 2)
+    razorpay_fee = round(subtotal * 0.02, 2) # 2% Razorpay Transaction Commission
+    gst_amount = 0.0
+    total_amount = round(subtotal + razorpay_fee, 2)
     
     # Generate Razorpay Order ID format: order_RVsas_...
     order_id = f"order_RVsas_{int(datetime.now(timezone.utc).timestamp())}_{random.randint(100, 999)}"
@@ -52,7 +51,7 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
     payment = Payment(
         razorpay_order_id=order_id,
         amount=subtotal,
-        platform_fee=platform_fee,
+        platform_fee=razorpay_fee,
         gst_amount=gst_amount,
         total_amount=total_amount,
         currency="INR",
@@ -67,7 +66,7 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
     return CreateOrderResponse(
         order_id=order_id,
         amount=subtotal,
-        platform_fee=platform_fee,
+        platform_fee=razorpay_fee,
         gst_amount=gst_amount,
         total_amount=total_amount,
         currency="INR",
@@ -75,6 +74,7 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
         plan_name=plan_info["name"],
         is_test_mode=is_test_mode
     )
+
 
 
 @router.post("/webhook")

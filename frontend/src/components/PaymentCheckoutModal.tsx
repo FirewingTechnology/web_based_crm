@@ -23,17 +23,15 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
   if (!isOpen) return null;
 
   const planPricing = {
-    starter: { name: 'Starter Plan', price: 1999, fee: 499 },
-    professional: { name: 'Professional Plan', price: 4999, fee: 499 },
-    enterprise: { name: 'Enterprise Plan', price: 14999, fee: 999 },
+    starter: { name: 'Starter CP Plan', price: 999 },
+    professional: { name: 'Professional Agency Plan', price: 4999 },
+    enterprise: { name: 'Enterprise Plan', price: 14999 },
   };
 
   const planObj = planPricing[selectedPlan];
   const basePrice = Math.round(planObj.price * (1 - appliedDiscount));
-  const platformFee = planObj.fee;
-  const taxable = basePrice + platformFee;
-  const gst = Math.round(taxable * 0.18);
-  const total = taxable + gst;
+  const razorpayFee = Math.round(basePrice * 0.02); // 2% Razorpay Transaction Fee
+  const total = basePrice + razorpayFee;
 
   const handleApplyCoupon = () => {
     if (couponCode.trim().toUpperCase() === 'REALVION20') {
@@ -135,12 +133,10 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
       if (typeof window !== 'undefined' && window.Razorpay) {
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response: any) {
-          // If in test mode, complete activation gracefully
           verifyAndActivate(orderData.order_id, response.error?.metadata?.payment_id || `pay_test_${Date.now()}`, 'simulated_sig');
         });
         rzp.open();
       } else {
-        // Fallback simulation if JS SDK is blocked by browser adblocker
         await verifyAndActivate(orderData.order_id, `pay_auto_${Date.now()}`, 'simulated_sig');
       }
     } catch (err: any) {
@@ -241,12 +237,8 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
                 <span className="font-semibold text-white">₹{basePrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span>Platform Setup Fee:</span>
-                <span className="font-semibold text-white">₹{platformFee.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>GST (18%):</span>
-                <span className="font-semibold text-white">₹{gst.toLocaleString()}</span>
+                <span>Razorpay Fee (2%):</span>
+                <span className="font-semibold text-white">₹{razorpayFee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between pt-2 border-t border-slate-800 text-sm font-bold text-[#C8A45D]">
                 <span>Total Amount Payable:</span>

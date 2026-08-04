@@ -82,10 +82,11 @@ export const RegisterPage: React.FC = () => {
   };
 
   const plans = [
-    { code: 'starter', name: 'Starter', price: 1999, seats: 5 },
-    { code: 'professional', name: 'Professional', price: 4999, seats: 15, popular: true },
+    { code: 'starter', name: 'Starter CP', price: 999, seats: 3 },
+    { code: 'professional', name: 'Professional Agency', price: 4999, seats: 15, popular: true },
     { code: 'enterprise', name: 'Enterprise', price: 14999, seats: 50 },
   ];
+
 
   return (
     <div className="pt-28 pb-20 px-6 max-w-4xl mx-auto">
