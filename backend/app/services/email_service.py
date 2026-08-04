@@ -32,6 +32,8 @@ BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 MAILJET_API_KEY = os.getenv("MAILJET_API_KEY", "")
 MAILJET_SECRET_KEY = os.getenv("MAILJET_SECRET_KEY", "")
 
+CUSTOM_USER_AGENT = "REALVION-Platform/1.0 (Mozilla/5.0)"
+
 def send_email_http_mailjet(to_email: str, subject: str, html_content: str) -> bool:
     """Send email via Mailjet HTTP API (Port 443 - 6,000 Free Emails/Month, 100% Free)"""
     if not MAILJET_API_KEY or not MAILJET_SECRET_KEY:
@@ -41,7 +43,8 @@ def send_email_http_mailjet(to_email: str, subject: str, html_content: str) -> b
         auth_str = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode("utf-8")).decode("utf-8")
         headers = {
             "Authorization": f"Basic {auth_str}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": CUSTOM_USER_AGENT
         }
         payload = {
             "Messages": [
@@ -75,7 +78,8 @@ def send_email_http_resend(to_email: str, subject: str, html_content: str) -> bo
         url = "https://api.resend.com/emails"
         headers = {
             "Authorization": f"Bearer {RESEND_API_KEY}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": CUSTOM_USER_AGENT
         }
         payload = {
             "from": f"REALVION Platform <onboarding@resend.dev>",
@@ -106,7 +110,8 @@ def send_email_http_brevo(to_email: str, subject: str, html_content: str) -> boo
         headers = {
             "api-key": BREVO_API_KEY,
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "User-Agent": CUSTOM_USER_AGENT
         }
         payload = {
             "sender": {"name": EMAIL_FROM_NAME, "email": SMTP_USER},
@@ -206,7 +211,7 @@ def send_otp_email(to_email: str, otp_code: str) -> bool:
         <h2 style="text-align: center; color: #f8fafc;">Verify Your Email Address</h2>
         <p style="text-align: center; color: #94a3b8;">Use the verification code below to complete your registration:</p>
         <div class="code">{otp_code}</div>
-        <p style="text-align: center; color: #64748b; font-size: 13px;">This code will expire in 10 minutes. Please do not share it with anyone.</p>
+        <p style="text-align: center; color: #64748b; font-size: 13px;">This code will expire in 15 minutes. Please do not share it with anyone.</p>
         <div class="footer">&copy; 2026 REALVION Platform. Enterprise Real Estate OS.</div>
       </div>
     </body>
