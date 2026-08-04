@@ -8,12 +8,13 @@ from app.middleware.auth_middleware import get_current_user
 router = APIRouter(prefix="/superadmin", tags=["SaaS Super Admin Panel"])
 
 def check_superadmin_access(current_user: User = Depends(get_current_user)):
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Super Admin privileges required to access SaaS control panel"
         )
     return current_user
+
 
 @router.get("/analytics", response_model=SaaSAnalyticsResponse)
 def get_saas_analytics(

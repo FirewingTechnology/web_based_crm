@@ -4,10 +4,12 @@ from sqlalchemy.orm import relationship
 from app.database import BaseModel
 
 class UserRole(str, enum.Enum):
+    SUPERADMIN = "Super Admin"
     ADMIN = "Admin"
     MANAGER = "Manager"
     SALES_EXECUTIVE = "Sales Executive"
     BROKER = "Broker"
+
 
 class User(BaseModel):
     __tablename__ = "users"

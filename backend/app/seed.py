@@ -16,6 +16,15 @@ def seed_db():
         print("[SEED] Starting database seeding for BrokerOS Lite...")
 
         # 1. Create Users
+        superadmin_user = User(
+            name="Platform Owner",
+            email="superadmin@realvion.com",
+            hashed_password=get_password_hash("SuperAdmin@123"),
+            role=UserRole.SUPERADMIN,
+            phone="+91 99999 88888",
+            firm_name="REALVION Master Control",
+            is_active=True
+        )
         admin_user = User(
             name="Aman Sharma",
             email="admin@brokeros.com",
@@ -25,6 +34,7 @@ def seed_db():
             firm_name="BrokerOS Corporate HQ",
             is_active=True
         )
+
         manager_user = User(
             name="Priya Patel",
             email="manager@brokeros.com",
@@ -62,10 +72,11 @@ def seed_db():
             is_active=True
         )
 
-        db.add_all([admin_user, manager_user, sales_user, sales_user2, broker_user])
+        db.add_all([superadmin_user, admin_user, manager_user, sales_user, sales_user2, broker_user])
         db.commit()
-        for u in [admin_user, manager_user, sales_user, sales_user2, broker_user]:
+        for u in [superadmin_user, admin_user, manager_user, sales_user, sales_user2, broker_user]:
             db.refresh(u)
+
 
         # 2. Broker Profile
         broker_profile = BrokerProfile(
