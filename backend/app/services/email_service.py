@@ -39,7 +39,7 @@ def send_email_http_resend(to_email: str, subject: str, html_content: str) -> bo
             "Content-Type": "application/json"
         }
         payload = {
-            "from": f"{EMAIL_FROM_NAME} <onboarding@resend.dev>",
+            "from": f"REALVION Platform <onboarding@resend.dev>",
             "to": [to_email],
             "subject": subject,
             "html": html_content
@@ -50,6 +50,10 @@ def send_email_http_resend(to_email: str, subject: str, html_content: str) -> bo
                 logger.info(f"Email successfully delivered to {to_email} via Resend HTTP API")
                 print(f"[RESEND SUCCESS] Delivered to {to_email} via HTTP API")
                 return True
+    except urllib.error.HTTPError as http_err:
+        err_body = http_err.read().decode('utf-8', errors='ignore')
+        logger.error(f"Resend HTTP API failed ({http_err.code}): {err_body}")
+        print(f"[RESEND ERROR {http_err.code}] {err_body}")
     except Exception as e:
         logger.error(f"Resend HTTP API failed: {e}")
     return False
@@ -77,9 +81,14 @@ def send_email_http_brevo(to_email: str, subject: str, html_content: str) -> boo
                 logger.info(f"Email successfully delivered to {to_email} via Brevo HTTP API")
                 print(f"[BREVO SUCCESS] Delivered to {to_email} via HTTP API")
                 return True
+    except urllib.error.HTTPError as http_err:
+        err_body = http_err.read().decode('utf-8', errors='ignore')
+        logger.error(f"Brevo HTTP API failed ({http_err.code}): {err_body}")
+        print(f"[BREVO ERROR {http_err.code}] {err_body}")
     except Exception as e:
         logger.error(f"Brevo HTTP API failed: {e}")
     return False
+
 
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     """
