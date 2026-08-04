@@ -30,12 +30,14 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileClose }) => {
   const { user, role, logout } = useAuth();
 
-  const isAdminOrManager = role === 'Admin' || role === 'Manager';
+  const isSuperAdmin = role === 'Super Admin';
+  const isAdminOrManager = isSuperAdmin || role === 'Admin' || role === 'Manager';
 
   const adminNavItems = [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'SaaS Control Panel', path: '/admin/saas', icon: ShieldCheck },
+    { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Lead Management', path: '/admin/leads', icon: Users },
+
     { label: 'Followups', path: '/admin/followups', icon: CalendarCheck },
     { label: 'Bookings', path: '/admin/bookings', icon: FileCheck2 },
     { label: 'Commission', path: '/admin/commissions', icon: Coins },

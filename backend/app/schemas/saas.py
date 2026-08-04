@@ -83,3 +83,21 @@ class SaaSAnalyticsResponse(BaseModel):
     demo_workspaces: int
     total_revenue: float
     growth_rate_pct: float
+
+class CreateOfflineTenantRequest(BaseModel):
+    admin_name: str
+    admin_email: EmailStr
+    admin_phone: str
+    admin_password: str
+    company_name: str
+    company_type: str = "Channel Partner"
+    plan_code: str = "professional"
+    payment_method: str = "Offline Cash / Bank Transfer"
+    seats_limit: int = 15
+    city: Optional[str] = "Mumbai"
+    state: Optional[str] = "Maharashtra"
+
+class UpdateQuotaRequest(BaseModel):
+    seats_limit: int
+    max_leads: int
+
