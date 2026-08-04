@@ -31,13 +31,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
   const { user, role, logout } = useAuth();
 
   const isSuperAdmin = role === 'Super Admin';
-  const isAdminOrManager = isSuperAdmin || role === 'Admin' || role === 'Manager';
+  const isAdminOrManager = role === 'Admin' || role === 'Manager';
+
+  const superAdminNavItems = [
+    { label: 'SaaS Control Panel', path: '/admin/saas', icon: ShieldCheck },
+    { label: 'Notifications', path: '/admin/notifications', icon: Bell },
+    { label: 'Settings & Logs', path: '/admin/settings', icon: Settings },
+  ];
 
   const adminNavItems = [
-    { label: 'SaaS Control Panel', path: '/admin/saas', icon: ShieldCheck },
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Lead Management', path: '/admin/leads', icon: Users },
-
     { label: 'Followups', path: '/admin/followups', icon: CalendarCheck },
     { label: 'Bookings', path: '/admin/bookings', icon: FileCheck2 },
     { label: 'Commission', path: '/admin/commissions', icon: Coins },
@@ -50,7 +54,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     { label: 'Settings & Logs', path: '/admin/settings', icon: Settings },
   ];
 
-
   const salesNavItems = [
     { label: 'Sales Dashboard', path: '/sales/dashboard', icon: LayoutDashboard },
     { label: 'My Leads', path: '/sales/leads', icon: Users },
@@ -62,7 +65,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     { label: 'My Profile', path: '/sales/profile', icon: UserCircle },
   ];
 
-  const navItems = isAdminOrManager ? adminNavItems : salesNavItems;
+  const navItems = isSuperAdmin
+    ? superAdminNavItems
+    : isAdminOrManager
+    ? adminNavItems
+    : salesNavItems;
+
 
   const SidebarContent = (
     <div className="flex flex-col justify-between h-full text-slate-300">

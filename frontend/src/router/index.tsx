@@ -39,12 +39,17 @@ export const AppRouter: React.FC = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Admin Portal Routes */}
-        <Route element={<RoleGuard allowedRoles={['Super Admin', 'Admin', 'Manager']} />}>
+        {/* Super Admin Owner Control Route */}
+        <Route element={<RoleGuard allowedRoles={['Super Admin']} />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/saas" element={<SuperAdminDashboard />} />
+          </Route>
+        </Route>
 
+        {/* Tenant Admin & Manager Portal Routes */}
+        <Route element={<RoleGuard allowedRoles={['Admin', 'Manager', 'Super Admin']} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/saas" element={<SuperAdminDashboard />} />
             <Route path="/admin/leads" element={<LeadManagement />} />
             <Route path="/admin/followups" element={<FollowupManagement />} />
             <Route path="/admin/bookings" element={<BookingManagement />} />
@@ -58,6 +63,7 @@ export const AppRouter: React.FC = () => {
             <Route path="/admin/settings" element={<SettingsPage />} />
           </Route>
         </Route>
+
 
 
         {/* Sales Portal Routes */}

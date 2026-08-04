@@ -12,12 +12,13 @@ from app.services.email_service import send_welcome_credentials_email
 router = APIRouter(prefix="/superadmin", tags=["SaaS Super Admin Panel"])
 
 def check_superadmin_access(current_user: User = Depends(get_current_user)):
-    if current_user.role not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
+    if current_user.role != UserRole.SUPERADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Super Admin privileges required to access SaaS control panel"
+            detail="Access Denied: Platform Owner Super Admin privileges required."
         )
     return current_user
+
 
 @router.get("/analytics", response_model=SaaSAnalyticsResponse)
 def get_saas_analytics(
