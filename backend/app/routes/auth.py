@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.auth import LoginRequest, Token, RefreshRequest
 from app.schemas.user import UserResponse
 from app.utils.security import verify_password, create_access_token, create_refresh_token, decode_token
@@ -79,19 +79,39 @@ from app.models.saas import Subscription, Organization
 
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    org = db.query(Organization).filter(Organization.name == current_user.firm_name).first()
-    
+    # SuperAdmin account never expires
+    if current_user.role == UserRole.SUPERADMIN:
+        resp_data = UserResponse.from_orm(current_user).dict()
+        resp_data["trial_expires_at"] = None
+        resp_data["is_trial_expired"] = False
+        resp_data["trial_seconds_remaining"] = 864000
+        return resp_data
+
     trial_expires_at = None
     is_trial_expired = False
-    trial_seconds_remaining = 0
+    trial_seconds_remaining = 3600
+
+    # Query LATEST Organization for this user's firm_name
+    org = None
+    if current_user.firm_name:
+        org = db.query(Organization).filter(
+            Organization.name == current_user.firm_name
+        ).order_by(Organization.id.desc()).first()
+
+    if not org:
+        org = db.query(Organization).order_by(Organization.id.desc()).first()
 
     if org:
-        sub = db.query(Subscription).filter(Subscription.organization_id == org.id).first()
+        # Query LATEST Subscription for this organization
+        sub = db.query(Subscription).filter(
+            Subscription.organization_id == org.id
+        ).order_by(Subscription.id.desc()).first()
+
         if sub and sub.status in ["Trial", "Demo", "Expired"]:
             trial_expires_at = sub.end_date
             now_naive = datetime.utcnow()
             diff_seconds = int((sub.end_date - now_naive).total_seconds())
-            
+
             if diff_seconds <= 0 or sub.status == "Expired":
                 is_trial_expired = True
                 trial_seconds_remaining = 0
@@ -99,6 +119,7 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
                     sub.status = "Expired"
                     db.commit()
             else:
+                is_trial_expired = False
                 trial_seconds_remaining = diff_seconds
 
     resp_data = UserResponse.from_orm(current_user).dict()
@@ -106,4 +127,5 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
     resp_data["is_trial_expired"] = is_trial_expired
     resp_data["trial_seconds_remaining"] = trial_seconds_remaining
     return resp_data
+
 

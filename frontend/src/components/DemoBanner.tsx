@@ -16,10 +16,12 @@ export const DemoBanner: React.FC = () => {
       return;
     }
 
-    if (user?.trial_seconds_remaining !== undefined) {
+    if (user?.trial_seconds_remaining !== undefined && user?.trial_seconds_remaining > 0) {
       setSecondsLeft(user.trial_seconds_remaining);
+      setIsExpired(false);
     }
   }, [user]);
+
 
   useEffect(() => {
     if (secondsLeft <= 0) {
