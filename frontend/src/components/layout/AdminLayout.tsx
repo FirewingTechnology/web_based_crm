@@ -10,10 +10,10 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-slate-100 flex flex-col">
-      <DemoBanner />
       <div className="flex flex-1">
         <Sidebar mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
         <div className="flex-1 md:ml-64 flex flex-col min-w-0">
+          <DemoBanner />
           <Header onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="p-4 sm:p-6 flex-1 max-w-7xl w-full mx-auto">
             <Outlet />
