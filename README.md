@@ -1,4 +1,4 @@
-# 🏢 BrokerOS Lite – Real Estate CRM
+# 🏢 REALVION – Real Estate Sales Operating System
 
 > Enterprise Real Estate Channel Partner (CP) SaaS & Brokerage CRM Platform.
 
@@ -22,7 +22,7 @@
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8001
 ```
 
 ### 2. **Frontend (React 18 + Vite + TypeScript)**
@@ -36,9 +36,9 @@ npm run dev
 
 ## 🔑 Initial Accounts
 
-- **Super Admin**: `admin@brokeros.com` | `Admin@123`
-- **Sales Executive**: `sales@brokeros.com` | `Sales@123`
-- **Manager**: `manager@brokeros.com` | `Manager@123`
+- **Super Admin**: `admin@realvion.com` | `Admin@123`
+- **Sales Executive**: `sales@realvion.com` | `Sales@123`
+- **Manager**: `manager@realvion.com` | `Manager@123`
 
 ---
 

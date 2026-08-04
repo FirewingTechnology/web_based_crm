@@ -3,7 +3,7 @@ services:
   # 1. FastAPI Backend Web Service
   # -------------------------------------------------------------
   - type: web
-    name: brokeros-backend
+    name: realvion-backend
     env: python
     region: singapore
     plan: free
@@ -15,15 +15,15 @@ services:
       - key: API_V1_STR
         value: /api/v1
       - key: PROJECT_NAME
-        value: BrokerOS Lite Real Estate CRM
+        value: Realvion - Real Estate Sales Operating System
       - key: SECRET_KEY
-        value: brokeros_render_production_jwt_secret_key_2026
+        value: realvion_render_production_jwt_secret_key_2026
 
   # -------------------------------------------------------------
   # 2. React Vite Frontend CRM Web App
   # -------------------------------------------------------------
   - type: static
-    name: brokeros-frontend
+    name: realvion-frontend
     region: singapore
     plan: free
     buildCommand: cd frontend && npm install && npm run build
@@ -37,10 +37,10 @@ services:
         value: https://web-based-crm.onrender.com/api/v1
 
   # -------------------------------------------------------------
-  # 3. Standalone BrokerOS Official Company Website
+  # 3. Standalone REALVION Official Company Website
   # -------------------------------------------------------------
   - type: static
-    name: brokeros-website
+    name: realvion-website
     region: singapore
     plan: free
     buildCommand: cd website && npm install && npm run build

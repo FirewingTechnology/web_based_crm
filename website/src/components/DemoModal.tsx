@@ -25,7 +25,7 @@ export const DemoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
       >
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2 text-[#C8A45D] font-bold text-sm">
-            <Sparkles className="h-5 w-5" /> Request Live BrokerOS Demo
+            <Sparkles className="h-5 w-5" /> Request Live REALVION Demo
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg">
             <X className="h-5 w-5" />

@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
             <Menu className="h-5 w-5" />
           </button>
         )}
-        <h2 className="text-base font-semibold text-white tracking-wide truncate">BrokerOS CRM</h2>
+        <h2 className="text-base font-semibold text-white tracking-wide truncate">REALVION</h2>
         <span className="text-slate-700 hidden sm:inline">|</span>
         <div className="hidden sm:block">
           <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{role}</Badge>
@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
         <button
           onClick={() => {
             playReminderChime();
-            speakReminderVoice(`Hello ${user?.name || 'User'}, BrokerOS voice alert system is active.`);
+            speakReminderVoice(`Hello ${user?.name || 'User'}, REALVION voice alert system is active.`);
           }}
           className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.05] transition flex items-center gap-1.5 text-xs font-medium"
           title="Test Voice & Ringtone Alert"
@@ -175,7 +175,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                   }}
                   className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition flex items-center gap-2"
                 >
-                  🚪 Sign Out of BrokerOS
+                  🚪 Sign Out of REALVION
                 </button>
               </div>
             </div>

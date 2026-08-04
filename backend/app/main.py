@@ -64,4 +64,4 @@ app.include_router(settings_route.router, prefix=api_v1)
 
 @app.get("/")
 def root():
-    return {"message": "BrokerOS Lite API is running", "version": "1.0.0"}
+    return {"message": "REALVION API is running", "version": "1.0.0"}

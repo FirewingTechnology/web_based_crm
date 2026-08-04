@@ -48,7 +48,7 @@ export const IndustriesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDem
         </div>
 
         <div className="p-10 rounded-3xl bg-[#0a0a0a] border border-white/10 text-center space-y-6">
-          <h2 className="text-3xl font-bold text-white">See how BrokerOS fits your exact business model.</h2>
+          <h2 className="text-3xl font-bold text-white">See how REALVION fits your exact business model.</h2>
           <button
             onClick={onOpenDemo}
             className="px-8 py-3.5 rounded-xl text-xs font-bold text-black bg-[#C8A45D] hover:bg-yellow-400 transition mx-auto flex items-center gap-2"

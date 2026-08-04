@@ -23,8 +23,8 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
     <nav className="fixed top-0 inset-x-0 z-40 h-20 border-b border-white/[0.08] bg-[#050505]/85 backdrop-blur-xl px-6 lg:px-12 flex items-center justify-between">
       <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
         <img
-          src="/logo.png"
-          alt="BrokerOS"
+          src="/logo.svg"
+          alt="REALVION"
           className="h-20 w-auto object-contain"
           style={{ maxWidth: '360px' }}
         />

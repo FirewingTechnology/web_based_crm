@@ -44,7 +44,7 @@ export const SolutionsPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
             Purpose-Built Real Estate Solutions
           </h1>
           <p className="text-base text-slate-400 font-light max-w-xl mx-auto">
-            Every module in BrokerOS is engineered around real estate channel partner workflows.
+            Every module in REALVION is engineered around real estate channel partner workflows.
           </p>
         </div>
 

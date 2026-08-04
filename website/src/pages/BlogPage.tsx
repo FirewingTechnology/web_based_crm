@@ -35,7 +35,7 @@ export const BlogPage: React.FC<{ onOpenDemo: () => void }> = () => {
         <div className="text-center space-y-4">
           <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Industry Knowledge & Insights</span>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight">
-            The BrokerOS Real Estate Journal
+            The REALVION Real Estate Journal
           </h1>
           <p className="text-base text-slate-400 font-light max-w-xl mx-auto">
             Practical strategies, market analysis, and sales automation guides for real estate channel partners.

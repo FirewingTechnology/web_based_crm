@@ -51,7 +51,7 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
             </h1>
 
             <p className="text-base sm:text-lg text-slate-400 leading-relaxed max-w-2xl font-light">
-              BrokerOS is the official operating system built specifically for Real Estate Channel Partners, Brokerage Firms, and Agency Leaders to organize buyer leads, voice follow-ups, developers, and project inventory.
+              REALVION is the official Real Estate Sales Operating System built specifically for Real Estate Channel Partners, Brokerage Firms, and Agency Leaders to organize buyer leads, voice follow-ups, developers, and project inventory.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
@@ -99,7 +99,7 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
                   <div className="h-3 w-3 rounded-full bg-rose-500/80" />
                   <div className="h-3 w-3 rounded-full bg-amber-500/80" />
                   <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
-                  <span className="text-xs font-semibold text-slate-400 ml-2">BrokerOS Live Cockpit</span>
+                  <span className="text-xs font-semibold text-slate-400 ml-2">REALVION Live Cockpit</span>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#C8A45D]/20 text-[#C8A45D] border border-[#C8A45D]/30">
                   RERA APPROVED

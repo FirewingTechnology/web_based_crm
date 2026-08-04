@@ -11,14 +11,14 @@ export const WebsiteFooter: React.FC = () => {
         <div className="space-y-4">
           <div className="cursor-pointer" onClick={() => navigate('/')}>
             <img
-              src="/logo.png"
-              alt="BrokerOS"
+              src="/logo.svg"
+              alt="REALVION"
               className="h-16 w-auto object-contain"
               style={{ maxWidth: '200px' }}
             />
           </div>
           <p className="text-slate-400 text-xs font-light leading-relaxed">
-            The official operating system for Real Estate Channel Partners, Brokerage Firms, and Sales Agencies.
+            The official Real Estate Sales Operating System for Channel Partners, Brokerage Firms, and Sales Agencies.
           </p>
           <div className="pt-2 text-[11px] text-slate-500 space-y-1">
             <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#C8A45D]" /> 1st Floor, Navale Icon, Narhe Gaon, Katraj, Pune, Maharashtra</p>
@@ -41,7 +41,7 @@ export const WebsiteFooter: React.FC = () => {
         <div>
           <h4 className="text-white font-bold mb-4 text-xs uppercase tracking-wider">Company & Industry</h4>
           <ul className="space-y-2.5">
-            <li><button onClick={() => navigate('/about')} className="hover:text-white transition">About BrokerOS</button></li>
+            <li><button onClick={() => navigate('/about')} className="hover:text-white transition">About REALVION</button></li>
             <li><button onClick={() => navigate('/industries')} className="hover:text-white transition">For Channel Partners</button></li>
             <li><button onClick={() => navigate('/industries')} className="hover:text-white transition">For Brokerage Firms</button></li>
             <li><button onClick={() => navigate('/industries')} className="hover:text-white transition">For Real Estate Developers</button></li>
@@ -61,7 +61,7 @@ export const WebsiteFooter: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-        <p>© 2026 BrokerOS Official. All rights reserved. Enterprise Real Estate OS.</p>
+        <p>© 2026 REALVION Official. All rights reserved. Real Estate Sales Operating System.</p>
         <div className="flex items-center gap-6">
           <button onClick={() => navigate('/faq')} className="hover:text-slate-300">Privacy Policy</button>
           <button onClick={() => navigate('/faq')} className="hover:text-slate-300">Terms of Service</button>

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="100%" height="100%">
+  <defs>
+    <!-- Gold Gradients -->
+    <linearGradient id="goldLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE79A" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#AA7C11" />
+    </linearGradient>
+    <linearGradient id="goldDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3E5AB" />
+      <stop offset="40%" stop-color="#C59B27" />
+      <stop offset="100%" stop-color="#7A5800" />
+    </linearGradient>
+    
+    <!-- Silver Gradients -->
+    <linearGradient id="silverLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="50%" stop-color="#C0C0C0" />
+      <stop offset="100%" stop-color="#8A95A5" />
+    </linearGradient>
+    <linearGradient id="silverDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="50%" stop-color="#94A3B8" />
+      <stop offset="100%" stop-color="#475569" />
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Monogram Logo Icon (RV + Skyscraper) -->
+  <g transform="translate(10, 10)">
+    <!-- Skyscraper Tower in R -->
+    <rect x="38" y="28" width="16" height="52" fill="url(#silverDark)" rx="1"/>
+    <path d="M 38 28 L 46 16 L 54 28 Z" fill="url(#silverLight)"/>
+    <!-- Windows -->
+    <rect x="41" y="32" width="4" height="6" fill="#1E293B"/>
+    <rect x="47" y="32" width="4" height="6" fill="#1E293B"/>
+    <rect x="41" y="42" width="4" height="6" fill="#1E293B"/>
+    <rect x="47" y="42" width="4" height="6" fill="#1E293B"/>
+    <rect x="41" y="52" width="4" height="6" fill="#1E293B"/>
+    <rect x="47" y="52" width="4" height="6" fill="#1E293B"/>
+    <rect x="41" y="62" width="4" height="6" fill="#1E293B"/>
+    <rect x="47" y="62" width="4" height="6" fill="#1E293B"/>
+
+    <!-- 'R' Gold Structure -->
+    <path d="M 12 10 H 52 C 68 10, 76 22, 68 38 C 60 52, 44 50, 44 50 L 60 84 H 46 L 33 50 H 26 V 84 H 12 V 10 Z" fill="url(#goldLight)"/>
+    <path d="M 26 22 H 46 C 52 22, 54 30, 48 38 C 44 42, 36 40, 26 40 V 22 Z" fill="#0F172A"/>
+
+    <!-- 'V' Silver Structure -->
+    <path d="M 52 28 L 76 84 H 92 L 116 28 H 100 L 84 66 L 68 28 H 52 Z" fill="url(#silverLight)"/>
+  </g>
+
+  <!-- REALVION Text -->
+  <text x="145" y="62" font-family="'Inter', 'Montserrat', 'Segoe UI', sans-serif" font-size="44" font-weight="900" letter-spacing="4" fill="url(#silverLight)">
+    REAL<tspan fill="url(#goldLight)">VION</tspan>
+  </text>
+
+  <!-- Divider Line -->
+  <line x1="145" y1="78" x2="480" y2="78" stroke="url(#goldLight)" stroke-width="1.5" stroke-opacity="0.7"/>
+
+  <!-- Tagline Text -->
+  <text x="148" y="94" font-family="'Inter', 'Segoe UI', sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="url(#goldDark)">
+    REAL ESTATE SALES OPERATING SYSTEM
+  </text>
+</svg>

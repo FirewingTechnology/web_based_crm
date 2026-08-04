@@ -66,8 +66,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
         <div className="py-4 px-3 flex items-center justify-between border-b border-[#C8A45D]/15">
           <div className="flex items-center w-full">
             <img
-              src="/logo.png"
-              alt="BrokerOS"
+              src="/logo.svg"
+              alt="REALVION"
               className="w-full h-auto object-contain"
               style={{ maxHeight: '64px' }}
             />

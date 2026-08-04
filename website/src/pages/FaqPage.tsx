@@ -6,12 +6,12 @@ export const FaqPage: React.FC = () => {
 
   const faqs = [
     {
-      q: "How does BrokerOS Lite differ from corporate CRMs like Salesforce or Zoho?",
-      a: "Corporate CRMs are designed for software companies with hundreds of complex, non-real estate fields. BrokerOS is custom-engineered specifically for Indian Real Estate Channel Partners, featuring RERA registration tracking, Lakhs/Crores unit pricing, single broker networks, and native voice reminder alarms."
+      q: "How does REALVION differ from corporate CRMs like Salesforce or Zoho?",
+      a: "Corporate CRMs are designed for software companies with hundreds of complex, non-real estate fields. REALVION is custom-engineered specifically for Indian Real Estate Channel Partners, featuring RERA registration tracking, Lakhs/Crores unit pricing, single broker networks, and native voice reminder alarms."
     },
     {
-      q: "Can sales executives access BrokerOS Lite from mobile devices?",
-      a: "Yes! BrokerOS features 100% mobile-responsive slide-over drawers, single-tap phone dialing, and touch navigation."
+      q: "Can sales executives access REALVION from mobile devices?",
+      a: "Yes! REALVION features 100% mobile-responsive slide-over drawers, single-tap phone dialing, and touch navigation."
     },
     {
       q: "Is public self-registration enabled for my sales team?",
@@ -19,11 +19,11 @@ export const FaqPage: React.FC = () => {
     },
     {
       q: "How does the Voice & Audio reminder alarm work?",
-      a: "BrokerOS utilizes native Web Audio API sine-wave chimes and Web Speech API text-to-speech to speak out scheduled client callbacks when tasks become due."
+      a: "REALVION utilizes native Web Audio API sine-wave chimes and Web Speech API text-to-speech to speak out scheduled client callbacks when tasks become due."
     },
     {
       q: "Can I manage single independent brokers as well as broker firms?",
-      a: "Yes. BrokerOS allows you to register independent single brokers (e.g. Ramesh Kumar) as well as full brokerage agencies, with custom commission override share tracking."
+      a: "Yes. REALVION allows you to register independent single brokers (e.g. Ramesh Kumar) as well as full brokerage agencies, with custom commission override share tracking."
     }
   ];
 

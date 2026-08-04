@@ -12,7 +12,7 @@ export const AboutPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) 
             <span className="text-[#C8A45D]">Engineered for Control.</span>
           </h1>
           <p className="text-base text-slate-400 font-light leading-relaxed max-w-2xl">
-            BrokerOS was born from a simple realization: Indian Real Estate Channel Partners were losing millions in commissions every year not because of bad leads, but because of fragmented tools and missed follow-ups.
+            REALVION was born from a simple realization: Indian Real Estate Channel Partners were losing millions in commissions every year not because of bad leads, but because of fragmented tools and missed follow-ups.
           </p>
         </div>
 
@@ -35,9 +35,9 @@ export const AboutPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) 
         </div>
 
         <div className="p-10 rounded-3xl bg-gradient-to-r from-[#101010] via-[#141414] to-[#0a0a0a] border border-white/10 space-y-6">
-          <h2 className="text-2xl font-bold text-white">Why BrokerOS was Built</h2>
+          <h2 className="text-2xl font-bold text-white">Why REALVION was Built</h2>
           <p className="text-xs text-slate-300 font-light leading-relaxed">
-            Unlike Western SaaS products like Salesforce or HubSpot, real estate channel partners in India operate under unique dynamics: RERA registrations, Lakhs and Crores pricing tiers, tiered commission overrides with builder developers, and intensive phone callback routines. BrokerOS is tailored specifically to solve these exact workflows.
+            Unlike Western SaaS products like Salesforce or HubSpot, real estate channel partners in India operate under unique dynamics: RERA registrations, Lakhs and Crores pricing tiers, tiered commission overrides with builder developers, and intensive phone callback routines. REALVION is tailored specifically to solve these exact workflows.
           </p>
 
           <button

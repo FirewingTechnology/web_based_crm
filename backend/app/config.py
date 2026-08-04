@@ -2,7 +2,7 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "BrokerOS Lite"
+    PROJECT_NAME: str = "REALVION - Real Estate Sales Operating System"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "brokeros_super_secret_jwt_key_2026_production_ready"
     REFRESH_SECRET_KEY: str = "brokeros_super_secret_refresh_jwt_key_2026"

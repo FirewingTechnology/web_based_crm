@@ -55,8 +55,8 @@ export const LoginPage: React.FC = () => {
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <img
-              src="/logo.png"
-              alt="BrokerOS"
+              src="/logo.svg"
+              alt="REALVION"
               className="w-full h-auto object-contain"
               style={{ maxHeight: '200px' }}
             />
