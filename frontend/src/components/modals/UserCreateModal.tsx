@@ -185,10 +185,10 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
               label="Assigned Role *"
               options={[
                 { label: 'Sales Executive', value: 'Sales Executive' },
-                { label: 'Manager', value: 'Manager' },
               ]}
               {...register('role')}
             />
+
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">

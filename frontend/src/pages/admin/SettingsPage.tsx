@@ -123,11 +123,9 @@ export const SettingsPage: React.FC = () => {
   ];
 
   const roleOptions = [
-    { label: 'Admin', value: 'Admin' },
-    { label: 'Manager', value: 'Manager' },
     { label: 'Sales Executive', value: 'Sales Executive' },
-    { label: 'Broker', value: 'Broker' },
   ];
+
 
   return (
     <div className="space-y-6">
