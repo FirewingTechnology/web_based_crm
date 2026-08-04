@@ -34,9 +34,10 @@ def test_get_me():
 
 def test_saas_otp_and_demo_register():
     # 1. Send OTP
-    send_res = client.post("/api/v1/saas/send-otp", json={"email": "test.agency@realvion.com"})
+    send_res = client.post("/api/v1/saas/send-otp", json={"email": "firewingtechnologiesindia@gmail.com"})
     assert send_res.status_code == 200
     assert send_res.json()["success"] == True
+
 
     # 2. Get Plans
     plans_res = client.get("/api/v1/saas/plans")
