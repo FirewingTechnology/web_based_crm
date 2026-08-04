@@ -55,6 +55,8 @@ class CreateOrderResponse(BaseModel):
     currency: str = "INR"
     key_id: str
     plan_name: str
+    is_test_mode: bool = False
+
 
 class VerifyPaymentRequest(BaseModel):
     razorpay_order_id: str

@@ -61,6 +61,8 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
     db.add(payment)
     db.commit()
     
+    is_test_mode = not RAZORPAY_KEY_SECRET or "SmSxyLmsbg4zDj" in RAZORPAY_KEY_ID
+
     return CreateOrderResponse(
         order_id=order_id,
         amount=subtotal,
@@ -69,8 +71,10 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
         total_amount=total_amount,
         currency="INR",
         key_id=RAZORPAY_KEY_ID,
-        plan_name=plan_info["name"]
+        plan_name=plan_info["name"],
+        is_test_mode=is_test_mode
     )
+
 
 @router.post("/webhook")
 async def razorpay_webhook(
