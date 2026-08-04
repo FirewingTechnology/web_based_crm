@@ -28,12 +28,15 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
 
   if (!allowedRoles.includes(user.role)) {
     // Redirect based on role if attempting to access forbidden portal
-    if (user.role === 'Admin' || user.role === 'Manager') {
+    if (user.role === 'Super Admin') {
+      return <Navigate to="/admin/saas" replace />;
+    } else if (user.role === 'Admin' || user.role === 'Manager') {
       return <Navigate to="/admin/dashboard" replace />;
     } else {
       return <Navigate to="/sales/dashboard" replace />;
     }
   }
+
 
   return <Outlet />;
 };

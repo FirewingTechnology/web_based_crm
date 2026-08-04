@@ -40,7 +40,8 @@ export const AppRouter: React.FC = () => {
         <Route path="/login" element={<LoginPage />} />
 
         {/* Admin Portal Routes */}
-        <Route element={<RoleGuard allowedRoles={['Admin', 'Manager']} />}>
+        <Route element={<RoleGuard allowedRoles={['Super Admin', 'Admin', 'Manager']} />}>
+
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/saas" element={<SuperAdminDashboard />} />

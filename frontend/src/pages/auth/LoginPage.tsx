@@ -26,11 +26,14 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
     try {
       const user = await login(email, password);
-      if (user.role === 'Admin' || user.role === 'Manager') {
+      if (user.role === 'Super Admin') {
+        navigate('/admin/saas');
+      } else if (user.role === 'Admin' || user.role === 'Manager') {
         navigate('/admin/dashboard');
       } else {
         navigate('/sales/dashboard');
       }
+
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid email or password credentials');
     } finally {
