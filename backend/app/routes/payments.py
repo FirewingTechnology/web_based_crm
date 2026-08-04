@@ -20,9 +20,10 @@ from app.middleware.auth_middleware import get_current_user
 
 router = APIRouter(prefix="/payments", tags=["Razorpay Payments & Webhooks"])
 
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_live_SmSxyLmsbg4zDj")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_SmSxyLmsbg4zDj")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "whsec_REALVIONWebhook2026Secret")
+
 
 
 PLAN_PRICES = {
