@@ -113,15 +113,27 @@ def register_demo(req: RegisterDemoRequest, db: Session = Depends(get_db)):
     db.add(org)
     db.flush()
     
-    # Create Workspace in Demo Mode
-    demo_expiry = datetime.now(timezone.utc) + timedelta(days=14)
+    # Create Workspace in 1-Hour Trial Mode
+    now = datetime.utcnow()
+    one_hour_later = now + timedelta(hours=1)
     workspace = Workspace(
         organization_id=org.id,
-        name=f"{req.company_name} Demo Workspace",
+        name=f"{req.company_name} Workspace",
         is_demo=True,
-        demo_expires_at=demo_expiry
+        demo_expires_at=one_hour_later
     )
     db.add(workspace)
+
+    # Create 1-Hour Free Trial Subscription
+    sub = Subscription(
+        organization_id=org.id,
+        status="Trial",
+        start_date=now,
+        end_date=one_hour_later,
+        auto_renew=False
+    )
+    db.add(sub)
+
     
     # Create Admin User
     hashed_pwd = get_password_hash(req.password)

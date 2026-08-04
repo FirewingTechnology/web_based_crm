@@ -12,7 +12,11 @@ export interface User {
   avatar_url?: string;
   created_at: string;
   updated_at: string;
+  trial_expires_at?: string;
+  is_trial_expired?: boolean;
+  trial_seconds_remaining?: number;
 }
+
 
 export interface UserCreateInput {
   name: string;

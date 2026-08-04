@@ -26,6 +26,10 @@ class UserResponse(UserBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    trial_expires_at: datetime | None = None
+    is_trial_expired: bool = False
+    trial_seconds_remaining: int = 0
 
     class Config:
         from_attributes = True
+

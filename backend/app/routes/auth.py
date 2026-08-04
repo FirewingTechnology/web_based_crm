@@ -74,6 +74,36 @@ def refresh_token(request: RefreshRequest, db: Session = Depends(get_db)):
 
     return Token(access_token=new_access_token, refresh_token=new_refresh_token)
 
+from datetime import datetime
+from app.models.saas import Subscription, Organization
+
 @router.get("/me", response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_user)):
-    return current_user
+def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    org = db.query(Organization).filter(Organization.name == current_user.firm_name).first()
+    
+    trial_expires_at = None
+    is_trial_expired = False
+    trial_seconds_remaining = 0
+
+    if org:
+        sub = db.query(Subscription).filter(Subscription.organization_id == org.id).first()
+        if sub and sub.status in ["Trial", "Demo", "Expired"]:
+            trial_expires_at = sub.end_date
+            now_naive = datetime.utcnow()
+            diff_seconds = int((sub.end_date - now_naive).total_seconds())
+            
+            if diff_seconds <= 0 or sub.status == "Expired":
+                is_trial_expired = True
+                trial_seconds_remaining = 0
+                if sub.status != "Expired":
+                    sub.status = "Expired"
+                    db.commit()
+            else:
+                trial_seconds_remaining = diff_seconds
+
+    resp_data = UserResponse.from_orm(current_user).dict()
+    resp_data["trial_expires_at"] = trial_expires_at
+    resp_data["is_trial_expired"] = is_trial_expired
+    resp_data["trial_seconds_remaining"] = trial_seconds_remaining
+    return resp_data
+
