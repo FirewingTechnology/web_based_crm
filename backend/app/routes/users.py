@@ -35,9 +35,10 @@ def create_user(
         hashed_password=get_password_hash(user_in.password),
         role=user_in.role,
         phone=user_in.phone,
-        firm_name=user_in.firm_name,
+        firm_name=user_in.firm_name or current_user.firm_name,
         avatar_url=user_in.avatar_url
     )
+
     db.add(user)
     db.commit()
     db.refresh(user)

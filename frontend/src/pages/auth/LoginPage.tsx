@@ -13,12 +13,23 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('registered') === 'true') {
+      const regEmail = params.get('email');
+      if (regEmail) setEmail(regEmail);
+      setSuccessMsg('🎉 Account created successfully! Please log in with your password to start your 1-Hour Free Trial.');
+    }
+  }, []);
 
   const handleTabSwitch = (type: 'admin' | 'sales') => {
     setLoginType(type);
     setError(null);
   };
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,11 +103,18 @@ export const LoginPage: React.FC = () => {
           </button>
         </div>
 
+        {successMsg && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs text-center font-medium">
+            {successMsg}
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium">
             {error}
           </div>
         )}
+
 
         <form onSubmit={handleLogin} className="space-y-4">
           <Input

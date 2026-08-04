@@ -69,17 +69,12 @@ export const RegisterPage: React.FC = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Failed to create workspace.');
 
-      // Save Auth Tokens & Single Sign-on to Portal
-      localStorage.setItem('brokeros_access_token', data.access_token);
-      localStorage.setItem('brokeros_refresh_token', data.refresh_token);
-      localStorage.setItem('brokeros_is_demo', 'true');
-      localStorage.setItem('brokeros_user', JSON.stringify(data.user));
+      const PORTAL_LOGIN_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? `http://localhost:5173/login?registered=true&email=${encodeURIComponent(formData.email)}`
+        : `https://web-based-crm-1.onrender.com/login?registered=true&email=${encodeURIComponent(formData.email)}`;
 
-      const PORTAL_DASHBOARD_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        ? 'http://localhost:5173/admin/dashboard'
-        : 'https://web-based-crm-1.onrender.com/admin/dashboard';
+      window.location.href = PORTAL_LOGIN_URL;
 
-      window.location.href = PORTAL_DASHBOARD_URL;
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
