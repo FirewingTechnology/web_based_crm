@@ -150,7 +150,12 @@ export const RegisterPage: React.FC = () => {
       }
 
       // Redirect to Web CRM Portal
-      window.location.href = 'http://localhost:5173/admin/dashboard';
+      const PORTAL_DASHBOARD_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:5173/admin/dashboard'
+        : 'https://web-based-crm-1.onrender.com/admin/dashboard';
+
+      window.location.href = PORTAL_DASHBOARD_URL;
+
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
