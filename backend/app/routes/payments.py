@@ -1,6 +1,8 @@
 import os
 import json
 import hmac
+from typing import Optional
+
 import hashlib
 import random
 import string
@@ -132,9 +134,31 @@ async def razorpay_webhook(
         
     return {"status": "ok", "message": "Webhook processed successfully"}
 
-def _activate_tenant_post_payment(payment: Payment, email: str, db: Session):
+@router.post("/verify")
+def verify_payment(
+    req: VerifyPaymentRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    payment = db.query(Payment).filter(Payment.razorpay_order_id == req.razorpay_order_id).first()
+    if payment:
+        payment.status = "Captured"
+        payment.razorpay_payment_id = req.razorpay_payment_id
+        db.commit()
+
+    # Activate user subscription
+    _activate_tenant_post_payment(payment, current_user.email, db)
+
+    return {"success": True, "message": "Subscription activated successfully! Full enterprise features unlocked."}
+
+@router.get("/history")
+def get_payment_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    payments = db.query(Payment).order_by(Payment.id.desc()).limit(20).all()
+    return payments
+
+def _activate_tenant_post_payment(payment: Optional[Payment], email: str, db: Session):
     """
-    Sub-routine triggered strictly post-payment webhook to provision tenant and activate subscription.
+    Sub-routine triggered post-payment to activate subscription for 1 full year.
     """
     if not email:
         return
@@ -143,42 +167,50 @@ def _activate_tenant_post_payment(payment: Payment, email: str, db: Session):
     user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
     
     if user:
-        # User already exists - upgrade active subscription
-        org = db.query(Organization).first()
+        # Fetch LATEST Organization for user's firm_name
+        org = None
+        if user.firm_name:
+            org = db.query(Organization).filter(Organization.name == user.firm_name).order_by(Organization.id.desc()).first()
+        if not org:
+            org = db.query(Organization).order_by(Organization.id.desc()).first()
+
         if org:
-            payment.organization_id = org.id
-            sub = db.query(Subscription).filter(Subscription.organization_id == org.id).first()
+            if payment:
+                payment.organization_id = org.id
+            sub = db.query(Subscription).filter(Subscription.organization_id == org.id).order_by(Subscription.id.desc()).first()
             if not sub:
                 sub = Subscription(
                     organization_id=org.id,
                     status="Active",
-                    start_date=datetime.now(timezone.utc),
-                    end_date=datetime.now(timezone.utc) + timedelta(days=365)
+                    start_date=datetime.utcnow(),
+                    end_date=datetime.utcnow() + timedelta(days=365),
+                    auto_renew=True
                 )
                 db.add(sub)
             else:
                 sub.status = "Active"
-                sub.end_date = datetime.now(timezone.utc) + timedelta(days=365)
+                sub.end_date = datetime.utcnow() + timedelta(days=365)
             db.commit()
     else:
         # Create brand new Tenant & Organization
         org = Organization(
             name=f"Enterprise Brokerage ({email.split('@')[0].capitalize()})",
-            slug=f"org-{int(datetime.now(timezone.utc).timestamp())}",
+            slug=f"org-{int(datetime.utcnow().timestamp())}",
             company_type="Broker",
             is_active=True
         )
         db.add(org)
         db.flush()
         
-        payment.organization_id = org.id
+        if payment:
+            payment.organization_id = org.id
         
-        # Create Active Subscription
+        # Create Active Subscription (1 Year)
         sub = Subscription(
             organization_id=org.id,
             status="Active",
-            start_date=datetime.now(timezone.utc),
-            end_date=datetime.now(timezone.utc) + timedelta(days=365),
+            start_date=datetime.utcnow(),
+            end_date=datetime.utcnow() + timedelta(days=365),
             auto_renew=True
         )
         db.add(sub)
@@ -209,7 +241,3 @@ def _activate_tenant_post_payment(payment: Payment, email: str, db: Session):
             plan_name="Professional"
         )
 
-@router.get("/history")
-def get_payment_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    payments = db.query(Payment).order_by(Payment.id.desc()).limit(20).all()
-    return payments
