@@ -1,7 +1,8 @@
 import React from 'react';
 import { Check, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export const PricingPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) => {
+export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
   const plans = [
     {
       name: "Starter CP",
@@ -93,16 +94,16 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }
                 </div>
               </div>
 
-              <button
-                onClick={onOpenDemo}
+              <Link
+                to="/register"
                 className={`w-full py-3.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
                   p.popular
                     ? 'bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 text-black hover:brightness-110'
                     : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                 }`}
               >
-                Choose Plan & Book Demo <ArrowRight className="h-4 w-4" />
-              </button>
+                Choose Plan & Start Free <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           ))}
         </div>
