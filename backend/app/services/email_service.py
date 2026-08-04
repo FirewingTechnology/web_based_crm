@@ -3,6 +3,8 @@ import smtplib
 import ssl
 import socket
 import logging
+import json
+import urllib.request
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
@@ -17,18 +19,82 @@ def _ipv4_only_getaddrinfo(*args, **kwargs):
     return ipv4_responses if ipv4_responses else responses
 socket.getaddrinfo = _ipv4_only_getaddrinfo
 
-# SMTP Credentials & Config
+# SMTP & HTTP API Credentials & Config
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_USER = os.getenv("SMTP_USER", "firewingtechnologiesindia@gmail.com")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "xlswimkesmlnrlnq").replace(" ", "")
 EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "REALVION Platform")
 
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+
+def send_email_http_resend(to_email: str, subject: str, html_content: str) -> bool:
+    """Send email via Resend HTTP API (Port 443 - Never Blocked by Render)"""
+    if not RESEND_API_KEY:
+        return False
+    try:
+        url = "https://api.resend.com/emails"
+        headers = {
+            "Authorization": f"Bearer {RESEND_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "from": f"{EMAIL_FROM_NAME} <onboarding@resend.dev>",
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content
+        }
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=8) as response:
+            if response.status in [200, 201, 202]:
+                logger.info(f"Email successfully delivered to {to_email} via Resend HTTP API")
+                print(f"[RESEND SUCCESS] Delivered to {to_email} via HTTP API")
+                return True
+    except Exception as e:
+        logger.error(f"Resend HTTP API failed: {e}")
+    return False
+
+def send_email_http_brevo(to_email: str, subject: str, html_content: str) -> bool:
+    """Send email via Brevo (Sendinblue) HTTP API (Port 443 - Never Blocked by Render)"""
+    if not BREVO_API_KEY:
+        return False
+    try:
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "api-key": BREVO_API_KEY,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+        payload = {
+            "sender": {"name": EMAIL_FROM_NAME, "email": SMTP_USER},
+            "to": [{"email": to_email}],
+            "subject": subject,
+            "htmlContent": html_content
+        }
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=8) as response:
+            if response.status in [200, 201, 202]:
+                logger.info(f"Email successfully delivered to {to_email} via Brevo HTTP API")
+                print(f"[BREVO SUCCESS] Delivered to {to_email} via HTTP API")
+                return True
+    except Exception as e:
+        logger.error(f"Brevo HTTP API failed: {e}")
+    return False
+
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     """
-    Send an email via SMTP.
-    Uses SSL Port 465 with forced IPv4 resolution for Render/Cloud Linux container compatibility.
-    Falls back to Port 587 TLS if required.
+    Send an email via HTTP REST API or fallback to SMTP socket.
+    Prioritizes HTTP APIs (Port 443) to bypass cloud container firewall restrictions.
     """
+    # 1. Try Resend HTTP API if configured
+    if RESEND_API_KEY and send_email_http_resend(to_email, subject, html_content):
+        return True
+
+    # 2. Try Brevo HTTP API if configured
+    if BREVO_API_KEY and send_email_http_brevo(to_email, subject, html_content):
+        return True
+
+    # 3. Fallback to raw SMTP socket connection (Fast 4-second timeout)
     if not SMTP_PASSWORD:
         logger.info(f"[EMAIL SERVICE - SIMULATED LOG] To: {to_email} | Subject: '{subject}'")
         print(f"==================================================")
@@ -44,29 +110,29 @@ def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     part_html = MIMEText(html_content, "html")
     msg.attach(part_html)
 
-    # Method 1: Try Port 465 (SSL - Cloud Container Standard)
+    # Method A: Try Port 465 (SSL)
     try:
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(SMTP_HOST, 465, context=context, timeout=12) as server:
+        with smtplib.SMTP_SSL(SMTP_HOST, 465, context=context, timeout=4) as server:
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
-        logger.info(f"Email successfully sent to {to_email} via SSL:465 (IPv4)")
+        logger.info(f"Email successfully sent to {to_email} via SSL:465")
         print(f"[EMAIL SUCCESS] Delivered to {to_email} via Port 465 SSL")
         return True
     except Exception as ssl_err:
-        logger.warning(f"Port 465 SSL failed: {ssl_err}. Attempting Port 587 TLS fallback...")
+        logger.warning(f"Port 465 SSL socket connection timed out: {ssl_err}")
 
-    # Method 2: Fallback to Port 587 (TLS)
+    # Method B: Try Port 587 (TLS)
     try:
-        with smtplib.SMTP(SMTP_HOST, 587, timeout=12) as server:
+        with smtplib.SMTP(SMTP_HOST, 587, timeout=4) as server:
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
-        logger.info(f"Email successfully sent to {to_email} via TLS:587 (IPv4)")
+        logger.info(f"Email successfully sent to {to_email} via TLS:587")
         print(f"[EMAIL SUCCESS] Delivered to {to_email} via Port 587 TLS")
         return True
     except Exception as tls_err:
-        logger.error(f"Failed to send email to {to_email} via both SSL and TLS: {tls_err}")
+        logger.error(f"Failed to send email to {to_email} via raw SMTP socket: {tls_err}")
         return False
 
 def send_otp_email(to_email: str, otp_code: str) -> bool:
