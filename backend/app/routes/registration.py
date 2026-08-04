@@ -107,23 +107,23 @@ def register_demo(req: RegisterDemoRequest, db: Session = Depends(get_db)):
             org = db.query(Organization).order_by(Organization.id.desc()).first()
             
         now = datetime.utcnow()
-        one_hour_later = now + timedelta(hours=1)
         if org:
             sub = db.query(Subscription).filter(Subscription.organization_id == org.id).order_by(Subscription.id.desc()).first()
-            if sub:
-                sub.status = "Trial"
-                sub.start_date = now
-                sub.end_date = one_hour_later
-            else:
+            if not sub:
                 sub = Subscription(
                     organization_id=org.id,
                     status="Trial",
                     start_date=now,
-                    end_date=one_hour_later,
+                    end_date=now + timedelta(hours=1),
                     auto_renew=False
                 )
                 db.add(sub)
+            elif sub.status == "Expired" or (sub.end_date and sub.end_date <= now):
+                sub.status = "Trial"
+                sub.start_date = now
+                sub.end_date = now + timedelta(hours=1)
         db.commit()
+
         db.refresh(existing_user)
         
         token_data = {"user_id": existing_user.id, "email": existing_user.email, "role": existing_user.role.value, "is_demo": True}
