@@ -73,9 +73,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
             <img
               src="/logo.png"
               alt="REALVION"
-              className="w-full h-auto object-contain"
-              style={{ maxHeight: '64px' }}
+              className="w-full h-auto object-contain py-1"
+              style={{ maxHeight: '76px' }}
             />
+
           </div>
           {onMobileClose && (
             <button

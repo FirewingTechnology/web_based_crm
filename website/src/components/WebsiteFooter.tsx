@@ -13,10 +13,11 @@ export const WebsiteFooter: React.FC = () => {
             <img
               src="/logo.png"
               alt="REALVION"
-              className="h-16 w-auto object-contain"
-              style={{ maxWidth: '200px' }}
+              className="h-20 w-auto object-contain"
+              style={{ maxWidth: '280px', maxHeight: '72px' }}
             />
           </div>
+
           <p className="text-slate-400 text-xs font-light leading-relaxed">
             The official Real Estate Sales Operating System for Channel Partners, Brokerage Firms, and Sales Agencies.
           </p>

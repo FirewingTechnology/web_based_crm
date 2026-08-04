@@ -60,9 +60,10 @@ export const LoginPage: React.FC = () => {
             <img
               src="/logo.png"
               alt="REALVION"
-              className="w-full h-auto object-contain"
-              style={{ maxHeight: '200px' }}
+              className="w-full h-auto object-contain transition-transform hover:scale-105"
+              style={{ maxHeight: '220px' }}
             />
+
           </div>
           <p className="text-xs text-slate-400">Authorized Portal Access & Authentication</p>
         </div>

@@ -22,15 +22,16 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
     : 'https://web-based-crm-1.onrender.com/login';
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-40 h-20 border-b border-white/[0.08] bg-[#050505]/85 backdrop-blur-xl px-6 lg:px-12 flex items-center justify-between">
-      <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+    <nav className="fixed top-0 inset-x-0 z-40 h-24 border-b border-white/[0.08] bg-[#050505]/90 backdrop-blur-xl px-6 lg:px-12 flex items-center justify-between">
+      <div className="flex items-center cursor-pointer py-1" onClick={() => navigate('/')}>
         <img
           src="/logo.png"
           alt="REALVION"
-          className="h-20 w-auto object-contain"
-          style={{ maxWidth: '360px' }}
+          className="h-20 sm:h-22 w-auto object-contain transition-transform hover:scale-105"
+          style={{ maxWidth: '420px', maxHeight: '76px' }}
         />
       </div>
+
 
       <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
         {navLinks.map((link) => (
