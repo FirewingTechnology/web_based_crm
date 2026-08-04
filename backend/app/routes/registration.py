@@ -90,61 +90,25 @@ def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
 @router.post("/register-demo", response_model=RegisterDemoResponse)
 def register_demo(req: RegisterDemoRequest, db: Session = Depends(get_db)):
     email = req.email.lower().strip()
+    phone = req.phone.strip() if req.phone else ""
     
-    # Check if user already exists
-    existing_user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
-    if existing_user:
-        # Update existing user's password to match what they entered
-        existing_user.hashed_password = get_password_hash(req.password)
-        existing_user.name = req.full_name
-        existing_user.phone = req.phone
-        existing_user.firm_name = req.company_name
-        existing_user.is_active = True
-        
-        # Reset 1-Hour Free Trial for existing user's workspace
-        org = db.query(Organization).filter(Organization.name == req.company_name).order_by(Organization.id.desc()).first()
-        if not org:
-            org = db.query(Organization).order_by(Organization.id.desc()).first()
-            
-        now = datetime.utcnow()
-        if org:
-            sub = db.query(Subscription).filter(Subscription.organization_id == org.id).order_by(Subscription.id.desc()).first()
-            if not sub:
-                sub = Subscription(
-                    organization_id=org.id,
-                    status="Trial",
-                    start_date=now,
-                    end_date=now + timedelta(hours=1),
-                    auto_renew=False
-                )
-                db.add(sub)
-            elif sub.status == "Expired" or (sub.end_date and sub.end_date <= now):
-                sub.status = "Trial"
-                sub.start_date = now
-                sub.end_date = now + timedelta(hours=1)
-        db.commit()
-
-        db.refresh(existing_user)
-        
-        token_data = {"user_id": existing_user.id, "email": existing_user.email, "role": existing_user.role.value, "is_demo": True}
-        access_token = create_access_token(data=token_data)
-        refresh_token = create_refresh_token(data=token_data)
-
-        return RegisterDemoResponse(
-            success=True,
-            access_token=access_token,
-            refresh_token=refresh_token,
-            is_demo_mode=True,
-            user={
-                "id": existing_user.id,
-                "email": existing_user.email,
-                "name": existing_user.name,
-                "role": existing_user.role.value,
-                "firm_name": req.company_name
-            },
-            workspace_name=f"{req.company_name} Workspace",
-            message="Workspace password updated successfully! Please log in."
+    # 1. Validate Duplicate Email Address
+    existing_email_user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
+    if existing_email_user:
+        raise HTTPException(
+            status_code=400,
+            detail="An account with this email address already exists. Please log in directly."
         )
+    
+    # 2. Validate Duplicate Mobile / Phone Number
+    if phone:
+        existing_phone_user = db.query(User).filter(User.phone == phone, User.is_deleted == False).first()
+        if existing_phone_user:
+            raise HTTPException(
+                status_code=400,
+                detail="An account with this mobile number already exists. Please log in directly."
+            )
+
 
     
     # Create Organization
