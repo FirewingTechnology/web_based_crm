@@ -15,10 +15,12 @@ from app.schemas.saas import (
 from app.utils.security import get_password_hash, create_access_token, create_refresh_token
 from app.services.email_service import send_otp_email
 
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+
 router = APIRouter(prefix="/saas", tags=["SaaS Registration & OTP"])
 
 @router.post("/send-otp", response_model=SendOTPResponse)
-def send_otp(req: SendOTPRequest, db: Session = Depends(get_db)):
+def send_otp(req: SendOTPRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     email = req.email.lower().strip()
     
     # Generate 6-digit OTP
@@ -38,13 +40,14 @@ def send_otp(req: SendOTPRequest, db: Session = Depends(get_db)):
     db.add(otp_entry)
     db.commit()
     
-    # Send Email via SMTP
-    send_otp_email(email, otp_code)
+    # Send Email asynchronously in background so API returns instantly
+    background_tasks.add_task(send_otp_email, email, otp_code)
     
     return SendOTPResponse(
         success=True,
         message=f"Verification code sent to {email}. (Valid for 10 minutes)"
     )
+
 
 @router.post("/verify-otp", response_model=VerifyOTPResponse)
 def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):

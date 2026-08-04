@@ -108,12 +108,16 @@ def list_tenant_admins(
         })
     return result
 
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+
 @router.post("/create-tenant")
 def create_offline_tenant(
     req: CreateOfflineTenantRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     admin: User = Depends(check_superadmin_access)
 ):
+
     existing_user = db.query(User).filter(User.email == req.admin_email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="An account with this email address already exists.")
@@ -186,7 +190,7 @@ def create_offline_tenant(
 
     # 6. Dispatch Welcome Credentials Email
     login_url = "https://web-based-crm-1.onrender.com/login"
-    send_welcome_credentials_email(req.admin_email, req.admin_name, req.admin_password, login_url)
+    background_tasks.add_task(send_welcome_credentials_email, req.admin_email, req.admin_name, req.admin_password, login_url)
 
     return {
         "success": True,
@@ -194,6 +198,7 @@ def create_offline_tenant(
         "admin_email": req.admin_email,
         "organization_id": org.id
     }
+
 
 @router.post("/admins/{user_id}/reset-password")
 def reset_admin_password(
