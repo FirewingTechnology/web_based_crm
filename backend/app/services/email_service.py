@@ -4,7 +4,9 @@ import ssl
 import socket
 import logging
 import json
+import base64
 import urllib.request
+import urllib.error
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
@@ -27,6 +29,43 @@ EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "REALVION Platform")
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY", "")
+MAILJET_SECRET_KEY = os.getenv("MAILJET_SECRET_KEY", "")
+
+def send_email_http_mailjet(to_email: str, subject: str, html_content: str) -> bool:
+    """Send email via Mailjet HTTP API (Port 443 - 6,000 Free Emails/Month, 100% Free)"""
+    if not MAILJET_API_KEY or not MAILJET_SECRET_KEY:
+        return False
+    try:
+        url = "https://api.mailjet.com/v3.1/send"
+        auth_str = base64.b64encode(f"{MAILJET_API_KEY}:{MAILJET_SECRET_KEY}".encode("utf-8")).decode("utf-8")
+        headers = {
+            "Authorization": f"Basic {auth_str}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "Messages": [
+                {
+                    "From": {"Email": SMTP_USER, "Name": EMAIL_FROM_NAME},
+                    "To": [{"Email": to_email}],
+                    "Subject": subject,
+                    "HTMLPart": html_content
+                }
+            ]
+        }
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=8) as response:
+            if response.status in [200, 201, 202]:
+                logger.info(f"Email successfully delivered to {to_email} via Mailjet HTTP API")
+                print(f"[MAILJET SUCCESS] Delivered to {to_email} via HTTP API")
+                return True
+    except urllib.error.HTTPError as http_err:
+        err_body = http_err.read().decode('utf-8', errors='ignore')
+        logger.error(f"Mailjet HTTP API failed ({http_err.code}): {err_body}")
+        print(f"[MAILJET ERROR {http_err.code}] {err_body}")
+    except Exception as e:
+        logger.error(f"Mailjet HTTP API failed: {e}")
+    return False
 
 def send_email_http_resend(to_email: str, subject: str, html_content: str) -> bool:
     """Send email via Resend HTTP API (Port 443 - Never Blocked by Render)"""
@@ -59,7 +98,7 @@ def send_email_http_resend(to_email: str, subject: str, html_content: str) -> bo
     return False
 
 def send_email_http_brevo(to_email: str, subject: str, html_content: str) -> bool:
-    """Send email via Brevo (Sendinblue) HTTP API (Port 443 - Never Blocked by Render)"""
+    """Send email via Brevo HTTP API (Port 443 - Never Blocked by Render)"""
     if not BREVO_API_KEY:
         return False
     try:
@@ -89,21 +128,24 @@ def send_email_http_brevo(to_email: str, subject: str, html_content: str) -> boo
         logger.error(f"Brevo HTTP API failed: {e}")
     return False
 
-
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     """
     Send an email via HTTP REST API or fallback to SMTP socket.
     Prioritizes HTTP APIs (Port 443) to bypass cloud container firewall restrictions.
     """
-    # 1. Try Resend HTTP API if configured
+    # 1. Try Mailjet HTTP API if configured (6,000 Free Emails/Month)
+    if MAILJET_API_KEY and MAILJET_SECRET_KEY and send_email_http_mailjet(to_email, subject, html_content):
+        return True
+
+    # 2. Try Resend HTTP API if configured
     if RESEND_API_KEY and send_email_http_resend(to_email, subject, html_content):
         return True
 
-    # 2. Try Brevo HTTP API if configured
+    # 3. Try Brevo HTTP API if configured
     if BREVO_API_KEY and send_email_http_brevo(to_email, subject, html_content):
         return True
 
-    # 3. Fallback to raw SMTP socket connection (Fast 4-second timeout)
+    # 4. Fallback to raw SMTP socket connection (Fast 4-second timeout)
     if not SMTP_PASSWORD:
         logger.info(f"[EMAIL SERVICE - SIMULATED LOG] To: {to_email} | Subject: '{subject}'")
         print(f"==================================================")
