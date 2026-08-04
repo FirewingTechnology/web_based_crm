@@ -9,6 +9,14 @@ from typing import Optional
 
 logger = logging.getLogger("email_service")
 
+# Force socket to resolve IPv4 addresses to prevent Linux container IPv6 "Network is unreachable" errors
+_orig_getaddrinfo = socket.getaddrinfo
+def _ipv4_only_getaddrinfo(*args, **kwargs):
+    responses = _orig_getaddrinfo(*args, **kwargs)
+    ipv4_responses = [r for r in responses if r[0] == socket.AF_INET]
+    return ipv4_responses if ipv4_responses else responses
+socket.getaddrinfo = _ipv4_only_getaddrinfo
+
 # SMTP Credentials & Config
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_USER = os.getenv("SMTP_USER", "firewingtechnologiesindia@gmail.com")
@@ -18,7 +26,7 @@ EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", "REALVION Platform")
 def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     """
     Send an email via SMTP.
-    Uses SSL Port 465 with IPv4 resolution for Cloud/Render Container Compatibility.
+    Uses SSL Port 465 with forced IPv4 resolution for Render/Cloud Linux container compatibility.
     Falls back to Port 587 TLS if required.
     """
     if not SMTP_PASSWORD:
@@ -36,13 +44,13 @@ def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
     part_html = MIMEText(html_content, "html")
     msg.attach(part_html)
 
-    # Method 1: Try Port 465 (SSL - Container Recommended)
+    # Method 1: Try Port 465 (SSL - Cloud Container Standard)
     try:
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(SMTP_HOST, 465, context=context, timeout=12) as server:
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
-        logger.info(f"Email successfully sent to {to_email} via SSL:465")
+        logger.info(f"Email successfully sent to {to_email} via SSL:465 (IPv4)")
         print(f"[EMAIL SUCCESS] Delivered to {to_email} via Port 465 SSL")
         return True
     except Exception as ssl_err:
@@ -54,7 +62,7 @@ def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
-        logger.info(f"Email successfully sent to {to_email} via TLS:587")
+        logger.info(f"Email successfully sent to {to_email} via TLS:587 (IPv4)")
         print(f"[EMAIL SUCCESS] Delivered to {to_email} via Port 587 TLS")
         return True
     except Exception as tls_err:
