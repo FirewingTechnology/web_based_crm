@@ -14,6 +14,7 @@ import { PricingPage } from './pages/PricingPage';
 import { BlogPage } from './pages/BlogPage';
 import { FaqPage } from './pages/FaqPage';
 import { ContactPage } from './pages/ContactPage';
+import { RegisterPage } from './pages/RegisterPage';
 
 export const App: React.FC = () => {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
@@ -35,6 +36,7 @@ export const App: React.FC = () => {
             <Route path="/blog" element={<BlogPage onOpenDemo={openDemo} />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

@@ -11,7 +11,7 @@ export const WebsiteFooter: React.FC = () => {
         <div className="space-y-4">
           <div className="cursor-pointer" onClick={() => navigate('/')}>
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="REALVION"
               className="h-16 w-auto object-contain"
               style={{ maxWidth: '200px' }}

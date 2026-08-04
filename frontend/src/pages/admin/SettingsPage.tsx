@@ -10,6 +10,7 @@ import { Modal } from '../../components/ui/Modal';
 import { DataTable } from '../../components/ui/DataTable';
 import { usersApi } from '../../api/users';
 import { User, UserCreateInput, UserRole } from '../../types/user';
+import { SubscriptionSettingsCard } from '../../components/SubscriptionSettingsCard';
 
 export const SettingsPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -130,6 +131,8 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <SubscriptionSettingsCard />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">System Settings & Users</h1>
@@ -145,6 +148,7 @@ export const SettingsPage: React.FC = () => {
           Create User Account
         </Button>
       </div>
+
 
       {/* Users Data Table */}
       <DataTable columns={columns} data={users} searchPlaceholder="Search user name, email, role..." />

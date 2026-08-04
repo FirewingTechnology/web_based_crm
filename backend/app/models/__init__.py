@@ -10,6 +10,11 @@ from app.models.booking import Booking, BookingStatus
 from app.models.commission import Commission, PayoutStatus
 from app.models.activity_log import ActivityLog
 from app.models.notification import Notification
+from app.models.saas import (
+    Organization, Workspace, Plan, Subscription, SubscriptionHistory,
+    Payment, PaymentLog, PaymentWebhook, License, OrganizationSetting,
+    EmailLog, OTP, RegistrationRequest
+)
 
 __all__ = [
     "Base",
@@ -34,5 +39,19 @@ __all__ = [
     "Commission",
     "PayoutStatus",
     "ActivityLog",
-    "Notification"
+    "Notification",
+    "Organization",
+    "Workspace",
+    "Plan",
+    "Subscription",
+    "SubscriptionHistory",
+    "Payment",
+    "PaymentLog",
+    "PaymentWebhook",
+    "License",
+    "OrganizationSetting",
+    "EmailLog",
+    "OTP",
+    "RegistrationRequest"
 ]
+

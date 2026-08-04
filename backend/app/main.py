@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
-from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route
+from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route, registration, payments, saas_admin
 
 # Create database tables automatically if they don't exist
 Base.metadata.create_all(bind=engine)
@@ -33,6 +33,8 @@ def startup_db_seed():
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
     "http://localhost:3000",
     "*"
 ]
@@ -61,7 +63,11 @@ app.include_router(reports.router, prefix=api_v1)
 app.include_router(notifications.router, prefix=api_v1)
 app.include_router(activity_logs.router, prefix=api_v1)
 app.include_router(settings_route.router, prefix=api_v1)
+app.include_router(registration.router, prefix=api_v1)
+app.include_router(payments.router, prefix=api_v1)
+app.include_router(saas_admin.router, prefix=api_v1)
 
 @app.get("/")
 def root():
-    return {"message": "REALVION API is running", "version": "1.0.0"}
+    return {"message": "REALVION API is running", "version": "2.0.0"}
+

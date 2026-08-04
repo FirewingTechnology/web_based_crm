@@ -20,6 +20,7 @@ import { CommissionManagement } from '../pages/admin/CommissionManagement';
 import { ReportManagement } from '../pages/admin/ReportManagement';
 import { NotificationsPage } from '../pages/admin/NotificationsPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
+import { SuperAdminDashboard } from '../pages/admin/SuperAdminDashboard';
 
 // Sales Portal Pages
 import { SalesDashboard } from '../pages/sales/SalesDashboard';
@@ -42,6 +43,7 @@ export const AppRouter: React.FC = () => {
         <Route element={<RoleGuard allowedRoles={['Admin', 'Manager']} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/saas" element={<SuperAdminDashboard />} />
             <Route path="/admin/leads" element={<LeadManagement />} />
             <Route path="/admin/followups" element={<FollowupManagement />} />
             <Route path="/admin/bookings" element={<BookingManagement />} />
@@ -55,6 +57,7 @@ export const AppRouter: React.FC = () => {
             <Route path="/admin/settings" element={<SettingsPage />} />
           </Route>
         </Route>
+
 
         {/* Sales Portal Routes */}
         <Route element={<RoleGuard allowedRoles={['Sales Executive', 'Broker', 'Manager', 'Admin']} />}>

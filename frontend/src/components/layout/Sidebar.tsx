@@ -18,6 +18,7 @@ import {
   Building,
   LogOut,
   X,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
 
   const adminNavItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'SaaS Control Panel', path: '/admin/saas', icon: ShieldCheck },
     { label: 'Lead Management', path: '/admin/leads', icon: Users },
     { label: 'Followups', path: '/admin/followups', icon: CalendarCheck },
     { label: 'Bookings', path: '/admin/bookings', icon: FileCheck2 },
@@ -45,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     { label: 'Notifications', path: '/admin/notifications', icon: Bell },
     { label: 'Settings & Logs', path: '/admin/settings', icon: Settings },
   ];
+
 
   const salesNavItems = [
     { label: 'Sales Dashboard', path: '/sales/dashboard', icon: LayoutDashboard },
@@ -66,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
         <div className="py-4 px-3 flex items-center justify-between border-b border-[#C8A45D]/15">
           <div className="flex items-center w-full">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="REALVION"
               className="w-full h-auto object-contain"
               style={{ maxHeight: '64px' }}
@@ -92,10 +95,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 to={item.path}
                 onClick={onMobileClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[#C8A45D]/15 text-[#C8A45D] border border-[#C8A45D]/30 shadow-sm'
-                      : 'hover:bg-white/[0.04] hover:text-slate-100 text-slate-400'
+                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                    ? 'bg-[#C8A45D]/15 text-[#C8A45D] border border-[#C8A45D]/30 shadow-sm'
+                    : 'hover:bg-white/[0.04] hover:text-slate-100 text-slate-400'
                   }`
                 }
               >

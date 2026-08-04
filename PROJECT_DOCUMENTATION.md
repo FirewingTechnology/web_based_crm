@@ -1,40 +1,63 @@
-# 🏢 BrokerOS Lite – Real Estate CRM Documentation
+# 🏢 REALVION – Master Real Estate CRM & Website Documentation
 
-> **Version**: 1.0.0  
-> **Architecture**: Decoupled Monorepo (FastAPI Backend + React Vite TypeScript Frontend)  
-> **Deployment**: Render Blueprint (`render.yaml`) Ready  
+> **Version**: 2.0.0  
+> **Architecture**: Decoupled Monorepo Ecosystem (FastAPI Backend + React Vite Portal + React Vite Marketing Website + Flutter Multi-Platform App)  
+> **Deployment**: Render Blueprint (`render.yaml`) & Multi-Platform Desktop/Mobile Ready  
 
 ---
 
 ## 📖 Executive Summary
 
-**BrokerOS Lite** is an enterprise-grade, high-performance Real Estate Channel Partner (CP) SaaS and Brokerage Management Platform. Built specifically for real estate developers, agencies, and sales teams, it streamlines lead pipelines, property bookings, broker commission payouts, sales targets, and real-time client follow-ups.
+**REALVION** is an enterprise-grade, high-performance Real Estate Channel Partner (CP) SaaS, Public Marketing Platform, and Brokerage Management System. Built specifically for real estate developers, agencies, channel partners, and sales teams, it unifies lead pipelines, property bookings, broker commission payouts, sales targets, dynamic public web inquiries, and real-time client follow-ups.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Technology Stack & Platform Components
 
-### 1. **Frontend Architecture**
+### 1. **Public Marketing Website (`web_based_crm/website`)**
 * **Framework**: React 18 with TypeScript & Vite
-* **Styling**: Custom Glassmorphism CSS Design System (`index.css`), TailwindCSS Tokens
-* **UI Components**: Framer Motion (Modal & Drawer Animations), Lucide React (Icons), TanStack Table v8 (Data Grids & Pagination)
+* **Styling**: Tailwind CSS Tokens, Custom Dark Aesthetic
+* **UI Components**: Framer Motion (Page & Modal Animations), Lucide React (Icons)
+* **Routes & Pages**:
+  * `/` – **HomePage**: Platform highlights, hero section, social proof, pricing previews
+  * `/solutions` – **SolutionsPage**: Tailored real estate agency & developer solutions
+  * `/features` – **FeaturesPage**: Dynamic feature catalog & technology deep-dives
+  * `/pricing` – **PricingPage**: Interactive SaaS pricing matrix & plan comparison
+  * `/industries` – **IndustriesPage**: Residential, commercial, and land developer use cases
+  * `/about` – **AboutPage**: Corporate story, vision, and technology stack
+  * `/blog` – **BlogPage**: Real estate sales strategies & market insights
+  * `/faq` – **FaqPage**: System capabilities, security, and onboarding FAQ
+  * `/contact` – **ContactPage**: Contact form, sales inquiries, and support routing
+  * `DemoModal` – **Interactive Demo Request**: Global pop-up request modal
+
+### 2. **Web CRM Application Portal (`web_based_crm/frontend`)**
+* **Framework**: React 18 with TypeScript & Vite
+* **Styling**: Custom Glassmorphism CSS Design System (`index.css`), Dark Theme Palette
+* **UI Components**: TanStack Table v8 (Data Grids, Pagination & Filtering), Framer Motion (Drawers & Modals), Lucide React
 * **Audio & Speech APIs**:
-  * **Web Audio API**: Real-time dual-harmonic sine-wave chime sound synthesizer ($C_5 \rightarrow E_5 \rightarrow G_5 \rightarrow C_6$).
+  * **Web Audio API**: Dual-harmonic sine-wave chime sound synthesizer ($C_5 \rightarrow E_5 \rightarrow G_5 \rightarrow C_6$).
   * **Web Speech API**: Native text-to-speech voice synthesizer for spoken reminder alerts.
 * **HTTP Client**: Axios with JWT Request/Response Interceptors, Auto-Refresh Tokens, and Hostname-based Production API Fallback (`https://web-based-crm.onrender.com/api/v1`).
 
-### 2. **Backend Architecture**
+
+### 3. **Backend API Architecture (`web_based_crm/backend`)**
 * **Framework**: Python 3.11 + FastAPI (Asynchronous ASGI Web Framework)
 * **ORM & Database**: SQLAlchemy 2.0 ORM with SQLite (Local) & PostgreSQL Support
 * **Security & Auth**: OAuth2 Password Bearer Tokens, PyJWT Token Encoding, Passlib (Bcrypt Password Hashing)
 * **Validation**: Pydantic v2 Schemas & Data Normalization
 * **Server**: Uvicorn ASGI Server & Gunicorn Production Process Manager
 
+### 4. **Flutter Multi-Platform Client (`BOS`)**
+* **Framework**: Flutter 3 & Dart 3
+* **State Management**: `flutter_riverpod` 2.6.1 with annotation generators
+* **Routing**: `go_router` 17.3.0 with `StatefulShellRoute` responsive navigation (`AppShell.dart`)
+* **Mock Engine**: Deterministic seeded mock data engine (`MockDataGenerator`) with AI lead scoring (0–100%) and luxury property portfolios.
+
 ---
 
 ## 🔐 Security & Role-Based Access Control (RBAC)
 
-Public self-registration is disabled for maximum enterprise security. Accounts are provisioned exclusively by the Administrator.
+Public self-registration is disabled for maximum enterprise security. Accounts are provisioned exclusively by system administrators.
 
 | Role | Access Scope & Permissions | Portal URL |
 | :--- | :--- | :--- |
@@ -64,11 +87,7 @@ Public self-registration is disabled for maximum enterprise security. Accounts a
 
 ### 4. 📞 Dynamic Lead Pipeline & Real-Time Lead Drawer
 * **7-Stage Pipeline**: `New` $\rightarrow$ `Contacted` $\rightarrow$ `Qualified` $\rightarrow$ `Site Visit Scheduled` $\rightarrow$ `Negotiation` $\rightarrow$ `Booked` $\rightarrow$ `Lost`.
-* **Real-Time Lead Drawer**: 0ms local UI updates and 4-second background polling to sync activity notes and status timeline history live across sessions.
-
-### 5. 🤝 External Broker Network (Single Brokers & Firms)
-* **Single Broker Registration**: Support for individual independent brokers (*Ramesh Kumar (Independent Broker)*) as well as brokerage agencies/firms.
-* **Commission Shares**: Custom override commission percentages per builder/broker.
+* **Real-Time Lead Drawer**: Instant local UI updates and live activity log note synchronization across active sessions.
 
 ---
 
@@ -93,22 +112,9 @@ Public self-registration is disabled for maximum enterprise security. Accounts a
 └────────────────┘       └─────────────────┘                │
 ```
 
-### Table Definitions:
-1. **`users`**: System user credentials, hashed passwords, roles (`Admin`, `Manager`, `Sales Executive`, `Broker`).
-2. **`builders`**: Real estate developers, contact details, standard commission rates.
-3. **`projects`**: Property inventory listings linked to `builders.id`.
-4. **`leads`**: Buyer leads, assigned sales executive (`assigned_to_id`), status, budget, location preferences.
-5. **`lead_notes`**: Activity notes linked to `leads.id` and `users.id`.
-6. **`lead_status_history`**: Audit trail of status transitions.
-7. **`followups`**: Scheduled tasks (`Call`, `WhatsApp`, `Site Visit`) linked to `leads.id` and `users.id`.
-8. **`broker_profiles`**: Channel partner profiles and performance scores.
-9. **`sales_targets`**: Monthly target benchmarks and dynamic deal closures.
-10. **`bookings`**: Confirmed deal bookings linked to `leads.id`, `projects.id`, and `users.id`.
-11. **`commissions`**: Earned broker and executive payouts.
-
 ---
 
-## 📡 API Endpoint Reference (16 Core Services)
+## 📡 API Endpoint Reference (14 Modular Services)
 
 | Method | Endpoint | Description | Role Required |
 | :--- | :--- | :--- | :--- |
@@ -135,46 +141,39 @@ Public self-registration is disabled for maximum enterprise security. Accounts a
 
 ---
 
-## 🚀 Deployment Guide (Render 1-Click Blueprint)
-
-### Environment Variables Matrix
-
-#### Backend Environment Variables:
-* `API_V1_STR`: `/api/v1`
-* `PROJECT_NAME`: `BrokerOS Lite Real Estate CRM`
-* `SECRET_KEY`: `your_random_jwt_secret_key`
-
-#### Frontend Environment Variables:
-* `VITE_API_URL`: `https://web-based-crm.onrender.com/api/v1`
-
----
-
-## 💻 Local Development Setup
+## 💻 Local Development & Setup
 
 ### 1. **Backend Setup**:
-```bash
-cd backend
-python -m venv .venv
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
+```powershell
+cd web_based_crm/backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+python -m app.seed
 uvicorn app.main:app --reload --port 8001
 ```
 
-### 2. **Frontend Setup**:
-```bash
-cd frontend
+### 2. **Web CRM Portal Setup**:
+```powershell
+cd web_based_crm/frontend
 npm install
 npm run dev -- --port 5173
+```
+
+### 3. **Public Website Setup**:
+```powershell
+cd web_based_crm/website
+npm install
+npm run dev -- --port 5174
 ```
 
 ---
 
 ## 🔑 Default Initial Credentials
 
-* **Super Admin**: `admin@brokeros.com` | Password: `Admin@123`
-* **Sales Executive**: `sales@brokeros.com` | Password: `Sales@123`
-* **Manager**: `manager@brokeros.com` | Password: `Manager@123`
+* **Super Admin**: `admin@brokeros.com` *(or `admin@realvion.com`)* | Password: `Admin@123`
+* **Sales Executive**: `sales@brokeros.com` *(or `sales@realvion.com`)* | Password: `Sales@123`
+* **Manager**: `manager@brokeros.com` *(or `manager@realvion.com`)* | Password: `Manager@123`
 
 ---
-*BrokerOS Lite CRM – Enterprise Real Estate Channel Partner Solution*
+*REALVION – Master Real Estate Operating System & Marketing Platform*

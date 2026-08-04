@@ -8,10 +8,12 @@ const getBaseUrl = () => {
     return envUrl;
   }
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    return '/api/v1';
+    return 'http://localhost:8001/api/v1';
   }
   return DEFAULT_BACKEND_URL;
 };
+
+
 
 const API_BASE_URL = getBaseUrl();
 

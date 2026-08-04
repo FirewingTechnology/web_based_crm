@@ -3,7 +3,7 @@ services:
   # 1. FastAPI Backend Web Service
   # -------------------------------------------------------------
   - type: web
-    name: realvion-backend
+    name: web-based-crm
     env: python
     region: singapore
     plan: free
@@ -15,9 +15,25 @@ services:
       - key: API_V1_STR
         value: /api/v1
       - key: PROJECT_NAME
-        value: Realvion - Real Estate Sales Operating System
+        value: REALVION - Real Estate Sales Operating System
       - key: SECRET_KEY
-        value: realvion_render_production_jwt_secret_key_2026
+        generateValue: true
+      - key: REFRESH_SECRET_KEY
+        generateValue: true
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
 
   # -------------------------------------------------------------
   # 2. React Vite Frontend CRM Web App

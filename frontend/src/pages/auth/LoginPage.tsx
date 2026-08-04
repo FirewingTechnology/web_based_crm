@@ -55,7 +55,7 @@ export const LoginPage: React.FC = () => {
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="REALVION"
               className="w-full h-auto object-contain"
               style={{ maxHeight: '200px' }}
@@ -69,22 +69,20 @@ export const LoginPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabSwitch('admin')}
-            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
-              loginType === 'admin'
+            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${loginType === 'admin'
                 ? 'bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 text-black shadow-md shadow-[#C8A45D]/30'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
-            }`}
+              }`}
           >
             <ShieldCheck className="h-4 w-4" /> Admin Login
           </button>
           <button
             type="button"
             onClick={() => handleTabSwitch('sales')}
-            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
-              loginType === 'sales'
+            className={`py-2.5 px-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${loginType === 'sales'
                 ? 'bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 text-black shadow-md shadow-[#C8A45D]/30'
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
-            }`}
+              }`}
           >
             <UserCheck className="h-4 w-4" /> Sales Login
           </button>

@@ -1,0 +1,85 @@
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel, EmailStr, Field
+
+class SendOTPRequest(BaseModel):
+    email: EmailStr
+
+class SendOTPResponse(BaseModel):
+    success: bool
+    message: str
+
+class VerifyOTPRequest(BaseModel):
+    email: EmailStr
+    otp_code: str
+
+class VerifyOTPResponse(BaseModel):
+    success: bool
+    message: str
+
+class RegisterDemoRequest(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone: str
+    password: str
+    company_name: str
+    company_type: str = "Agency"
+    gst_number: Optional[str] = None
+    website: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    employees: Optional[str] = "1-10"
+    selected_plan_code: str = "professional"
+
+class RegisterDemoResponse(BaseModel):
+    success: bool
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    is_demo_mode: bool = True
+    user: Dict[str, Any]
+    workspace_name: str
+    message: str
+
+class CreateOrderRequest(BaseModel):
+    plan_code: str = "professional"
+    billing_cycle: str = "monthly" # monthly or yearly
+    coupon_code: Optional[str] = None
+
+class CreateOrderResponse(BaseModel):
+    order_id: str
+    amount: float
+    platform_fee: float
+    gst_amount: float
+    total_amount: float
+    currency: str = "INR"
+    key_id: str
+    plan_name: str
+
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+class PlanSchema(BaseModel):
+    id: int
+    name: str
+    code: str
+    price_monthly: float
+    price_yearly: float
+    platform_fee: float
+    max_users: int
+    max_leads: int
+    features: List[str] = []
+
+    class Config:
+        from_attributes = True
+
+class SaaSAnalyticsResponse(BaseModel):
+    mrr: float
+    arr: float
+    total_customers: int
+    active_subscriptions: int
+    demo_workspaces: int
+    total_revenue: float
+    growth_rate_pct: float

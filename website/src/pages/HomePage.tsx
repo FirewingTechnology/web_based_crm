@@ -10,12 +10,23 @@ import {
   Phone,
   Flame,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Play,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  TrendingUp,
+  Award,
+  Shield,
+  Zap,
+  Users,
+  Star
 } from 'lucide-react';
 
 export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) => {
   const navigate = useNavigate();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
@@ -23,6 +34,10 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
     const y = (clientY / window.innerHeight - 0.5) * 20;
     setMousePos({ x, y });
   };
+
+  const logos = [
+    "Lodha Group", "DLF Limited", "Godrej Properties", "Sobha Developers", "Prestige Group", "Oberoi Realty"
+  ];
 
   const questions = [
     "How many follow-ups were missed in your sales team this week?",
@@ -32,8 +47,45 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
     "If your phone is lost today... can your real estate business continue tomorrow?"
   ];
 
+  const timelineSteps = [
+    { title: "Step 1: One-Click Registration", desc: "Select your plan, verify your work email with OTP, and register your brokerage entity." },
+    { title: "Step 2: Instant Demo Workspace", desc: "Your workspace is immediately provisioned with 50 pre-seeded leads, builders, and analytics." },
+    { title: "Step 3: Automated Follow-Up Alarms", desc: "Synthesizes dual-harmonic audio chimes and voice alerts so no client call is ever lost." },
+    { title: "Step 4: Commission & Revenue Auto-Calculation", desc: "Track channel partner commission payouts, executive targets, and booking ledgers live." }
+  ];
+
+  const comparisonFeatures = [
+    { name: "Real Estate CP Specific Workflows", realvion: true, legacy: false },
+    { name: "Dual-Harmonic Audio & Speech Alarms", realvion: true, legacy: false },
+    { name: "Inline Builder & Developer Creation", realvion: true, legacy: false },
+    { name: "Automated Self-Onboarding & Instant Demo", realvion: true, legacy: false },
+    { name: "Lakhs & Crores (INR) Revenue Metrics", realvion: true, legacy: false },
+    { name: "Role-Based Access Control (RBAC)", realvion: true, legacy: true },
+    { name: "CSV Data Export & Detailed Audits", realvion: true, legacy: false }
+  ];
+
+  const faqs = [
+    { q: "How fast can my real estate agency get started?", a: "You can register and launch your demo workspace in under 2 minutes. Instant 50 sample leads, builders, and analytics are preloaded automatically." },
+    { q: "Is payment mandatory to test the system?", a: "No! You get instant access to a full Demo Workspace to test all features. Payment is only required when you activate your live workspace via Razorpay." },
+    { q: "Does REALVION support multi-tenant team members?", a: "Yes. Admins can create Sales Executives, Managers, and Broker Partners with role-scoped permissions." },
+    { q: "How do the voice follow-up reminders work?", a: "REALVION checks your agenda every 8 seconds and synthesizes a 4-note sound chime followed by spoken voice alerts ('Reminder Alert! You have a scheduled call with Lead Name')." }
+  ];
+
   return (
-    <div className="bg-[#050505] text-slate-100 selection:bg-[#C8A45D] selection:text-black" onMouseMove={handleMouseMove}>
+    <div className="bg-[#050505] text-slate-100 selection:bg-[#C8A45D] selection:text-black relative" onMouseMove={handleMouseMove}>
+      
+      {/* Floating CTA Bar */}
+      <div className="fixed bottom-6 right-6 z-40 hidden md:flex items-center gap-3 p-3 rounded-2xl bg-[#0a0a0a]/90 border border-[#C8A45D]/40 backdrop-blur-xl shadow-2xl">
+        <span className="text-xs font-semibold text-slate-200 pl-2">Ready to transform your sales?</span>
+        <button
+          onClick={() => navigate('/register')}
+          className="px-4 py-2 rounded-xl text-xs font-bold text-black bg-[#C8A45D] hover:brightness-110 shadow-lg shadow-[#C8A45D]/25 transition flex items-center gap-1"
+        >
+          Get Started <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* Hero Section */}
       <section className="relative pt-36 pb-24 px-6 lg:px-12 max-w-7xl mx-auto min-h-screen flex flex-col justify-center overflow-hidden">
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#C8A45D]/10 rounded-full blur-[140px] pointer-events-none" />
 
@@ -56,32 +108,32 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <button
-                onClick={onOpenDemo}
+                onClick={() => navigate('/register')}
                 className="px-8 py-4 rounded-2xl text-sm font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:shadow-xl hover:shadow-[#C8A45D]/30 transition transform hover:-translate-y-0.5 flex items-center gap-2"
               >
-                Book Personal Live Demo <ArrowRight className="h-5 w-5" />
+                Start Free Trial <ArrowRight className="h-5 w-5" />
               </button>
 
               <button
-                onClick={() => navigate('/solutions')}
+                onClick={onOpenDemo}
                 className="px-6 py-4 rounded-2xl text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-2"
               >
-                Explore Solutions <ChevronRight className="h-5 w-5 text-[#C8A45D]" />
+                <Play className="h-4 w-4 text-[#C8A45D] fill-[#C8A45D]" /> Watch Live Demo
               </button>
             </div>
 
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/[0.08] text-xs">
               <div>
-                <p className="text-2xl font-bold text-white">100%</p>
-                <p className="text-slate-500 mt-0.5">Real Estate CP Focused</p>
+                <p className="text-2xl font-bold text-white">50,000+</p>
+                <p className="text-slate-500 mt-0.5">Leads Managed</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#C8A45D]">0</p>
-                <p className="text-slate-500 mt-0.5">Missed Client Follow-ups</p>
+                <p className="text-2xl font-bold text-[#C8A45D]">₹1,200 Cr+</p>
+                <p className="text-slate-500 mt-0.5">GMV Processed</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">INR</p>
-                <p className="text-slate-500 mt-0.5">Lakhs / Crores Pricing</p>
+                <p className="text-2xl font-bold text-white">99.9%</p>
+                <p className="text-slate-500 mt-0.5">System Uptime</p>
               </div>
             </div>
           </div>
@@ -144,55 +196,102 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
         </div>
       </section>
 
-      <section className="py-24 px-6 lg:px-12 border-t border-white/[0.08] bg-[#080808]">
-        <div className="max-w-5xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Business Reality</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              Is your real estate business running on memory... or systems?
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {questions.map((q, idx) => (
-              <div key={idx} className="p-6 rounded-2xl bg-[#101010] border border-white/[0.08] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[#C8A45D] px-2 py-0.5 rounded bg-[#C8A45D]/10">
-                    REALITY 0{idx + 1}
-                  </span>
-                  <AlertCircle className="h-4 w-4 text-[#C8A45D]" />
-                </div>
-                <h3 className="text-base font-semibold text-slate-200">{q}</h3>
-              </div>
+      {/* Customer Logos Bar */}
+      <section className="py-12 border-y border-white/[0.08] bg-[#080808]">
+        <div className="max-w-7xl mx-auto px-6 text-center space-y-6">
+          <p className="text-xs font-semibold text-slate-400 tracking-widest uppercase">
+            Trusted by Leading Real Estate Agencies & Developers
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-70">
+            {logos.map((logo, i) => (
+              <span key={i} className="text-sm font-bold text-slate-300 tracking-wider">
+                {logo}
+              </span>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-24 px-6 lg:px-12 border-t border-white/[0.08] max-w-7xl mx-auto space-y-12">
+      {/* Feature Timeline Section */}
+      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-16">
         <div className="text-center space-y-4">
-          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Product Suite</span>
-          <h2 className="text-3xl sm:text-5xl font-black text-white">
-            Built for total control.
-          </h2>
+          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">How It Works</span>
+          <h2 className="text-3xl sm:text-4xl font-black text-white">Self-Onboarding in 4 Simple Steps</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <div className="p-8 rounded-3xl bg-[#101010] border border-white/[0.08] space-y-4">
-            <UserCheck className="h-8 w-8 text-[#C8A45D]" />
-            <h3 className="text-xl font-bold text-white">Lead Management</h3>
-            <p className="text-xs text-slate-400 font-light">7-stage sales pipeline with lead drawer and interaction history timeline.</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {timelineSteps.map((step, idx) => (
+            <div key={idx} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-3 relative">
+              <span className="text-xs font-mono font-bold text-[#C8A45D] px-2.5 py-1 rounded bg-[#C8A45D]/10 border border-[#C8A45D]/20">
+                0{idx + 1}
+              </span>
+              <h3 className="text-base font-bold text-white pt-2">{step.title}</h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-light">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Comparison Table */}
+      <section className="py-20 px-6 lg:px-12 bg-[#080808] border-t border-white/[0.08]">
+        <div className="max-w-5xl mx-auto space-y-12">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Why Choose REALVION</span>
+            <h2 className="text-3xl font-bold text-white">REALVION vs Generic CRMs</h2>
           </div>
-          <div className="p-8 rounded-3xl bg-[#101010] border border-white/[0.08] space-y-4">
-            <Volume2 className="h-8 w-8 text-[#C8A45D]" />
-            <h3 className="text-xl font-bold text-white">Voice & Audio Alarms</h3>
-            <p className="text-xs text-slate-400 font-light">Web Audio harmonic chimes and text-to-speech voice announcements for scheduled callbacks.</p>
+
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0a0a0a]">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-900/80 text-white font-semibold">
+                <tr>
+                  <th className="p-4">Feature / Capability</th>
+                  <th className="p-4 text-center text-[#C8A45D]">REALVION Platform</th>
+                  <th className="p-4 text-center text-slate-400">Legacy / Generic CRMs</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {comparisonFeatures.map((f, i) => (
+                  <tr key={i} className="hover:bg-white/[0.02]">
+                    <td className="p-4 font-medium text-white">{f.name}</td>
+                    <td className="p-4 text-center">
+                      {f.realvion ? <CheckCircle2 className="h-5 w-5 text-emerald-400 inline" /> : <XCircle className="h-5 w-5 text-rose-500 inline" />}
+                    </td>
+                    <td className="p-4 text-center">
+                      {f.legacy ? <CheckCircle2 className="h-5 w-5 text-emerald-400 inline" /> : <XCircle className="h-5 w-5 text-rose-500 inline" />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="p-8 rounded-3xl bg-[#101010] border border-white/[0.08] space-y-4">
-            <Building className="h-8 w-8 text-[#C8A45D]" />
-            <h3 className="text-xl font-bold text-white">Builders & Inventory</h3>
-            <p className="text-xs text-slate-400 font-light">Centralized developer listings, pricing tiers, PDF brochures, and RERA IDs.</p>
-          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 px-6 lg:px-12 max-w-4xl mx-auto space-y-12">
+        <div className="text-center space-y-3">
+          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Got Questions?</span>
+          <h2 className="text-3xl font-bold text-white">Frequently Asked Questions</h2>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, idx) => (
+            <div
+              key={idx}
+              onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+              className="p-5 rounded-2xl bg-[#0a0a0a] border border-white/10 cursor-pointer space-y-2 transition"
+            >
+              <div className="flex items-center justify-between font-semibold text-sm text-white">
+                <span>{faq.q}</span>
+                <HelpCircle className="h-4 w-4 text-[#C8A45D]" />
+              </div>
+              {openFaqIndex === idx && (
+                <p className="text-xs text-slate-400 pt-2 border-t border-white/5 leading-relaxed font-light">
+                  {faq.a}
+                </p>
+              )}
+            </div>
+          ))}
         </div>
       </section>
     </div>
