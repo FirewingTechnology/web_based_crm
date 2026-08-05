@@ -40,11 +40,14 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
   };
 
   const roleColors: Record<string, 'purple' | 'blue' | 'emerald' | 'amber'> = {
+    'Super Admin': 'amber',
     Admin: 'purple',
     Manager: 'blue',
     'Sales Executive': 'emerald',
     Broker: 'amber',
   };
+
+  const roleDisplayName = role === 'Super Admin' ? 'Platform Owner' : role;
 
   return (
     <header className="glass-card sticky top-0 z-20 h-16 border-b border-[#C8A45D]/12 px-4 sm:px-6 flex items-center justify-between">
@@ -61,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
         <h2 className="text-base font-semibold text-white tracking-wide truncate">REALVION</h2>
         <span className="text-slate-700 hidden sm:inline">|</span>
         <div className="hidden sm:block">
-          <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{role}</Badge>
+          <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{roleDisplayName}</Badge>
         </div>
       </div>
 
@@ -163,7 +166,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                 <p className="text-xs font-bold text-white">{user?.name}</p>
                 <p className="text-[11px] text-slate-400">{user?.email}</p>
                 <div className="mt-2">
-                  <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{role}</Badge>
+                  <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{roleDisplayName}</Badge>
                 </div>
               </div>
 

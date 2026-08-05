@@ -129,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-              <p className="text-[10px] text-[#C8A45D]/80 truncate font-medium">{role}</p>
+              <p className="text-[10px] text-[#C8A45D]/80 truncate font-medium">{role === 'Super Admin' ? 'Platform Owner' : role}</p>
             </div>
           </div>
           <button
