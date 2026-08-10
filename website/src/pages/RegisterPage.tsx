@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap } from 'lucide-react';
+import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap, CreditCard, Lock, Check } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -82,9 +82,9 @@ export const RegisterPage: React.FC = () => {
   };
 
   const plans = [
-    { code: 'starter', name: 'Starter CP', price: 999, seats: 3 },
-    { code: 'professional', name: 'Professional Agency', price: 4999, seats: 15, popular: true },
-    { code: 'enterprise', name: 'Enterprise', price: 14999, seats: 50 },
+    { code: 'starter', name: 'Starter CP', price: 999, seats: 3, desc: 'Solo agents & small teams' },
+    { code: 'professional', name: 'Professional Agency', price: 4999, seats: 15, popular: true, desc: 'Growing brokerage firms' },
+    { code: 'enterprise', name: 'Enterprise', price: 14999, seats: 50, desc: 'Large CPs & enterprise teams' },
   ];
 
 
@@ -111,7 +111,7 @@ export const RegisterPage: React.FC = () => {
           <div className="w-12 h-[1px] bg-slate-800" />
           <div className={`flex items-center gap-2 text-xs font-bold ${step >= 2 ? 'text-[#C8A45D]' : 'text-slate-500'}`}>
             <span className="w-6 h-6 rounded-full bg-[#C8A45D]/20 border border-[#C8A45D] flex items-center justify-center">2</span>
-            Plan & Instant Launch
+            Select Free Trial Tier (₹0 Today)
           </div>
         </div>
       </div>
@@ -130,7 +130,7 @@ export const RegisterPage: React.FC = () => {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="p-8 rounded-2xl bg-[#0a0a0a] border border-white/10 shadow-2xl backdrop-blur-xl"
+        className="p-6 md:p-8 rounded-2xl bg-[#0a0a0a] border border-white/10 shadow-2xl backdrop-blur-xl"
       >
         {/* STEP 1: Account & Company Details */}
         {step === 1 && (
@@ -231,69 +231,156 @@ export const RegisterPage: React.FC = () => {
         {/* STEP 2: Select Plan & Launch 1-Hour Free Trial */}
         {step === 2 && (
           <div className="space-y-6">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-              <ShieldCheck className="h-5 w-5 text-[#C8A45D]" /> Step 2: Select Plan & Launch 1-Hour Trial
-            </h3>
-
-            <div className="p-4 rounded-2xl bg-[#C8A45D]/10 border border-[#C8A45D]/30 text-xs text-slate-300 flex items-center gap-3">
-              <Clock className="h-6 w-6 text-[#C8A45D] shrink-0" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-4 gap-3">
               <div>
-                <span className="font-bold text-white text-sm">⏱️ 1-Hour Free Trial Guarantee</span>
-                <p className="text-slate-400 mt-0.5">Your account will be valid for 1 hour from registration time. After 1 hour, upgrade to a paid plan to keep full access.</p>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-[#C8A45D]" /> Step 2: Select Plan Tier to Test
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Choose which features to test during your 1-hour trial. <span className="text-emerald-400 font-semibold">You pay ₹0 today.</span>
+                </p>
               </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold shrink-0 self-start sm:self-auto">
+                <Lock className="h-3.5 w-3.5" /> No Credit Card Required
+              </div>
+            </div>
+
+            {/* Top Reassurance Guarantee Banner */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-amber-950/30 border border-emerald-500/30 text-xs text-slate-300 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-white font-bold text-sm">
+                  <span className="px-2.5 py-0.5 rounded bg-emerald-500 text-black text-[11px] font-black uppercase tracking-wide">
+                    100% FREE TRIAL
+                  </span>
+                  <span>1-Hour Workspace Guarantee</span>
+                </div>
+                <span className="text-emerald-400 font-extrabold text-xs sm:text-sm bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                  ₹0.00 DUE TODAY
+                </span>
+              </div>
+              <p className="text-slate-300 leading-relaxed text-xs">
+                Your free 1-hour trial starts immediately upon launch. Test all premium CRM capabilities & 50 preloaded leads without any payment or credit card.
+              </p>
             </div>
 
             {/* Plan Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {plans.map((p) => (
-                <div
-                  key={p.code}
-                  onClick={() => setFormData({ ...formData, selectedPlan: p.code })}
-                  className={`p-5 rounded-2xl border cursor-pointer transition relative ${
-                    formData.selectedPlan === p.code
-                      ? 'bg-[#C8A45D]/10 border-[#C8A45D] shadow-lg shadow-[#C8A45D]/15'
-                      : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  {p.popular && (
-                    <span className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C8A45D] text-black uppercase">
-                      Most Popular
-                    </span>
-                  )}
-                  <h4 className="font-bold text-white text-base">{p.name}</h4>
-                  <div className="text-2xl font-extrabold text-[#C8A45D] mt-2">
-                    ₹{p.price.toLocaleString()} <span className="text-xs font-normal text-slate-400">/mo</span>
+              {plans.map((p) => {
+                const isSelected = formData.selectedPlan === p.code;
+                return (
+                  <div
+                    key={p.code}
+                    onClick={() => setFormData({ ...formData, selectedPlan: p.code })}
+                    className={`p-5 rounded-2xl border cursor-pointer transition-all relative flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-gradient-to-b from-[#C8A45D]/15 to-slate-900/90 border-[#C8A45D] shadow-xl shadow-[#C8A45D]/20 ring-1 ring-[#C8A45D]'
+                        : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    {p.popular && (
+                      <span className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C8A45D] text-black uppercase tracking-wider shadow">
+                        Most Popular
+                      </span>
+                    )}
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-white text-base">{p.name}</h4>
+                        {isSelected && (
+                          <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40">
+                            SELECTED
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Explicit ₹0 Trial Box */}
+                      <div className="bg-black/50 p-3 rounded-xl border border-white/10 space-y-1">
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Trial Cost:</span>
+                          <span className="text-lg font-black text-emerald-400">₹0 TODAY</span>
+                        </div>
+                        <div className="flex items-baseline justify-between border-t border-white/10 pt-1 text-[11px]">
+                          <span className="text-slate-400">If Upgraded Later:</span>
+                          <span className="text-slate-300 font-bold">₹{p.price.toLocaleString()}/mo</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 pt-1 text-xs text-slate-300">
+                        <div className="flex items-center gap-1.5 text-white font-medium">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                          <span>{p.seats} User Seats Included</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-300">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                          <span>1-Hour Unrestricted Trial</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-400">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                          <span>No Credit Card Needed</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-white/10 text-center">
+                      <span
+                        className={`text-xs font-bold inline-block px-3 py-1 rounded-lg w-full ${
+                          isSelected
+                            ? 'bg-[#C8A45D] text-black shadow-md'
+                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {isSelected ? '✓ Selected for Free Trial' : 'Select Plan Tier'}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> {p.seats} User Seats Included
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+            {/* Guarantee Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center gap-2.5 text-slate-300">
+                <CreditCard className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span><strong>No Credit Card:</strong> Zero upfront payment or card details required.</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center gap-2.5 text-slate-300">
+                <Zap className="h-4 w-4 text-amber-400 shrink-0" />
+                <span><strong>Instant Setup:</strong> Your workspace provisions in under 30 seconds.</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center gap-2.5 text-slate-300">
+                <Clock className="h-4 w-4 text-blue-400 shrink-0" />
+                <span><strong>No Auto-Renew:</strong> Trial ends automatically after 60 minutes.</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="px-5 py-3 rounded-xl border border-white/10 text-xs font-medium text-slate-300 hover:bg-white/5 transition"
+                className="w-full sm:w-auto px-5 py-3 rounded-xl border border-white/10 text-xs font-medium text-slate-300 hover:bg-white/5 transition"
               >
-                Back
+                ← Back
               </button>
 
-              <button
-                type="button"
-                onClick={handleCompleteRegistration}
-                disabled={loading}
-                className="py-4 px-8 rounded-xl font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition shadow-lg shadow-[#C8A45D]/25 flex items-center justify-center gap-2 text-sm"
-              >
-                {loading ? (
-                  'Launching Workspace...'
-                ) : (
-                  <>
-                    <Zap className="h-5 w-5" /> Launch 1-Hour Free Trial Workspace <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
+              <div className="w-full sm:w-auto text-right space-y-1">
+                <button
+                  type="button"
+                  onClick={handleCompleteRegistration}
+                  disabled={loading}
+                  className="w-full sm:w-auto py-4 px-8 rounded-xl font-extrabold text-black bg-gradient-to-r from-emerald-400 via-amber-400 to-[#C8A45D] hover:brightness-110 transition shadow-xl shadow-emerald-500/10 flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
+                >
+                  {loading ? (
+                    'Provisioning Workspace...'
+                  ) : (
+                    <>
+                      <Zap className="h-5 w-5 fill-black" /> Launch 1-Hour Free Trial (₹0) <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+                <p className="text-[11px] text-slate-400 text-center sm:text-right">
+                  🔒 100% Free • No Credit Card Required Today
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -301,3 +388,4 @@ export const RegisterPage: React.FC = () => {
     </div>
   );
 };
+
