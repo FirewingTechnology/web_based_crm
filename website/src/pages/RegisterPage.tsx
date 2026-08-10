@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap, CreditCard, Lock, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap, CreditCard, Lock, Check, ShieldAlert, LogIn, X } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -116,13 +116,74 @@ export const RegisterPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Error Alert */}
-      {error && (
-        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          {error}
-        </div>
-      )}
+      {/* Interactive Security & Notice Popup Modal */}
+      <AnimatePresence>
+        {error && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            {/* Backdrop Blur Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setError(null)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="relative z-10 w-full max-w-md p-6 sm:p-8 rounded-3xl bg-[#0d0d0d] border border-[#C8A45D]/40 shadow-2xl shadow-[#C8A45D]/15 text-center space-y-5"
+            >
+              <button
+                onClick={() => setError(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white p-1.5 rounded-full bg-white/5 hover:bg-white/10 transition"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              {/* Glowing Icon Container */}
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-red-500/20 to-amber-400/10 border border-[#C8A45D]/30 flex items-center justify-center mx-auto text-[#C8A45D] shadow-lg shadow-[#C8A45D]/20">
+                <ShieldAlert className="h-8 w-8" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C8A45D] bg-[#C8A45D]/10 px-3 py-1 rounded-full border border-[#C8A45D]/20">
+                  Security & Trial Notice
+                </span>
+                <h3 className="text-xl font-extrabold text-white">Registration Restricted</h3>
+                <p className="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto bg-black/40 p-3.5 rounded-xl border border-white/5">
+                  {error}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 space-y-2.5">
+                {(error.toLowerCase().includes('log in') || error.toLowerCase().includes('already exists') || error.toLowerCase().includes('already been created') || error.toLowerCase().includes('claimed')) ? (
+                  <a
+                    href={typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                      ? `http://localhost:5173/login?email=${encodeURIComponent(formData.email)}`
+                      : `https://web-based-crm-1.onrender.com/login?email=${encodeURIComponent(formData.email)}`}
+                    className="w-full py-3.5 px-6 rounded-xl font-extrabold text-black bg-gradient-to-r from-amber-400 via-[#C8A45D] to-yellow-500 hover:brightness-110 transition shadow-lg shadow-[#C8A45D]/25 flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
+                  >
+                    <LogIn className="h-4 w-4" /> Log In to Existing Account <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="w-full py-3 px-6 rounded-xl border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-white transition"
+                >
+                  Modify Form Details
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Form Container */}
       <motion.div

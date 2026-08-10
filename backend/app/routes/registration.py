@@ -3,6 +3,7 @@ import string
 import re
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import (
@@ -125,21 +126,21 @@ def register_demo(req: RegisterDemoRequest, request: Request, db: Session = Depe
         client_ip = request.client.host if request.client else "unknown"
 
     # 1. SERVER-SIDE SECURITY VALIDATION: Case-Insensitive Email Check
-    existing_email_user = db.query(User).filter(User.email.ilike(email)).first()
+    existing_email_user = db.query(User).filter(func.lower(User.email) == email).first()
     if existing_email_user:
         raise HTTPException(
             status_code=400,
             detail="An account or free trial has already been created with this email address. Each user is allowed only 1 free trial. Please log in directly."
         )
 
-    existing_demo_audit = db.query(DemoAudit).filter(DemoAudit.email.ilike(email)).first()
+    existing_demo_audit = db.query(DemoAudit).filter(func.lower(DemoAudit.email) == email).first()
     if existing_demo_audit:
         raise HTTPException(
             status_code=400,
             detail="This email address has already claimed a 1-hour free trial. Multiple trial accounts for the same email are prohibited. Please log in to your existing account."
         )
 
-    existing_reg_req = db.query(RegistrationRequest).filter(RegistrationRequest.email.ilike(email)).first()
+    existing_reg_req = db.query(RegistrationRequest).filter(func.lower(RegistrationRequest.email) == email).first()
     if existing_reg_req and existing_reg_req.is_converted:
         raise HTTPException(
             status_code=400,
@@ -165,7 +166,7 @@ def register_demo(req: RegisterDemoRequest, request: Request, db: Session = Depe
 
     # 3. SERVER-SIDE SECURITY VALIDATION: Organization / Agency Name Duplicate Check
     if company_name_clean:
-        existing_org = db.query(Organization).filter(Organization.name.ilike(company_name_clean)).first()
+        existing_org = db.query(Organization).filter(func.lower(Organization.name) == company_name_clean.lower()).first()
         if existing_org:
             raise HTTPException(
                 status_code=400,
@@ -184,7 +185,6 @@ def register_demo(req: RegisterDemoRequest, request: Request, db: Session = Depe
             status_code=429,
             detail="Maximum free trial creation limit reached from your IP address today. Please contact support or upgrade your account."
         )
-
 
     
     # Create Organization
@@ -229,6 +229,7 @@ def register_demo(req: RegisterDemoRequest, request: Request, db: Session = Depe
     # Create Admin User
     hashed_pwd = get_password_hash(req.password)
     admin_user = User(
+        organization_id=org.id,
         email=email,
         name=req.full_name,
         phone=req.phone,

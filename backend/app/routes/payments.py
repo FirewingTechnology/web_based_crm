@@ -225,6 +225,7 @@ def _activate_tenant_post_payment(payment: Optional[Payment], email: str, db: Se
         hashed_pwd = get_password_hash(temp_pwd)
         
         admin_user = User(
+            organization_id=org.id,
             email=email,
             name=email.split("@")[0].capitalize(),
             phone="+919876543210",

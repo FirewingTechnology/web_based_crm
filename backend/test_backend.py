@@ -130,6 +130,49 @@ def test_demo_security_duplicate_prevention():
     assert dup_company_res.status_code == 400
     assert "already exists" in dup_company_res.json()["detail"].lower()
 
+def test_trial_expiration_isolation():
+    # 1. Register an account created earlier
+    reg = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Afternoon User",
+        "email": "afternoon.user@example.com",
+        "phone": "+91 98888 11111",
+        "password": "Password@123",
+        "company_name": "Afternoon Agency Ltd",
+        "company_type": "Agency",
+        "city": "Mumbai"
+    })
+    assert reg.status_code == 200
+    user_token = reg.json()["access_token"]
+
+    # 2. Simulate time passing past trial end by updating sub.end_date to the past
+    db = SessionLocal()
+    from app.models.saas import Organization, Subscription
+    org = db.query(Organization).filter(Organization.name == "Afternoon Agency Ltd").first()
+    sub = db.query(Subscription).filter(Subscription.organization_id == org.id).first()
+    from datetime import datetime, timedelta
+    sub.end_date = datetime.utcnow() - timedelta(hours=3) # Expired 3 hours ago
+    db.commit()
+    db.close()
+
+    # 3. Create a brand new workspace 1 minute ago for another user
+    reg2 = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Evening User",
+        "email": "evening.user@example.com",
+        "phone": "+91 98888 22222",
+        "password": "Password@123",
+        "company_name": "Evening Agency Ltd",
+        "company_type": "Agency",
+        "city": "Mumbai"
+    })
+    assert reg2.status_code == 200
+
+    # 4. Check get_me for afternoon user -> MUST be expired and NOT stolen from evening user's trial
+    me_res = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {user_token}"})
+    assert me_res.status_code == 200
+    me_data = me_res.json()
+    assert me_data["is_trial_expired"] == True
+    assert me_data["trial_seconds_remaining"] == 0
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
@@ -137,5 +180,6 @@ if __name__ == "__main__":
     test_saas_otp_and_demo_register()
     test_get_dashboard_stats()
     test_demo_security_duplicate_prevention()
+    test_trial_expiration_isolation()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
 

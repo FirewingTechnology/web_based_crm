@@ -9,6 +9,10 @@ from app.middleware.auth_middleware import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+from datetime import datetime, timedelta
+from sqlalchemy import func
+from app.models.saas import Subscription, Organization
+
 @router.post("/login", response_model=Token)
 async def login(request: Request, db: Session = Depends(get_db)):
     email = None
@@ -33,7 +37,8 @@ async def login(request: Request, db: Session = Depends(get_db)):
             detail="Email and password are required"
         )
 
-    user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
+    clean_email = email.lower().strip()
+    user = db.query(User).filter(func.lower(User.email) == clean_email, User.is_deleted == False).first()
     if not user or not verify_password(password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -74,9 +79,6 @@ def refresh_token(request: RefreshRequest, db: Session = Depends(get_db)):
 
     return Token(access_token=new_access_token, refresh_token=new_refresh_token)
 
-from datetime import datetime
-from app.models.saas import Subscription, Organization
-
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # SuperAdmin account never expires
@@ -89,43 +91,77 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
 
     trial_expires_at = None
     is_trial_expired = False
-    trial_seconds_remaining = 3600
+    trial_seconds_remaining = 0
 
-    # Query LATEST Organization for this user's firm_name
+    # Query Organization strictly bound to this user
     org = None
-    if current_user.firm_name:
-        org = db.query(Organization).filter(
-            Organization.name == current_user.firm_name
-        ).order_by(Organization.id.desc()).first()
+    if getattr(current_user, "organization_id", None):
+        org = db.query(Organization).filter(Organization.id == current_user.organization_id).first()
 
-    if not org:
-        org = db.query(Organization).order_by(Organization.id.desc()).first()
+    if not org and current_user.firm_name:
+        org = db.query(Organization).filter(
+            func.lower(Organization.name) == current_user.firm_name.lower().strip()
+        ).order_by(Organization.id.asc()).first()
+
+    now_naive = datetime.utcnow()
 
     if org:
-        # Query LATEST Subscription for this organization
         sub = db.query(Subscription).filter(
             Subscription.organization_id == org.id
         ).order_by(Subscription.id.desc()).first()
 
-        if sub and sub.status in ["Trial", "Demo", "Expired"]:
-            trial_expires_at = sub.end_date
-            now_naive = datetime.utcnow()
-            diff_seconds = int((sub.end_date - now_naive).total_seconds())
+        if sub:
+            if sub.status == "Active":
+                is_trial_expired = False
+                trial_seconds_remaining = 864000
+            else:
+                end_dt = sub.end_date
+                if end_dt and getattr(end_dt, "tzinfo", None) is not None:
+                    end_dt = end_dt.replace(tzinfo=None)
+                trial_expires_at = end_dt
+                diff_seconds = int((end_dt - now_naive).total_seconds())
 
-            if diff_seconds <= 0 or sub.status == "Expired":
+                if diff_seconds <= 0 or sub.status == "Expired":
+                    is_trial_expired = True
+                    trial_seconds_remaining = 0
+                    if sub.status != "Expired":
+                        sub.status = "Expired"
+                        db.commit()
+                else:
+                    is_trial_expired = False
+                    trial_seconds_remaining = diff_seconds
+        else:
+            created_at = org.created_at or current_user.created_at
+            if created_at and getattr(created_at, "tzinfo", None) is not None:
+                created_at = created_at.replace(tzinfo=None)
+            trial_end = created_at + timedelta(hours=1)
+            trial_expires_at = trial_end
+            diff_seconds = int((trial_end - now_naive).total_seconds())
+            if diff_seconds <= 0:
                 is_trial_expired = True
                 trial_seconds_remaining = 0
-                if sub.status != "Expired":
-                    sub.status = "Expired"
-                    db.commit()
             else:
                 is_trial_expired = False
                 trial_seconds_remaining = diff_seconds
+    else:
+        created_at = current_user.created_at
+        if created_at and getattr(created_at, "tzinfo", None) is not None:
+            created_at = created_at.replace(tzinfo=None)
+        trial_end = created_at + timedelta(hours=1)
+        trial_expires_at = trial_end
+        diff_seconds = int((trial_end - now_naive).total_seconds())
+        if diff_seconds <= 0:
+            is_trial_expired = True
+            trial_seconds_remaining = 0
+        else:
+            is_trial_expired = False
+            trial_seconds_remaining = diff_seconds
 
     resp_data = UserResponse.from_orm(current_user).dict()
     resp_data["trial_expires_at"] = trial_expires_at
     resp_data["is_trial_expired"] = is_trial_expired
     resp_data["trial_seconds_remaining"] = trial_seconds_remaining
     return resp_data
+
 
 

@@ -147,6 +147,7 @@ def create_offline_tenant(
 
     # 3. Create Admin User
     admin_user = User(
+        organization_id=org.id,
         name=req.admin_name,
         email=req.admin_email,
         phone=req.admin_phone,

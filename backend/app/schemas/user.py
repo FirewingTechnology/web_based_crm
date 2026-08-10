@@ -8,6 +8,7 @@ class UserBase(BaseModel):
     role: UserRole
     phone: str | None = None
     firm_name: str | None = None
+    organization_id: int | None = None
     avatar_url: str | None = None
 
 class UserCreate(UserBase):

@@ -3,7 +3,8 @@ from app.database import SessionLocal, engine, Base
 from app.models import (
     User, UserRole, Builder, Project, ProjectStatus, Lead, LeadNote, LeadStatusHistory,
     LeadStatus, LeadPriority, Followup, FollowupType, FollowupStatus, BrokerProfile,
-    SalesTarget, Booking, BookingStatus, Commission, PayoutStatus, ActivityLog, Notification
+    SalesTarget, Booking, BookingStatus, Commission, PayoutStatus, ActivityLog, Notification,
+    Organization, Subscription
 )
 from app.utils.security import get_password_hash
 
@@ -14,6 +15,27 @@ def seed_db():
     db = SessionLocal()
     try:
         print("[SEED] Starting database seeding for BrokerOS Lite...")
+
+        # 0. Create Seed Organization & Subscription
+        seed_org = Organization(
+            name="BrokerOS Corporate HQ",
+            slug="brokeros-corporate-hq",
+            company_type="Real Estate Advisory",
+            is_active=True
+        )
+        db.add(seed_org)
+        db.commit()
+        db.refresh(seed_org)
+
+        seed_sub = Subscription(
+            organization_id=seed_org.id,
+            status="Active",
+            start_date=datetime.now(timezone.utc),
+            end_date=datetime.now(timezone.utc) + timedelta(days=365),
+            auto_renew=True
+        )
+        db.add(seed_sub)
+        db.commit()
 
         # 1. Create Users
         superadmin_user = User(
@@ -26,6 +48,7 @@ def seed_db():
             is_active=True
         )
         admin_user = User(
+            organization_id=seed_org.id,
             name="Aman Sharma",
             email="admin@brokeros.com",
             hashed_password=get_password_hash("Admin@123"),
@@ -36,6 +59,7 @@ def seed_db():
         )
 
         manager_user = User(
+            organization_id=seed_org.id,
             name="Priya Patel",
             email="manager@brokeros.com",
             hashed_password=get_password_hash("Manager@123"),
@@ -45,6 +69,7 @@ def seed_db():
             is_active=True
         )
         sales_user = User(
+            organization_id=seed_org.id,
             name="Rohan Gupta",
             email="sales@brokeros.com",
             hashed_password=get_password_hash("Sales@123"),
@@ -54,6 +79,7 @@ def seed_db():
             is_active=True
         )
         sales_user2 = User(
+            organization_id=seed_org.id,
             name="Neha Singh",
             email="rahul@brokeros.com",
             hashed_password=get_password_hash("Sales@123"),
