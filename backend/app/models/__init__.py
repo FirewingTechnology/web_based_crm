@@ -13,7 +13,7 @@ from app.models.notification import Notification
 from app.models.saas import (
     Organization, Workspace, Plan, Subscription, SubscriptionHistory,
     Payment, PaymentLog, PaymentWebhook, License, OrganizationSetting,
-    EmailLog, OTP, RegistrationRequest
+    EmailLog, OTP, RegistrationRequest, DemoAudit
 )
 
 __all__ = [
@@ -52,6 +52,7 @@ __all__ = [
     "OrganizationSetting",
     "EmailLog",
     "OTP",
-    "RegistrationRequest"
+    "RegistrationRequest",
+    "DemoAudit"
 ]
 

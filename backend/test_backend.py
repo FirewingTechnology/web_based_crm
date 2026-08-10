@@ -76,10 +76,66 @@ def test_get_dashboard_stats():
     stats = res.json()
     assert stats["total_leads"] >= 5
 
+def test_demo_security_duplicate_prevention():
+    # 1. First demo registration should succeed
+    demo_res1 = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Unique Security Test Owner",
+        "email": "security.user1@realviondemo.com",
+        "phone": "+91 99887 76655",
+        "password": "Demo@123Password",
+        "company_name": "Unique Security Agency 1",
+        "company_type": "Agency",
+        "city": "Mumbai",
+        "employees": "10-50",
+        "selected_plan_code": "professional"
+    })
+    assert demo_res1.status_code == 200
+
+    # 2. Try registering with SAME email (different case) -> MUST FAIL (400)
+    dup_email_res = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Attacker Duplicate Email",
+        "email": "SECURITY.USER1@realviondemo.com",
+        "phone": "+91 91111 22222",
+        "password": "Demo@123Password",
+        "company_name": "Different Agency",
+        "company_type": "Agency",
+        "city": "Delhi"
+    })
+    assert dup_email_res.status_code == 400
+    assert "already" in dup_email_res.json()["detail"].lower()
+
+    # 3. Try registering with SAME phone number (formatted without spaces/country code) -> MUST FAIL (400)
+    dup_phone_res = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Attacker Duplicate Phone",
+        "email": "completely.new.email@example.com",
+        "phone": "9988776655", # Same last 10 digits!
+        "password": "Demo@123Password",
+        "company_name": "Another Agency",
+        "company_type": "Agency",
+        "city": "Pune"
+    })
+    assert dup_phone_res.status_code == 400
+    assert "mobile number" in dup_phone_res.json()["detail"].lower() or "trial" in dup_phone_res.json()["detail"].lower()
+
+    # 4. Try registering with SAME company name -> MUST FAIL (400)
+    dup_company_res = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Attacker Duplicate Company",
+        "email": "new.email.company@example.com",
+        "phone": "+91 97777 66666",
+        "password": "Demo@123Password",
+        "company_name": "Unique Security Agency 1",
+        "company_type": "Agency",
+        "city": "Mumbai"
+    })
+    assert dup_company_res.status_code == 400
+    assert "already exists" in dup_company_res.json()["detail"].lower()
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
     test_get_me()
     test_saas_otp_and_demo_register()
     test_get_dashboard_stats()
+    test_demo_security_duplicate_prevention()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
+

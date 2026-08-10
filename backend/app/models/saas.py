@@ -161,3 +161,14 @@ class RegistrationRequest(BaseModel):
     selected_plan_code = Column(String(100), default="professional")
     step_completed = Column(Integer, default=1)
     is_converted = Column(Boolean, default=False)
+
+class DemoAudit(BaseModel):
+    __tablename__ = "demo_audits"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    phone_clean = Column(String(50), index=True, nullable=True)
+    company_name = Column(String(255), nullable=True)
+    ip_address = Column(String(100), nullable=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+

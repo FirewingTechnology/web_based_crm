@@ -1,11 +1,12 @@
 import random
 import string
+import re
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import (
-    User, UserRole, Organization, Workspace, Plan, Subscription, OTP, RegistrationRequest,
+    User, UserRole, Organization, Workspace, Plan, Subscription, OTP, RegistrationRequest, DemoAudit,
     Lead, LeadStatus, LeadPriority, Builder, Project, ProjectStatus, Followup, FollowupType, FollowupStatus
 )
 from app.schemas.saas import (
@@ -15,13 +16,35 @@ from app.schemas.saas import (
 from app.utils.security import get_password_hash, create_access_token, create_refresh_token
 from app.services.email_service import send_otp_email
 
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-
 router = APIRouter(prefix="/saas", tags=["SaaS Registration & OTP"])
+
+def clean_phone_number(phone: str) -> str:
+    """Strips non-digits and extracts last 10 digits for mobile number comparison."""
+    if not phone:
+        return ""
+    digits = re.sub(r'\D', '', phone)
+    return digits[-10:] if len(digits) >= 10 else digits
+
 
 @router.post("/send-otp", response_model=SendOTPResponse)
 def send_otp(req: SendOTPRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     email = req.email.lower().strip()
+
+    # Validate if email already registered
+    existing_user = db.query(User).filter(User.email.ilike(email)).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="An account with this email address already exists. Please log in directly."
+        )
+
+    # Check DemoAudit
+    existing_audit = db.query(DemoAudit).filter(DemoAudit.email.ilike(email)).first()
+    if existing_audit:
+        raise HTTPException(
+            status_code=400,
+            detail="This email address has already been used for a free trial. Please log in to your existing account."
+        )
     
     # Generate 6-digit OTP
     otp_code = "".join(random.choices(string.digits, k=6))
@@ -88,26 +111,79 @@ def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/register-demo", response_model=RegisterDemoResponse)
-def register_demo(req: RegisterDemoRequest, db: Session = Depends(get_db)):
+def register_demo(req: RegisterDemoRequest, request: Request, db: Session = Depends(get_db)):
     email = req.email.lower().strip()
-    phone = req.phone.strip() if req.phone else ""
+    raw_phone = req.phone.strip() if req.phone else ""
+    clean_phone = clean_phone_number(raw_phone)
+    company_name_clean = req.company_name.strip() if req.company_name else ""
     
-    # 1. Validate Duplicate Email Address
-    existing_email_user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
+    # Extract Client IP
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "unknown"
+
+    # 1. SERVER-SIDE SECURITY VALIDATION: Case-Insensitive Email Check
+    existing_email_user = db.query(User).filter(User.email.ilike(email)).first()
     if existing_email_user:
+        raise HTTPException(
+            status_code=400,
+            detail="An account or free trial has already been created with this email address. Each user is allowed only 1 free trial. Please log in directly."
+        )
+
+    existing_demo_audit = db.query(DemoAudit).filter(DemoAudit.email.ilike(email)).first()
+    if existing_demo_audit:
+        raise HTTPException(
+            status_code=400,
+            detail="This email address has already claimed a 1-hour free trial. Multiple trial accounts for the same email are prohibited. Please log in to your existing account."
+        )
+
+    existing_reg_req = db.query(RegistrationRequest).filter(RegistrationRequest.email.ilike(email)).first()
+    if existing_reg_req and existing_reg_req.is_converted:
         raise HTTPException(
             status_code=400,
             detail="An account with this email address already exists. Please log in directly."
         )
-    
-    # 2. Validate Duplicate Mobile / Phone Number
-    if phone:
-        existing_phone_user = db.query(User).filter(User.phone == phone, User.is_deleted == False).first()
-        if existing_phone_user:
+
+    # 2. SERVER-SIDE SECURITY VALIDATION: Cleaned 10-Digit Mobile / Phone Check
+    if clean_phone:
+        all_users_with_phone = db.query(User).filter(User.phone.isnot(None), User.phone != "").all()
+        for u in all_users_with_phone:
+            if clean_phone_number(u.phone) == clean_phone:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"A trial workspace or account has already been registered with mobile number ending in ...{clean_phone[-4:]}. Each phone number is eligible for only 1 free trial. Please log in."
+                )
+
+        existing_phone_audit = db.query(DemoAudit).filter(DemoAudit.phone_clean == clean_phone).first()
+        if existing_phone_audit:
             raise HTTPException(
                 status_code=400,
-                detail="An account with this mobile number already exists. Please log in directly."
+                detail=f"Mobile number ending in ...{clean_phone[-4:]} has already been used to claim a 1-hour free trial. Please log in to your account."
             )
+
+    # 3. SERVER-SIDE SECURITY VALIDATION: Organization / Agency Name Duplicate Check
+    if company_name_clean:
+        existing_org = db.query(Organization).filter(Organization.name.ilike(company_name_clean)).first()
+        if existing_org:
+            raise HTTPException(
+                status_code=400,
+                detail=f"An agency workspace for '{company_name_clean}' already exists. Please contact your company administrator to invite you or log in directly."
+            )
+
+    # 4. SERVER-SIDE SECURITY VALIDATION: IP Rate Limiting (Max 5 trials per IP per 24 hours)
+    twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+    recent_trials_from_ip = db.query(DemoAudit).filter(
+        DemoAudit.ip_address == client_ip,
+        DemoAudit.created_at >= twenty_four_hours_ago
+    ).count()
+
+    if recent_trials_from_ip >= 5:
+        raise HTTPException(
+            status_code=429,
+            detail="Maximum free trial creation limit reached from your IP address today. Please contact support or upgrade your account."
+        )
 
 
     
@@ -258,6 +334,15 @@ def register_demo(req: RegisterDemoRequest, db: Session = Depends(get_db)):
             )
             db.add(f)
 
+    # Record Demo Audit entry for security tracking
+    audit_entry = DemoAudit(
+        email=email,
+        phone_clean=clean_phone,
+        company_name=company_name_clean,
+        ip_address=client_ip,
+        created_at=datetime.utcnow()
+    )
+    db.add(audit_entry)
 
     db.commit()
     db.refresh(admin_user)
