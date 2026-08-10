@@ -19,23 +19,37 @@ def get_users(
         query = query.filter(User.role == role)
     return query.order_by(User.name).all()
 
+from sqlalchemy import func
+from app.models.saas import Organization
+
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(
     user_in: UserCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(RequireRole([UserRole.ADMIN]))
 ):
-    existing = db.query(User).filter(User.email == user_in.email, User.is_deleted == False).first()
+    clean_email = user_in.email.lower().strip()
+    existing = db.query(User).filter(func.lower(User.email) == clean_email, User.is_deleted == False).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    org_id = current_user.organization_id
+    firm_name = user_in.firm_name or current_user.firm_name
+    if not org_id and firm_name:
+        org = db.query(Organization).filter(func.lower(Organization.name) == firm_name.lower().strip()).first()
+        if org:
+            org_id = org.id
+            current_user.organization_id = org_id
+            db.commit()
+
     user = User(
+        organization_id=org_id,
         name=user_in.name,
-        email=user_in.email,
+        email=clean_email,
         hashed_password=get_password_hash(user_in.password),
         role=user_in.role,
         phone=user_in.phone,
-        firm_name=user_in.firm_name or current_user.firm_name,
+        firm_name=firm_name,
         avatar_url=user_in.avatar_url
     )
 

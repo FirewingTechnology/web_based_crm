@@ -173,6 +173,49 @@ def test_trial_expiration_isolation():
     assert me_data["is_trial_expired"] == True
     assert me_data["trial_seconds_remaining"] == 0
 
+def test_sales_executive_inherits_admin_trial():
+    # 1. Register a Demo Admin
+    reg = client.post("/api/v1/saas/register-demo", json={
+        "full_name": "Trial Admin",
+        "email": "trial.admin@agency.com",
+        "phone": "+91 97777 11111",
+        "password": "Password@123",
+        "company_name": "Trial Agency Corp",
+        "company_type": "Agency",
+        "city": "Mumbai"
+    })
+    assert reg.status_code == 200
+    admin_token = reg.json()["access_token"]
+
+    # 2. Admin creates a Sales Executive user
+    se_create = client.post("/api/v1/users", json={
+        "name": "Sales Executive Amol",
+        "email": "amol.sales@agency.com",
+        "password": "Password@123",
+        "role": "Sales Executive",
+        "phone": "+91 97777 22222"
+    }, headers={"Authorization": f"Bearer {admin_token}"})
+    assert se_create.status_code == 201
+
+    # 3. Sales Executive logs in
+    se_login = client.post("/api/v1/auth/login", json={
+        "email": "amol.sales@agency.com",
+        "password": "Password@123"
+    })
+    assert se_login.status_code == 200
+    se_token = se_login.json()["access_token"]
+
+    # 4. Fetch Sales Executive get_me -> MUST have exact organization_id and matching trial seconds as Admin
+    se_me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {se_token}"})
+    assert se_me.status_code == 200
+    se_data = se_me.json()
+
+    admin_me = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {admin_token}"}).json()
+
+    assert se_data["organization_id"] == admin_me["organization_id"]
+    assert abs(se_data["trial_seconds_remaining"] - admin_me["trial_seconds_remaining"]) <= 5
+    assert se_data["is_trial_expired"] == admin_me["is_trial_expired"]
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
@@ -181,5 +224,6 @@ if __name__ == "__main__":
     test_get_dashboard_stats()
     test_demo_security_duplicate_prevention()
     test_trial_expiration_isolation()
+    test_sales_executive_inherits_admin_trial()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
 

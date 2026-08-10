@@ -102,6 +102,9 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
         org = db.query(Organization).filter(
             func.lower(Organization.name) == current_user.firm_name.lower().strip()
         ).order_by(Organization.id.asc()).first()
+        if org:
+            current_user.organization_id = org.id
+            db.commit()
 
     now_naive = datetime.utcnow()
 
