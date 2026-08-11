@@ -72,7 +72,8 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
   const getShareText = () => {
     if (!createdCredentials) return '';
     const loginUrl = typeof window !== 'undefined' ? `${window.location.origin}/login` : 'https://web-based-crm-1.onrender.com/login';
-    return `Welcome to BrokerOS CRM!\n\nHere are your Sales Executive portal login credentials:\n\nPortal URL: ${loginUrl}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\n\nPlease log in and change your password upon first login.`;
+    return `Welcome to REALVION CRM!\n\nHere are your Sales Executive portal login credentials:\n\nPortal URL: ${loginUrl}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\n\nPlease log in and change your password upon first login.`;
+
   };
 
   const handleCopyCredentials = () => {

@@ -49,7 +49,8 @@ export const MyProfile: React.FC = () => {
             <p className="text-slate-400 flex items-center gap-1.5 font-medium">
               <Building className="h-3.5 w-3.5 text-amber-400" /> Firm / Division
             </p>
-            <p className="font-semibold text-white text-sm">{user?.firm_name || 'BrokerOS Corporate HQ'}</p>
+            <p className="font-semibold text-white text-sm">{user?.firm_name || 'REALVION Corporate HQ'}</p>
+
           </div>
 
           <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">

@@ -14,12 +14,12 @@ def seed_db():
     
     db = SessionLocal()
     try:
-        print("[SEED] Starting database seeding for BrokerOS Lite...")
+        print("[SEED] Starting database seeding for REALVION...")
 
         # 0. Create Seed Organization & Subscription
         seed_org = Organization(
-            name="BrokerOS Corporate HQ",
-            slug="brokeros-corporate-hq",
+            name="REALVION Corporate HQ",
+            slug="realvion-corporate-hq",
             company_type="Real Estate Advisory",
             is_active=True
         )
