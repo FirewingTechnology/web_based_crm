@@ -4,8 +4,20 @@ from app.config import settings
 from app.database import engine, Base
 from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route, registration, payments, saas_admin
 
-# Create database tables automatically if they don't exist
-Base.metadata.create_all(bind=engine)
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=0.2,
+        integrations=[FastApiIntegration()]
+    )
+
+# Gate auto table creation — Alembic migrations are canonical for production PostgreSQL
+if os.getenv("ENABLE_AUTO_CREATE_ALL", "false").lower() == "true":
+    Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -13,9 +25,17 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs"
 )
 
+@app.get(f"{settings.API_V1_STR}/debug-sentry")
+def trigger_sentry_test_error():
+    """Deliberate test error endpoint to verify Sentry alert triggering."""
+    raise ValueError("[REALVION SENTRY TEST] Deliberate test exception for error monitoring verification.")
+
 @app.on_event("startup")
 def startup_db_seed():
-    Base.metadata.create_all(bind=engine)
+
+    if os.getenv("ENABLE_AUTO_CREATE_ALL", "false").lower() == "true":
+        Base.metadata.create_all(bind=engine)
+
     try:
         from app.database import SessionLocal
         from app.models.user import User
