@@ -88,7 +88,18 @@ def seed_db():
             firm_name="BrokerOS Corporate HQ",
             is_active=True
         )
+        broker_org = Organization(
+            name="Apex Realty Advisors",
+            slug="apex-realty-advisors",
+            company_type="Brokerage Firm",
+            is_active=True
+        )
+        db.add(broker_org)
+        db.commit()
+        db.refresh(broker_org)
+
         broker_user = User(
+            organization_id=broker_org.id,
             name="Karan Malhotra",
             email="broker@brokeros.com",
             hashed_password=get_password_hash("Broker@123"),
@@ -100,6 +111,7 @@ def seed_db():
 
         db.add_all([superadmin_user, admin_user, manager_user, sales_user, sales_user2, broker_user])
         db.commit()
+
         for u in [superadmin_user, admin_user, manager_user, sales_user, sales_user2, broker_user]:
             db.refresh(u)
 
