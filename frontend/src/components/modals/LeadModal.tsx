@@ -145,10 +145,17 @@ export const LeadModal: React.FC<LeadModalProps> = ({
           />
           <Input
             label="Phone Number *"
-            placeholder="+91 98765 43210"
-            {...register('phone', { required: 'Phone is required' })}
+            placeholder="10-digit mobile number (e.g. 9876543210)"
+            {...register('phone', {
+              required: 'Phone number is required',
+              pattern: {
+                value: /^[6-9]\d{9}$/,
+                message: 'Enter a valid 10-digit Indian mobile number starting with 6-9'
+              }
+            })}
             error={errors.phone?.message}
           />
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

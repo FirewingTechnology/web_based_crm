@@ -71,7 +71,7 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
 
   const getShareText = () => {
     if (!createdCredentials) return '';
-    const loginUrl = 'http://localhost:5174/login';
+    const loginUrl = typeof window !== 'undefined' ? `${window.location.origin}/login` : 'https://web-based-crm-1.onrender.com/login';
     return `Welcome to BrokerOS CRM!\n\nHere are your Sales Executive portal login credentials:\n\nPortal URL: ${loginUrl}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}\n\nPlease log in and change your password upon first login.`;
   };
 
@@ -112,8 +112,9 @@ export const UserCreateModal: React.FC<UserCreateModalProps> = ({
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span className="text-slate-400">Portal Link:</span>
-                <span className="font-semibold text-blue-400">http://localhost:5174/login</span>
+                <span className="font-semibold text-blue-400">{typeof window !== 'undefined' ? `${window.location.origin}/login` : 'https://web-based-crm-1.onrender.com/login'}</span>
               </div>
+
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span className="text-slate-400">Login Email:</span>
                 <span className="font-bold text-emerald-400">{createdCredentials.email}</span>
