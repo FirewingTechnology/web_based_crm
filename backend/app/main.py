@@ -34,12 +34,16 @@ origins = [
     settings.FRONTEND_URL,
     settings.WEBSITE_URL,
     settings.CRM_URL,
+    "https://web-based-crm-1.onrender.com",
+    "https://realvion-frontend.onrender.com",
+    "https://realvion-official-site.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
     "http://localhost:3000",
 ]
+
 # Filter duplicates and empty strings
 allowed_origins = list(set([o.strip() for o in origins if o and o.strip() and o != "*"]))
 
