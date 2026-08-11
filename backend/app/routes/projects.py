@@ -18,6 +18,8 @@ def get_projects(
     current_user: User = Depends(get_current_user)
 ):
     query = db.query(Project).filter(Project.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Project.organization_id == current_user.organization_id)
     if builder_id:
         query = query.filter(Project.builder_id == builder_id)
     if status:
@@ -37,12 +39,16 @@ def get_projects(
 
 @router.get("/{project_id}", response_model=ProjectResponse)
 def get_project(project_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    project = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False).first()
+    query = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Project.organization_id == current_user.organization_id)
+    project = query.first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     res = ProjectResponse.model_validate(project)
     res.builder_name = project.builder.name if project.builder else "Unknown"
     return res
+
 
 @router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 def create_project(

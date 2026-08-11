@@ -88,6 +88,9 @@ def get_bookings(
 
     query = db.query(Booking).filter(Booking.is_deleted == False)
 
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Booking.organization_id == current_user.organization_id)
+
     if my_bookings_only or current_user.role == UserRole.SALES_EXECUTIVE:
         query = query.filter(Booking.assigned_executive_id == current_user.id)
     elif current_user.role == UserRole.BROKER:
@@ -108,10 +111,14 @@ def get_bookings(
 
 @router.get("/{booking_id}", response_model=BookingResponse)
 def get_booking(booking_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    booking = db.query(Booking).filter(Booking.id == booking_id, Booking.is_deleted == False).first()
+    query = db.query(Booking).filter(Booking.id == booking_id, Booking.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Booking.organization_id == current_user.organization_id)
+    booking = query.first()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     return format_booking_response(booking)
+
 
 @router.post("", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
 def create_booking(

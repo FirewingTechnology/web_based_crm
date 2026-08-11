@@ -20,11 +20,19 @@ from app.services.email_service import send_otp_email
 router = APIRouter(prefix="/saas", tags=["SaaS Registration & OTP"])
 
 def clean_phone_number(phone: str) -> str:
-    """Strips non-digits and extracts last 10 digits for mobile number comparison."""
+    """Strips non-digits, strips country code (+91 / 91 / leading 0), and validates 10-digit mobile number."""
     if not phone:
         return ""
     digits = re.sub(r'\D', '', phone)
-    return digits[-10:] if len(digits) >= 10 else digits
+    if digits.startswith("91") and len(digits) == 12:
+        digits = digits[2:]
+    elif digits.startswith("0") and len(digits) == 11:
+        digits = digits[1:]
+    
+    # Check for 10 digits starting with 6-9 and not all identical digits
+    if len(digits) == 10 and re.match(r'^[6-9]\d{9}$', digits) and len(set(digits)) > 1:
+        return digits
+    return ""
 
 
 @router.post("/validate-registration", response_model=ValidateRegistrationResponse)
@@ -34,11 +42,12 @@ def validate_registration(req: ValidateRegistrationRequest, db: Session = Depend
     clean_phone = clean_phone_number(raw_phone)
     company_name_clean = req.company_name.strip() if req.company_name else ""
 
-    if not clean_phone or len(clean_phone) < 10:
+    if not clean_phone:
         raise HTTPException(
             status_code=400,
-            detail="Please enter a valid 10-digit mobile number."
+            detail="Please enter a valid 10-digit Indian mobile number (e.g. +91 98100 12345)."
         )
+
 
     # 1. Email Check
     existing_email_user = db.query(User).filter(func.lower(User.email) == email).first()

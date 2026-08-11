@@ -223,8 +223,12 @@ def verify_payment(
 
 @router.get("/history")
 def get_payment_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    payments = db.query(Payment).order_by(Payment.id.desc()).limit(20).all()
+    query = db.query(Payment)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Payment.organization_id == current_user.organization_id)
+    payments = query.order_by(Payment.id.desc()).limit(20).all()
     return payments
+
 
 def _activate_tenant_post_payment(payment: Optional[Payment], email: str, db: Session):
     """
