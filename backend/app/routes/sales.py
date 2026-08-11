@@ -79,7 +79,11 @@ def get_sales_targets(
 
     query = db.query(SalesTarget).filter(SalesTarget.is_deleted == False)
 
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.join(User).filter(User.organization_id == current_user.organization_id)
+
     if current_user.role == UserRole.SALES_EXECUTIVE:
+
         query = query.filter(SalesTarget.user_id == current_user.id)
     elif user_id:
         query = query.filter(SalesTarget.user_id == user_id)

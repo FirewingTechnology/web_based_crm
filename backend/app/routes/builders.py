@@ -15,6 +15,9 @@ def get_builders(
     current_user: User = Depends(get_current_user)
 ):
     query = db.query(Builder).filter(Builder.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Builder.organization_id == current_user.organization_id)
+
     if search:
         query = query.filter(
             (Builder.name.ilike(f"%{search}%")) | (Builder.company.ilike(f"%{search}%"))
@@ -30,7 +33,10 @@ def get_builders(
 
 @router.get("/{builder_id}", response_model=BuilderResponse)
 def get_builder(builder_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    builder = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False).first()
+    query = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Builder.organization_id == current_user.organization_id)
+    builder = query.first()
     if not builder:
         raise HTTPException(status_code=404, detail="Builder not found")
     res = BuilderResponse.model_validate(builder)
@@ -43,9 +49,12 @@ def create_builder(
     db: Session = Depends(get_db),
     current_user: User = Depends(RequireRole([UserRole.ADMIN, UserRole.MANAGER]))
 ):
-    builder = Builder(**builder_in.model_dump())
+    builder_data = builder_in.model_dump()
+    builder_data["organization_id"] = current_user.organization_id
+    builder = Builder(**builder_data)
     db.add(builder)
     db.commit()
+
     db.refresh(builder)
     res = BuilderResponse.model_validate(builder)
     res.projects_count = 0

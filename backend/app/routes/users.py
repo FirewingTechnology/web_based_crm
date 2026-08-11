@@ -15,7 +15,10 @@ def get_users(
     current_user: User = Depends(RequireRole([UserRole.ADMIN, UserRole.MANAGER]))
 ):
     query = db.query(User).filter(User.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(User.organization_id == current_user.organization_id)
     if role:
+
         query = query.filter(User.role == role)
     return query.order_by(User.name).all()
 

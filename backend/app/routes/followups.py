@@ -29,7 +29,11 @@ def get_followups(
 ):
     query = db.query(Followup).filter(Followup.is_deleted == False)
 
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Followup.organization_id == current_user.organization_id)
+
     if my_followups_only or current_user.role in [UserRole.SALES_EXECUTIVE, UserRole.BROKER]:
+
         query = query.filter(Followup.assigned_to_id == current_user.id)
 
     if status:
