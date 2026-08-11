@@ -1,0 +1,57 @@
+{
+  "status": 200,
+  "plans": [
+    {
+      "id": 1,
+      "name": "Starter",
+      "code": "starter",
+      "price_monthly": 1999,
+      "price_yearly": 19990,
+      "platform_fee": 499,
+      "max_users": 3,
+      "max_leads": 1000,
+      "features": [
+        "3 User Licenses",
+        "Up to 1,000 Leads",
+        "Basic Followup Reminders",
+        "Standard Reports"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Professional",
+      "code": "professional",
+      "price_monthly": 4999,
+      "price_yearly": 49990,
+      "platform_fee": 499,
+      "max_users": 10,
+      "max_leads": 10000,
+      "features": [
+        "10 User Licenses",
+        "Up to 10,000 Leads",
+        "Real-Time Voice Alarms",
+        "Commission Calculation Engine",
+        "CSV Data Export",
+        "Priority Support"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Enterprise",
+      "code": "enterprise",
+      "price_monthly": 14999,
+      "price_yearly": 149990,
+      "platform_fee": 999,
+      "max_users": 50,
+      "max_leads": 100000,
+      "features": [
+        "Unlimited User Licenses",
+        "Unlimited Leads",
+        "Dedicated Account Manager",
+        "Custom Webhooks & API Integration",
+        "Multi-Tenant Broker Network",
+        "24/7 Phone & Email Support"
+      ]
+    }
+  ]
+}

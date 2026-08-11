@@ -8,6 +8,7 @@ import { LeadModal } from '../../components/modals/LeadModal';
 import { LeadDrawer } from '../../components/modals/LeadDrawer';
 import { FollowupModal } from '../../components/modals/FollowupModal';
 import { CSVImportModal } from '../../components/modals/CSVImportModal';
+import { WhatsAppButton } from '../../components/common/WhatsAppButton';
 import { leadsApi } from '../../api/leads';
 import { followupsApi } from '../../api/followups';
 import { usersApi } from '../../api/users';
@@ -169,6 +170,7 @@ export const LeadManagement: React.FC = () => {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
+          <WhatsAppButton phone={row.original.phone} leadName={row.original.name} variant="icon" />
           <button
             onClick={() => {
               setSelectedLead(row.original);

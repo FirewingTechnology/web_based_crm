@@ -1,0 +1,6 @@
+{
+  "architecture": "Stateless JWT (HMAC-SHA256)",
+  "token_status_before_logout": 200,
+  "token_revocation_type": "Client-side token drop (No server-side Redis blacklist)",
+  "jwt_expiration_ttl": "15 minutes"
+}

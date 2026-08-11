@@ -1,0 +1,5 @@
+{
+  "status": 400,
+  "response": "{\"detail\":\"Invalid request payload\"}",
+  "exposesStackTrace": false
+}

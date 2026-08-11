@@ -1,0 +1,10 @@
+{
+  "status": 200,
+  "order_id": "order_TOZzOWf8ePvAhc",
+  "subtotal": 999,
+  "platform_fee": 19.98,
+  "total_amount": 1018.98,
+  "currency": "INR",
+  "razorpay_key_id": "rzp_live_SmSxyLmsbg4zDj",
+  "plan_name": "Starter CP Plan"
+}

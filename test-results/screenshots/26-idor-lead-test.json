@@ -1,0 +1,10 @@
+{
+  "company_a_lead_id": 156,
+  "company_b_single_access_status": 404,
+  "company_b_single_access_body": {
+    "detail": "Lead not found"
+  },
+  "company_b_leads_list_count": 0,
+  "lead_present_in_company_b_list": false,
+  "is_blocked": true
+}

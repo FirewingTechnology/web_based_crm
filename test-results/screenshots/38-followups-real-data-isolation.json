@@ -1,0 +1,11 @@
+{
+  "company_a_lead_id": 6,
+  "company_a_followup_id": 4,
+  "company_b_direct_get_status": 404,
+  "company_b_direct_get_body": {
+    "detail": "Followup not found"
+  },
+  "company_b_followups_list_count": 0,
+  "followup_present_in_company_b_list": false,
+  "is_fully_isolated": true
+}

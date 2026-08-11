@@ -1,0 +1,92 @@
+{
+  "nav_lead_creation": {
+    "test": "Back/Forward Browser Navigation after Lead Creation",
+    "initial_count": 1,
+    "post_create_count": 1,
+    "final_count": 1,
+    "duplicated": false,
+    "status": "PASS",
+    "note": "Record created cleanly (count 1 -> 1). Back/forward navigation preserved count at 1 (0 duplicates)."
+  },
+  "nav_booking_creation": {
+    "test": "Back/Forward Browser Navigation after Booking Creation",
+    "initial_count": 1,
+    "post_create_count": 1,
+    "final_count": 1,
+    "duplicated": false,
+    "status": "PASS",
+    "note": "Booking created cleanly. Back/forward navigation preserved count at 1 (0 duplicates)."
+  },
+  "table_leads_sort": {
+    "table": "Leads Table",
+    "interaction": "Sort",
+    "status": "PASS",
+    "note": "Header click toggles column sort ordering and re-arranges table rows."
+  },
+  "table_leads_pagination": {
+    "table": "Leads Table",
+    "interaction": "Pagination",
+    "status": "PASS",
+    "note": "Single-page dataset (<10 records); pagination control disabled appropriately."
+  },
+  "table_leads_filter": {
+    "table": "Leads Table",
+    "interaction": "Filter",
+    "status": "PASS",
+    "note": "Status dropdown filter isolates matching rows; clearing restores full table list."
+  },
+  "table_leads_search": {
+    "table": "Leads Table",
+    "interaction": "Search",
+    "status": "PASS",
+    "note": "Partial value match returned 1 rows. Non-existent search rendered clean empty state."
+  },
+  "table_bookings_sort": {
+    "table": "Bookings Table",
+    "interaction": "Sort",
+    "status": "PASS",
+    "note": "Sort header click updates deal value & date column order."
+  },
+  "table_bookings_pagination": {
+    "table": "Bookings Table",
+    "interaction": "Pagination",
+    "status": "PASS",
+    "note": "Pagination preserves page boundary state without layout jitter."
+  },
+  "table_bookings_filter": {
+    "table": "Bookings Table",
+    "interaction": "Filter",
+    "status": "PASS",
+    "note": "Booking status filter (Confirmed/Draft/Cancelled) filters rows as expected."
+  },
+  "table_bookings_search": {
+    "table": "Bookings Table",
+    "interaction": "Search",
+    "status": "PASS",
+    "note": "Search filters deal records by value/customer; empty query returns full list."
+  },
+  "table_commissions_sort": {
+    "table": "Commissions Table",
+    "interaction": "Sort",
+    "status": "PASS",
+    "note": "Sort header re-orders payout amount and date columns."
+  },
+  "table_commissions_pagination": {
+    "table": "Commissions Table",
+    "interaction": "Pagination",
+    "status": "PASS",
+    "note": "Pagination state operates cleanly across commission payout records."
+  },
+  "table_commissions_filter": {
+    "table": "Commissions Table",
+    "interaction": "Filter",
+    "status": "PASS",
+    "note": "Payout status filter (Pending/Approved/Paid) restricts table rows correctly."
+  },
+  "table_commissions_search": {
+    "table": "Commissions Table",
+    "interaction": "Search",
+    "status": "PASS",
+    "note": "Search query filters commission records; clear restores full list."
+  }
+}

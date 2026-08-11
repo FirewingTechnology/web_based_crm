@@ -1,0 +1,13 @@
+{
+  "company_a_payments": [
+    6,
+    5,
+    4,
+    3,
+    2,
+    1
+  ],
+  "company_b_payments": [],
+  "overlap_ids": [],
+  "is_isolated": true
+}

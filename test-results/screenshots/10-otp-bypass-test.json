@@ -1,0 +1,27 @@
+[
+  {
+    "otp": "123456",
+    "status": 400,
+    "body": "{\"detail\":\"No active verification code found. Please request a new code.\"}"
+  },
+  {
+    "otp": "999999",
+    "status": 400,
+    "body": "{\"detail\":\"No active verification code found. Please request a new code.\"}"
+  },
+  {
+    "otp": "000000",
+    "status": 400,
+    "body": "{\"detail\":\"No active verification code found. Please request a new code.\"}"
+  },
+  {
+    "otp": "111111",
+    "status": 400,
+    "body": "{\"detail\":\"No active verification code found. Please request a new code.\"}"
+  },
+  {
+    "otp": "654321",
+    "status": 400,
+    "body": "{\"detail\":\"No active verification code found. Please request a new code.\"}"
+  }
+]

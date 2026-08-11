@@ -1,0 +1,18 @@
+{
+  "event_id": "evt_qa_test_1786473297334",
+  "first": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "message": "Webhook processed successfully"
+    }
+  },
+  "second": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "message": "Event already processed"
+    }
+  },
+  "isDuplicateDetected": true
+}

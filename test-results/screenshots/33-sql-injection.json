@@ -1,0 +1,16 @@
+[
+  {
+    "payload": "' OR '1'='1",
+    "status": 401,
+    "detail": "Incorrect email or password"
+  },
+  {
+    "payload": "admin'--",
+    "status": 401,
+    "detail": "Incorrect email or password"
+  },
+  {
+    "payload": "1; DROP TABLE users;--",
+    "status": 403
+  }
+]

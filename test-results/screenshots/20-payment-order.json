@@ -1,0 +1,14 @@
+{
+  "status": 200,
+  "body": {
+    "order_id": "order_TOYzI9580WmcyZ",
+    "amount": 999,
+    "platform_fee": 19.98,
+    "gst_amount": 0,
+    "total_amount": 1018.98,
+    "currency": "INR",
+    "key_id": "rzp_live_SmSxyLmsbg4zDj",
+    "plan_name": "Starter CP Plan",
+    "is_test_mode": false
+  }
+}

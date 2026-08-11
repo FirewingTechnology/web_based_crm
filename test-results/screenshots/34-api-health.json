@@ -1,0 +1,4 @@
+{
+  "status": 200,
+  "body": "{\"message\":\"REALVION API is running\",\"version\":\"2.0.0\"}"
+}

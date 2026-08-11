@@ -39,7 +39,8 @@ async function createDemoWorkspace(request: any): Promise<{ token: string; org_i
       city: 'Mumbai',
       state: 'Maharashtra',
       pincode: '400001',
-      employees: 10,
+      employees: '5-10',
+
     },
     headers: { 'Content-Type': 'application/json' },
   });

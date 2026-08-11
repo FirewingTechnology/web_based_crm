@@ -11,11 +11,11 @@ export const DemoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ 
   if (!isOpen) return null;
 
   const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:8001/api/v1'
+    ? 'http://127.0.0.1:8001/api/v1'
     : 'https://web-based-crm.onrender.com/api/v1';
 
   const PORTAL_DASHBOARD_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5173/admin/dashboard'
+    ? 'http://127.0.0.1:5173/admin/dashboard'
     : 'https://web-based-crm-1.onrender.com/admin/dashboard';
 
   const handleLaunchInstantDemo = async () => {

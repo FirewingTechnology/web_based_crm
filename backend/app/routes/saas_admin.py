@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Organization, Workspace, Subscription, Payment, User, UserRole, Plan, Lead
-from app.schemas.saas import SaaSAnalyticsResponse, CreateOfflineTenantRequest, UpdateQuotaRequest
+from app.schemas.saas import SaaSAnalyticsResponse, CreateOfflineTenantRequest, UpdateQuotaRequest, UpgradePlanRequest, ExtendSubscriptionRequest
 from app.middleware.auth_middleware import get_current_user
 from app.utils.security import get_password_hash
 from app.services.email_service import send_welcome_credentials_email
@@ -247,3 +247,144 @@ def delete_organization(
     db.commit()
     
     return {"success": True, "message": f"Organization {org.name} deleted successfully."}
+
+
+# ─── NEW: Upgrade Plan ───────────────────────────────────────────────────────
+
+@router.post("/admins/{user_id}/upgrade-plan")
+def upgrade_admin_plan(
+    user_id: int,
+    req: UpgradePlanRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(check_superadmin_access)
+):
+    """Change a tenant admin's plan code, seat/lead quota, and renew subscription."""
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Admin user not found.")
+
+    # Find their org
+    org = None
+    if target_user.organization_id:
+        org = db.query(Organization).filter(Organization.id == target_user.organization_id).first()
+    if not org and target_user.firm_name:
+        org = db.query(Organization).filter(
+            Organization.name == target_user.firm_name
+        ).first()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="No organization found for this admin.")
+
+    now = datetime.now(timezone.utc)
+    sub = db.query(Subscription).filter(
+        Subscription.organization_id == org.id
+    ).order_by(Subscription.id.desc()).first()
+
+    if sub:
+        sub.plan_code = req.plan_code
+        sub.status = "Active"
+        sub.max_users = req.seats_limit
+        sub.max_leads = req.max_leads
+        sub.end_date = now + timedelta(days=req.extend_days)
+    else:
+        sub = Subscription(
+            organization_id=org.id,
+            plan_code=req.plan_code,
+            status="Active",
+            start_date=now,
+            end_date=now + timedelta(days=req.extend_days),
+            max_users=req.seats_limit,
+            max_leads=req.max_leads,
+            auto_renew=True
+        )
+        db.add(sub)
+
+    org.is_active = True
+    db.commit()
+
+    return {
+        "success": True,
+        "message": f"Plan for '{target_user.name}' ({target_user.email}) upgraded to '{req.plan_code.upper()}' — {req.seats_limit} seats, {req.max_leads} leads, valid for {req.extend_days} days.",
+        "plan_code": req.plan_code,
+        "seats_limit": req.seats_limit,
+        "max_leads": req.max_leads,
+        "end_date": (now + timedelta(days=req.extend_days)).isoformat()
+    }
+
+
+# ─── NEW: Extend Subscription ─────────────────────────────────────────────────
+
+@router.post("/admins/{user_id}/extend-subscription")
+def extend_admin_subscription(
+    user_id: int,
+    req: ExtendSubscriptionRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(check_superadmin_access)
+):
+    """Add N days to a tenant admin's subscription end_date."""
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Admin user not found.")
+
+    org = None
+    if target_user.organization_id:
+        org = db.query(Organization).filter(Organization.id == target_user.organization_id).first()
+    if not org and target_user.firm_name:
+        org = db.query(Organization).filter(Organization.name == target_user.firm_name).first()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="No organization found for this admin.")
+
+    sub = db.query(Subscription).filter(
+        Subscription.organization_id == org.id
+    ).order_by(Subscription.id.desc()).first()
+
+    if not sub:
+        raise HTTPException(status_code=404, detail="No subscription found. Use upgrade-plan to create one.")
+
+    now = datetime.now(timezone.utc)
+    base = sub.end_date if sub.end_date and sub.end_date > now.replace(tzinfo=None) else now.replace(tzinfo=None)
+    sub.end_date = base + timedelta(days=req.extend_days)
+    sub.status = "Active"
+    org.is_active = True
+    db.commit()
+
+    return {
+        "success": True,
+        "message": f"Subscription for '{target_user.name}' extended by {req.extend_days} days. New end date: {sub.end_date.strftime('%Y-%m-%d')}.",
+        "new_end_date": sub.end_date.isoformat()
+    }
+
+
+# ─── NEW: Recent Payments ─────────────────────────────────────────────────────
+
+@router.get("/recent-payments")
+def get_recent_payments(
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    admin: User = Depends(check_superadmin_access)
+):
+    """Latest payments across all tenants with org and admin context."""
+    payments = db.query(Payment).order_by(Payment.id.desc()).limit(limit).all()
+    result = []
+    for p in payments:
+        org = db.query(Organization).filter(Organization.id == p.organization_id).first() if p.organization_id else None
+        adm = db.query(User).filter(
+            User.organization_id == p.organization_id,
+            User.role == UserRole.ADMIN
+        ).first() if p.organization_id else None
+        result.append({
+            "id": p.id,
+            "payment_id": p.payment_id or "N/A",
+            "order_id": p.order_id or "N/A",
+            "org_name": org.name if org else "Unknown",
+            "admin_name": adm.name if adm else "N/A",
+            "admin_email": adm.email if adm else "N/A",
+            "amount": p.amount,
+            "total_amount": p.total_amount,
+            "status": p.status,
+            "payment_method": getattr(p, 'payment_method', 'Razorpay'),
+            "created_at": p.created_at.strftime("%Y-%m-%d %H:%M") if getattr(p, 'created_at', None) else "N/A"
+        })
+    return result
+

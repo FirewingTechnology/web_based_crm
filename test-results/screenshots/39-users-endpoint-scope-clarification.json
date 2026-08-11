@@ -1,0 +1,17 @@
+{
+  "company_a_admin_user_count": 4,
+  "company_a_user_ids": [
+    2,
+    5,
+    3,
+    4
+  ],
+  "company_b_admin_user_count": 1,
+  "company_b_user_ids": [
+    7
+  ],
+  "cross_tenant_user_overlap": 0,
+  "non_admin_broker_access_status": 403,
+  "non_admin_broker_access_detail": "User with role 'UserRole.BROKER' does not have permission to access this resource",
+  "isolation_verdict": "PASS: Admins see strictly their own organization users (0 overlap). Non-Admins receive 403 Forbidden via RBAC."
+}

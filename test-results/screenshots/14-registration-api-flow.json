@@ -1,0 +1,8 @@
+{
+  "validate": 200,
+  "sendOtp": 200,
+  "otpBody": {
+    "success": true,
+    "message": "Verification code sent to qa.full.1786473270690@mailinator.com. (Valid for 10 minutes)"
+  }
+}

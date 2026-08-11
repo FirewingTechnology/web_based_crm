@@ -1,0 +1,31 @@
+{
+  "builders": {
+    "single_status": 404,
+    "leaked_in_list": false,
+    "pass": true
+  },
+  "followups": {
+    "company_a_count": 0,
+    "company_b_count": 0,
+    "overlap": 0,
+    "pass": true
+  },
+  "users": {
+    "company_a_count": 4,
+    "company_b_status": 403,
+    "overlap": 0,
+    "pass": true
+  },
+  "sales_targets": {
+    "company_a_count": 2,
+    "company_b_count": 0,
+    "overlap": 0,
+    "pass": true
+  },
+  "notifications": {
+    "company_a_count": 1,
+    "company_b_count": 0,
+    "overlap": 0,
+    "pass": true
+  }
+}

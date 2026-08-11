@@ -1,0 +1,45 @@
+[
+  {
+    "attempt": 1,
+    "status": 400,
+    "body": {
+      "detail": "Incorrect verification code. 4 attempt(s) remaining."
+    }
+  },
+  {
+    "attempt": 2,
+    "status": 400,
+    "body": {
+      "detail": "Incorrect verification code. 3 attempt(s) remaining."
+    }
+  },
+  {
+    "attempt": 3,
+    "status": 400,
+    "body": {
+      "detail": "Incorrect verification code. 2 attempt(s) remaining."
+    }
+  },
+  {
+    "attempt": 4,
+    "status": 400,
+    "body": {
+      "detail": "Incorrect verification code. 1 attempt(s) remaining."
+    }
+  },
+  {
+    "attempt": 5,
+    "status": 400,
+    "body": {
+      "detail": "Incorrect verification code. 0 attempt(s) remaining."
+    }
+  },
+  {
+    "attempt": 6,
+    "status": 400,
+    "body": {
+      "detail": "Maximum verification attempts exceeded. Please request a new code."
+    },
+    "isLockout": true
+  }
+]

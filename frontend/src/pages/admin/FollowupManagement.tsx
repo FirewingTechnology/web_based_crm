@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { DataTable } from '../../components/ui/DataTable';
 import { FollowupModal } from '../../components/modals/FollowupModal';
+import { WhatsAppButton } from '../../components/common/WhatsAppButton';
 import { followupsApi } from '../../api/followups';
 import { leadsApi } from '../../api/leads';
 import { usersApi } from '../../api/users';
@@ -95,9 +96,12 @@ export const FollowupManagement: React.FC = () => {
       accessorKey: 'lead_name',
       header: 'Buyer Lead',
       cell: ({ row }) => (
-        <div>
-          <p className="font-medium text-slate-200">{row.original.lead_name}</p>
-          <p className="text-slate-400 text-[11px]">{row.original.lead_phone}</p>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="font-medium text-white">{row.original.lead_name}</p>
+            <p className="text-slate-400 text-[11px]">{row.original.lead_phone}</p>
+          </div>
+          <WhatsAppButton phone={row.original.lead_phone} leadName={row.original.lead_name} variant="icon" />
         </div>
       ),
     },

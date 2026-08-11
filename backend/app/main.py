@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
@@ -8,6 +9,7 @@ import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+
 if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
@@ -65,7 +67,12 @@ origins = [
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+    "http://localhost:5176",
+    "http://127.0.0.1:5176",
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 # Filter duplicates and empty strings

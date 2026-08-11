@@ -1,0 +1,38 @@
+[
+  {
+    "breakpoint": "320px-mobile-xs",
+    "width": 320,
+    "hasHorizontalOverflow": false,
+    "screenshot": "04-responsive-320px-mobile-xs.png"
+  },
+  {
+    "breakpoint": "375px-mobile",
+    "width": 375,
+    "hasHorizontalOverflow": false,
+    "screenshot": "04-responsive-375px-mobile.png"
+  },
+  {
+    "breakpoint": "768px-tablet",
+    "width": 768,
+    "hasHorizontalOverflow": false,
+    "screenshot": "04-responsive-768px-tablet.png"
+  },
+  {
+    "breakpoint": "1024px-laptop",
+    "width": 1024,
+    "hasHorizontalOverflow": false,
+    "screenshot": "04-responsive-1024px-laptop.png"
+  },
+  {
+    "breakpoint": "1440px-desktop",
+    "width": 1440,
+    "hasHorizontalOverflow": false,
+    "screenshot": "04-responsive-1440px-desktop.png"
+  },
+  {
+    "breakpoint": "1920px-widescreen",
+    "width": 1920,
+    "hasHorizontalOverflow": false,
+    "screenshot": "04-responsive-1920px-widescreen.png"
+  }
+]

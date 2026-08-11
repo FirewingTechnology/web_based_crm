@@ -1,0 +1,98 @@
+[
+  {
+    "module": "Dashboard",
+    "target_path": "/admin/dashboard",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Lead Management",
+    "target_path": "/admin/leads",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Followups",
+    "target_path": "/admin/followups",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Bookings",
+    "target_path": "/admin/bookings",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Commission",
+    "target_path": "/admin/commissions",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Projects",
+    "target_path": "/admin/projects",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Builders",
+    "target_path": "/admin/builders",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Broker Management",
+    "target_path": "/admin/brokers",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Sales Management",
+    "target_path": "/admin/sales",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Reports",
+    "target_path": "/admin/reports",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Notifications",
+    "target_path": "/admin/notifications",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  },
+  {
+    "module": "Settings & Logs",
+    "target_path": "/admin/settings",
+    "actual_url": "https://web-based-crm-1.onrender.com/login",
+    "content_length": 217,
+    "has_content": true,
+    "status": "PASS"
+  }
+]

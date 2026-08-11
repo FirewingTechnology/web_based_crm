@@ -5,6 +5,7 @@ import { Lead } from '../../types/lead';
 import { leadsApi } from '../../api/leads';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { WhatsAppButton } from '../common/WhatsAppButton';
 
 interface LeadDrawerProps {
   lead: Lead | null;
@@ -129,9 +130,12 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
 
               {/* Quick Info Grid */}
               <div className="grid grid-cols-2 gap-3 my-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <Phone className="h-4 w-4 text-blue-400 shrink-0" />
-                  <span className="font-semibold text-white">{activeLead.phone}</span>
+                <div className="flex items-center justify-between gap-2 text-slate-300">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Phone className="h-4 w-4 text-blue-400 shrink-0" />
+                    <span className="font-semibold text-white truncate">{activeLead.phone}</span>
+                  </div>
+                  <WhatsAppButton phone={activeLead.phone} leadName={activeLead.name} variant="icon" />
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <Mail className="h-4 w-4 text-purple-400 shrink-0" />
@@ -166,14 +170,17 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                   </select>
                 </div>
 
-                <Button
-                  size="sm"
-                  variant="primary"
-                  icon={<Calendar className="h-4 w-4" />}
-                  onClick={() => onOpenFollowupModal(activeLead)}
-                >
-                  Schedule Followup
-                </Button>
+                <div className="flex items-center gap-2">
+                  <WhatsAppButton phone={activeLead.phone} leadName={activeLead.name} variant="button" />
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    icon={<Calendar className="h-4 w-4" />}
+                    onClick={() => onOpenFollowupModal(activeLead)}
+                  >
+                    Schedule Followup
+                  </Button>
+                </div>
               </div>
             </div>
 

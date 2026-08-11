@@ -8,6 +8,7 @@ import { DataTable } from '../../components/ui/DataTable';
 import { LeadModal } from '../../components/modals/LeadModal';
 import { LeadDrawer } from '../../components/modals/LeadDrawer';
 import { FollowupModal } from '../../components/modals/FollowupModal';
+import { WhatsAppButton } from '../../components/common/WhatsAppButton';
 import { leadsApi } from '../../api/leads';
 import { followupsApi } from '../../api/followups';
 import { Lead, LeadCreateInput } from '../../types/lead';
@@ -129,6 +130,7 @@ export const MyLeads: React.FC = () => {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
+          <WhatsAppButton phone={row.original.phone} leadName={row.original.name} variant="icon" />
           <button
             onClick={() => {
               setSelectedLead(row.original);

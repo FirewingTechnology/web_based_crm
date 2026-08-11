@@ -1,0 +1,141 @@
+{
+  "leads": {
+    "status": 200,
+    "data": []
+  },
+  "builders": {
+    "status": 200,
+    "data": [
+      {
+        "name": "DLF Limited",
+        "company": "DLF Home Developers",
+        "contact_person": "Rajesh Verma",
+        "phone": "+91 97111 22334",
+        "email": "verma-rajesh@dlf.in",
+        "address": "DLF Shopping Mall, Arjun Nagar, Gurugram",
+        "commission_rate": 3,
+        "notes": "High demand NRI preferred projects in NCR region.",
+        "id": 3,
+        "created_at": "2026-08-11T18:33:38.065354",
+        "updated_at": "2026-08-11T18:33:38.065355",
+        "projects_count": 1
+      },
+      {
+        "name": "DLF Limited",
+        "company": "DLF Limited",
+        "contact_person": "Sales Desk",
+        "phone": "+919820077889",
+        "email": "info@dlf.in",
+        "address": "Mumbai",
+        "commission_rate": 3,
+        "notes": null,
+        "id": 7,
+        "created_at": "2026-08-11T18:34:43.059464",
+        "updated_at": "2026-08-11T18:34:43.059466",
+        "projects_count": 1
+      },
+      {
+        "name": "Godrej Properties",
+        "company": "Godrej Properties Ltd",
+        "contact_person": "Vikram Ahuja",
+        "phone": "+91 98765 43210",
+        "email": "vikram@godrejproperties.com",
+        "address": "Godrej One, Vikhroli East, Mumbai",
+        "commission_rate": 3.5,
+        "notes": "Tier 1 Developer. Prompt payouts within 30 days of booking.",
+        "id": 1,
+        "created_at": "2026-08-11T18:33:38.065347",
+        "updated_at": "2026-08-11T18:33:38.065351",
+        "projects_count": 1
+      },
+      {
+        "name": "Godrej Properties",
+        "company": "Godrej Properties",
+        "contact_person": "Sales Desk",
+        "phone": "+919820044556",
+        "email": "sales@godrejprop.com",
+        "address": "Mumbai",
+        "commission_rate": 3,
+        "notes": null,
+        "id": 6,
+        "created_at": "2026-08-11T18:34:43.059148",
+        "updated_at": "2026-08-11T18:34:43.059151",
+        "projects_count": 1
+      },
+      {
+        "name": "Lodha Group",
+        "company": "Macrotech Developers",
+        "contact_person": "Sunita Sharma",
+        "phone": "+91 98123 45678",
+        "email": "sunita@lodhagroup.com",
+        "address": "Lodha Excelus, NM Joshi Marg, Mumbai",
+        "commission_rate": 4,
+        "notes": "Special incentive scheme for 3BHK and 4BHK luxury units.",
+        "id": 2,
+        "created_at": "2026-08-11T18:33:38.065353",
+        "updated_at": "2026-08-11T18:33:38.065353",
+        "projects_count": 1
+      },
+      {
+        "name": "Lodha Group",
+        "company": "Lodha Group",
+        "contact_person": "Sales Desk",
+        "phone": "+919820011223",
+        "email": "contact@lodha.com",
+        "address": "Mumbai",
+        "commission_rate": 3,
+        "notes": null,
+        "id": 5,
+        "created_at": "2026-08-11T18:34:43.058482",
+        "updated_at": "2026-08-11T18:34:43.058485",
+        "projects_count": 1
+      },
+      {
+        "name": "Prestige Estates",
+        "company": "Prestige Estates",
+        "contact_person": "Sales Desk",
+        "phone": "+919820099001",
+        "email": "contact@prestige.com",
+        "address": "Mumbai",
+        "commission_rate": 3,
+        "notes": null,
+        "id": 8,
+        "created_at": "2026-08-11T18:34:43.059792",
+        "updated_at": "2026-08-11T18:34:43.059847",
+        "projects_count": 1
+      },
+      {
+        "name": "Prestige Group",
+        "company": "Prestige Estates Projects Ltd",
+        "contact_person": "Ananya Rao",
+        "phone": "+91 99000 11223",
+        "email": "ananya@prestigeconstructions.com",
+        "address": "Prestige Falcon Towers, MG Road, Bengaluru",
+        "commission_rate": 3.5,
+        "notes": "Strong presence in South India & upcoming NCR expansion.",
+        "id": 4,
+        "created_at": "2026-08-11T18:33:38.065355",
+        "updated_at": "2026-08-11T18:33:38.065356",
+        "projects_count": 1
+      },
+      {
+        "name": "Sobha Developers",
+        "company": "Sobha Developers",
+        "contact_person": "Sales Desk",
+        "phone": "+919820033445",
+        "email": "sales@sobha.com",
+        "address": "Mumbai",
+        "commission_rate": 3,
+        "notes": null,
+        "id": 9,
+        "created_at": "2026-08-11T18:34:43.060159",
+        "updated_at": "2026-08-11T18:34:43.060161",
+        "projects_count": 1
+      }
+    ]
+  },
+  "projects": {
+    "status": 200,
+    "data": []
+  }
+}

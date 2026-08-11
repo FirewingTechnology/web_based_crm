@@ -1,0 +1,39 @@
+[
+  {
+    "role": "Sales Executive",
+    "action": "Create Project (Requires Admin/Manager)",
+    "endpoint": "/projects",
+    "method": "POST",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJlbWFpbCI6InNhbGVzQGJyb2tlcm9zLmNvbSIsInJvbGUiOiJTYWxlcyBFeGVjdXRpdmUiLCJleHAiOjE3ODY1NTk3MTIsInR5cGUiOiJhY2Nlc3MifQ.5mBmvHcHbs6MB5YEqSgFs-esbfC1QewtNE9iZb1nYXI",
+    "data": {
+      "name": "Unauthorized Project",
+      "min_price": 100,
+      "max_price": 200,
+      "location": "Noida"
+    },
+    "status": 403,
+    "isRejected": true
+  },
+  {
+    "role": "Sales Executive",
+    "action": "Access Superadmin Endpoints",
+    "endpoint": "/saas-admin/stats",
+    "method": "GET",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJlbWFpbCI6InNhbGVzQGJyb2tlcm9zLmNvbSIsInJvbGUiOiJTYWxlcyBFeGVjdXRpdmUiLCJleHAiOjE3ODY1NTk3MTIsInR5cGUiOiJhY2Nlc3MifQ.5mBmvHcHbs6MB5YEqSgFs-esbfC1QewtNE9iZb1nYXI",
+    "status": 404,
+    "isRejected": true
+  },
+  {
+    "role": "Broker",
+    "action": "Modify Commission Payout (Requires Admin)",
+    "endpoint": "/commissions/1",
+    "method": "PUT",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJlbWFpbCI6ImJyb2tlckBicm9rZXJvcy5jb20iLCJyb2xlIjoiQnJva2VyIiwiZXhwIjoxNzg2NTU5NzE0LCJ0eXBlIjoiYWNjZXNzIn0.A_q53lgFbkSsrPRXW6ABrFFchp2bidDS8HTF_XP-Wbc",
+    "data": {
+      "payout_status": "Paid",
+      "remarks": "Hacked"
+    },
+    "status": 403,
+    "isRejected": true
+  }
+]

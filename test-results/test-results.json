@@ -1,0 +1,176 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/12-whatsapp-click-to-chat.spec.ts"
+    ],
+    "configFile": "D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\playwright.config.ts",
+    "rootDir": "D:/amol_personal/client/BOS/web_based_crm/qa-tests/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/amol_personal/client/BOS/web_based_crm/test-results/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/amol_personal/client/BOS/web_based_crm/qa-tests/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "../test-results/html-report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../test-results/test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "12-whatsapp-click-to-chat.spec.ts",
+      "file": "12-whatsapp-click-to-chat.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "WhatsApp Click-to-Chat Feature Verification",
+          "file": "12-whatsapp-click-to-chat.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "WhatsApp icon button is visible on Leads table rows and 360 Drawer",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 8127,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/login\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/login\", waiting until \"load\"\u001b[22m\n\n    at D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\tests\\12-whatsapp-click-to-chat.spec.ts:8:16",
+                        "location": {
+                          "file": "D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\tests\\12-whatsapp-click-to-chat.spec.ts",
+                          "column": 16,
+                          "line": 8
+                        },
+                        "snippet": "\u001b[0m \u001b[90m  6 |\u001b[39m   test(\u001b[32m'WhatsApp icon button is visible on Leads table rows and 360 Drawer'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m  7 |\u001b[39m     \u001b[90m// 1. Login as Admin\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  8 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m`${CRM}/login`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  9 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'admin@brokeros.com'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 10 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"password\"]'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'Admin@123'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 11 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button[type=\"submit\"]'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\tests\\12-whatsapp-click-to-chat.spec.ts",
+                            "column": 16,
+                            "line": 8
+                          },
+                          "message": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5173/login\", waiting until \"load\"\u001b[22m\n\n\n   6 |   test('WhatsApp icon button is visible on Leads table rows and 360 Drawer', async ({ page }) => {\n   7 |     // 1. Login as Admin\n>  8 |     await page.goto(`${CRM}/login`);\n     |                ^\n   9 |     await page.fill('input[type=\"email\"]', 'admin@brokeros.com');\n  10 |     await page.fill('input[type=\"password\"]', 'Admin@123');\n  11 |     await page.click('button[type=\"submit\"]');\n    at D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\tests\\12-whatsapp-click-to-chat.spec.ts:8:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-11T22:34:07.058Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\amol_personal\\client\\BOS\\web_based_crm\\test-results\\artifacts\\12-whatsapp-click-to-chat--9c818-s-table-rows-and-360-Drawer-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\amol_personal\\client\\BOS\\web_based_crm\\test-results\\artifacts\\12-whatsapp-click-to-chat--9c818-s-table-rows-and-360-Drawer-chromium\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "D:\\amol_personal\\client\\BOS\\web_based_crm\\test-results\\artifacts\\12-whatsapp-click-to-chat--9c818-s-table-rows-and-360-Drawer-chromium\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\amol_personal\\client\\BOS\\web_based_crm\\qa-tests\\tests\\12-whatsapp-click-to-chat.spec.ts",
+                        "column": 16,
+                        "line": 8
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "dde1a6678be1be26b3a5-5602e1af22b9df6d8f99",
+              "file": "12-whatsapp-click-to-chat.spec.ts",
+              "line": 6,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-08-11T22:34:05.505Z",
+    "duration": 31239.094,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

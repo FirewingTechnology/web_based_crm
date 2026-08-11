@@ -6,8 +6,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export const WEBSITE_URL = 'https://realvion-official-site.onrender.com';
-export const CRM_URL = 'https://realvion-frontend.onrender.com';
+export const CRM_URL = 'https://web-based-crm-1.onrender.com';
 export const API_URL = 'https://web-based-crm.onrender.com/api/v1';
+
 
 export const SCREENSHOTS_DIR = path.resolve(__dirname, '../../test-results/screenshots');
 
@@ -22,7 +23,8 @@ export async function screenshot(page: Page, name: string): Promise<string> {
   const paddedNum = String(screenshotCounter).padStart(2, '0');
   const filename = `${paddedNum}-${name}.png`;
   const filepath = path.join(SCREENSHOTS_DIR, filename);
-  await page.screenshot({ path: filepath, fullPage: true });
+  await page.screenshot({ path: filepath });
+
   console.log(`  📸 Screenshot saved: ${filename}`);
   screenshotCounter++;
   return filepath;

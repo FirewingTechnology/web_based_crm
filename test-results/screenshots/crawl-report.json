@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-08-11T20:16:48.851Z",
+  "total_routes_visited": 23,
+  "total_forms_tested": 1,
+  "viewports_tested": [
+    "320px-mobile-sm",
+    "768px-tablet",
+    "1024px-laptop",
+    "1440px-desktop",
+    "1920px-fhd"
+  ],
+  "console_errors": [],
+  "console_warnings": [],
+  "network_errors": [],
+  "layout_issues": [],
+  "form_test_results": [
+    {
+      "form": "Add Lead Modal",
+      "test_case": "Submit Empty",
+      "validation_triggered": false,
+      "status": "PASS"
+    }
+  ],
+  "table_test_results": [
+    {
+      "table": "Leads Table",
+      "action": "Search XSS String Injection",
+      "rows_returned": 1,
+      "status": "PASS"
+    }
+  ]
+}

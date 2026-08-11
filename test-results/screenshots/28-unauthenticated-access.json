@@ -1,0 +1,26 @@
+[
+  {
+    "endpoint": "/leads",
+    "status": 401
+  },
+  {
+    "endpoint": "/builders",
+    "status": 401
+  },
+  {
+    "endpoint": "/projects",
+    "status": 401
+  },
+  {
+    "endpoint": "/users",
+    "status": 401
+  },
+  {
+    "endpoint": "/commissions",
+    "status": 401
+  },
+  {
+    "endpoint": "/payments/history",
+    "status": 401
+  }
+]

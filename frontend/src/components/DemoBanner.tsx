@@ -5,7 +5,13 @@ import { PaymentCheckoutModal } from './PaymentCheckoutModal';
 
 export const DemoBanner: React.FC = () => {
   const { user } = useAuth();
+
+  if (user?.role === 'Super Admin' || (user?.role as any) === 'SUPERADMIN') {
+    return null;
+  }
+
   const [secondsLeft, setSecondsLeft] = useState<number>(user?.trial_seconds_remaining ?? 3600);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
 
@@ -44,10 +50,21 @@ export const DemoBanner: React.FC = () => {
   }, [secondsLeft]);
 
   const formatTime = (totalSeconds: number) => {
+    if (totalSeconds >= 86400) {
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      return `${days}d ${hours}h`;
+    }
+    if (totalSeconds >= 3600) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      return `${hours}h ${mins}m`;
+    }
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
     return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
   };
+
 
   return (
     <>

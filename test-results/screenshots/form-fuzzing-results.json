@@ -1,0 +1,20 @@
+[
+  {
+    "form": "Add Lead Modal",
+    "test_case": "Submit Empty",
+    "validation_triggered": true,
+    "status": "PASS"
+  },
+  {
+    "form": "Add Lead Modal",
+    "test_case": "Submit Invalid Phone",
+    "validation_triggered": true,
+    "status": "PASS"
+  },
+  {
+    "form": "Add Lead Modal",
+    "test_case": "Submit Malicious Input (XSS/SQLi Sanitization)",
+    "rejected_or_escaped_cleanly": true,
+    "status": "PASS"
+  }
+]

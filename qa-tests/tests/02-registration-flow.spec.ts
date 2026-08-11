@@ -279,12 +279,12 @@ test.describe('2. Registration Flow', () => {
   });
 
   test('2.9 - Invalid mobile number rejected', async ({ page }) => {
-    const invalidPhones = ['12345', '00000000000', 'abc1234567', '1111111111'];
+    const invalidPhones = ['12345', '0000000000', 'abc1234567', '1111111111', '5999999999'];
     const results: any[] = [];
 
     for (const phone of invalidPhones) {
       const resp = await page.request.post(`${API_URL}/saas/validate-registration`, {
-        data: { email: `phone.test.${Date.now()}@mailinator.com`, phone, company_name: 'Phone Test' },
+        data: { email: `phone.test.${Date.now()}.${Math.random()}@mailinator.com`, phone, company_name: 'Phone Test' },
         headers: { 'Content-Type': 'application/json' },
       });
       const body = await resp.json().catch(() => ({}));
@@ -304,4 +304,5 @@ test.describe('2. Registration Flow', () => {
     );
     expect(allRejected).toBe(true);
   });
+
 });

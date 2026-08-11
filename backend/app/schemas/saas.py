@@ -118,3 +118,13 @@ class UpdateQuotaRequest(BaseModel):
     seats_limit: int
     max_leads: int
 
+
+class UpgradePlanRequest(BaseModel):
+    plan_code: str  # starter | professional | enterprise
+    seats_limit: int = 15
+    max_leads: int = 5000
+    extend_days: int = 365  # how many days from today to set end_date
+
+
+class ExtendSubscriptionRequest(BaseModel):
+    extend_days: int = 365  # additional days to add to current end_date (or from today)
