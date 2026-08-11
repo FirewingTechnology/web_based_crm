@@ -25,10 +25,14 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs"
 )
 
+from app.middleware.auth_middleware import RequireRole
+from app.models.user import UserRole
+
 @app.get(f"{settings.API_V1_STR}/debug-sentry")
-def trigger_sentry_test_error():
-    """Deliberate test error endpoint to verify Sentry alert triggering."""
+def trigger_sentry_test_error(current_user=Depends(RequireRole([UserRole.SUPERADMIN]))):
+    """Deliberate test error endpoint to verify Sentry alert triggering (SuperAdmin Protected)."""
     raise ValueError("[REALVION SENTRY TEST] Deliberate test exception for error monitoring verification.")
+
 
 @app.on_event("startup")
 def startup_db_seed():
