@@ -21,7 +21,9 @@ class Followup(BaseModel):
     __tablename__ = "followups"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     lead_id = Column(Integer, ForeignKey("leads.id"), nullable=False)
+
     assigned_to_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     type = Column(Enum(FollowupType), default=FollowupType.CALL, nullable=False)
     status = Column(Enum(FollowupStatus), default=FollowupStatus.PENDING, nullable=False, index=True)

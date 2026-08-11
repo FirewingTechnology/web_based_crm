@@ -42,12 +42,17 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
     }
   };
 
-  const verifyAndActivate = async (orderId: string, paymentId: string, signature: string) => {
-    const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:8001/api/v1'
-      : 'https://web-based-crm.onrender.com/api/v1';
+  const getApiBase = () => {
+    return import.meta.env.VITE_API_URL || (
+      typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8001/api/v1'
+        : 'https://web-based-crm.onrender.com/api/v1'
+    );
+  };
 
-    const token = localStorage.getItem('brokeros_access_token') || '';
+  const verifyAndActivate = async (orderId: string, paymentId: string, signature: string) => {
+    const API_BASE = getApiBase();
+    const token = localStorage.getItem('realvion_access_token') || localStorage.getItem('brokeros_access_token') || '';
 
     try {
       const verifyRes = await fetch(`${API_BASE}/payments/verify`, {
@@ -66,6 +71,7 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
       const verifyData = await verifyRes.json();
       if (!verifyRes.ok) throw new Error(verifyData.detail || 'Payment verification failed.');
 
+      localStorage.removeItem('realvion_is_demo');
       localStorage.removeItem('brokeros_is_demo');
       setPaymentSuccess(true);
     } catch (err: any) {
@@ -79,11 +85,8 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
     setLoading(true);
     setError(null);
 
-    const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:8001/api/v1'
-      : 'https://web-based-crm.onrender.com/api/v1';
-
-    const userObj = JSON.parse(localStorage.getItem('brokeros_user') || '{}');
+    const API_BASE = getApiBase();
+    const userObj = JSON.parse(localStorage.getItem('realvion_user') || localStorage.getItem('brokeros_user') || '{}');
 
     try {
       // Step 1: Create Order
@@ -100,7 +103,7 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
       if (!res.ok) throw new Error(orderData.detail || 'Failed to create payment order.');
 
       // Step 2: Launch Official Razorpay Interactive Checkout Flow
-      const keyId = orderData.key_id || 'rzp_test_SmSxyLmsbg4zDj';
+      const keyId = orderData.key_id;
 
       const options = {
         key: keyId,
@@ -117,10 +120,15 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
         },
         theme: { color: '#C8A45D' },
         handler: async function (response: any) {
+          if (!response.razorpay_payment_id || !response.razorpay_signature) {
+            setError('Payment completed but verification data missing.');
+            setLoading(false);
+            return;
+          }
           await verifyAndActivate(
             response.razorpay_order_id || orderData.order_id,
-            response.razorpay_payment_id || `pay_${Date.now()}`,
-            response.razorpay_signature || 'simulated_sig'
+            response.razorpay_payment_id,
+            response.razorpay_signature
           );
         },
         modal: {
@@ -133,17 +141,19 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
       if (typeof window !== 'undefined' && window.Razorpay) {
         const rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function (response: any) {
-          verifyAndActivate(orderData.order_id, response.error?.metadata?.payment_id || `pay_test_${Date.now()}`, 'simulated_sig');
+          setError(`Payment failed: ${response.error?.description || 'Transaction declined'}`);
+          setLoading(false);
         });
         rzp.open();
       } else {
-        await verifyAndActivate(orderData.order_id, `pay_auto_${Date.now()}`, 'simulated_sig');
+        throw new Error('Razorpay SDK not loaded. Please refresh the page.');
       }
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">

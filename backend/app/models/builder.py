@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import BaseModel
 
@@ -6,7 +6,9 @@ class Builder(BaseModel):
     __tablename__ = "builders"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     name = Column(String(150), nullable=False, index=True) # e.g. Godrej Properties
+
     company = Column(String(150), nullable=False)
     contact_person = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=False)

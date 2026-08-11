@@ -25,11 +25,13 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    force_password_change: bool = False
     created_at: datetime
     updated_at: datetime
     trial_expires_at: datetime | None = None
     is_trial_expired: bool = False
     trial_seconds_remaining: int = 0
+
 
     class Config:
         from_attributes = True

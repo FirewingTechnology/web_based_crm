@@ -53,11 +53,15 @@ def get_leads(
 ):
     query = db.query(Lead).filter(Lead.is_deleted == False)
 
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Lead.organization_id == current_user.organization_id)
+
     # Role level scoping: Sales Execs / Brokers default to seeing their assigned leads if my_leads_only is True
     if my_leads_only or current_user.role in [UserRole.SALES_EXECUTIVE, UserRole.BROKER]:
         query = query.filter(or_(Lead.assigned_to_id == current_user.id, Lead.created_by_id == current_user.id))
     elif assigned_to_id:
         query = query.filter(Lead.assigned_to_id == assigned_to_id)
+
 
     if status:
         query = query.filter(Lead.status == status)
@@ -164,7 +168,10 @@ async def import_leads_csv(
 
 @router.get("/{lead_id}", response_model=LeadResponse)
 def get_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    lead = db.query(Lead).filter(Lead.id == lead_id, Lead.is_deleted == False).first()
+    query = db.query(Lead).filter(Lead.id == lead_id, Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Lead.organization_id == current_user.organization_id)
+    lead = query.first()
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
     return format_lead_response(lead)
@@ -177,10 +184,12 @@ def create_lead(
 ):
     lead_dict = lead_in.model_dump(exclude={"initial_note"})
     
-    # If no assignee provided, default to creator
+    # Attach organization_id of creator
+    lead_dict["organization_id"] = current_user.organization_id
     if not lead_dict.get("assigned_to_id"):
         lead_dict["assigned_to_id"] = current_user.id
     lead_dict["created_by_id"] = current_user.id
+
 
     lead = Lead(**lead_dict)
     db.add(lead)

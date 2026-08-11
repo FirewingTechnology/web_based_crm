@@ -26,7 +26,7 @@ export const apiClient = axios.create({
 
 // Request Interceptor: Attach JWT Access Token
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('brokeros_access_token');
+  const token = localStorage.getItem('realvion_access_token') || localStorage.getItem('brokeros_access_token');
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -44,18 +44,22 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const refreshToken = localStorage.getItem('brokeros_refresh_token');
+      const refreshToken = localStorage.getItem('realvion_refresh_token') || localStorage.getItem('brokeros_refresh_token');
       if (refreshToken) {
         try {
           const res = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refresh_token: refreshToken,
           });
           const { access_token, refresh_token } = res.data;
+          localStorage.setItem('realvion_access_token', access_token);
+          localStorage.setItem('realvion_refresh_token', refresh_token);
           localStorage.setItem('brokeros_access_token', access_token);
           localStorage.setItem('brokeros_refresh_token', refresh_token);
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
           return apiClient(originalRequest);
         } catch (refreshErr) {
+          localStorage.removeItem('realvion_access_token');
+          localStorage.removeItem('realvion_refresh_token');
           localStorage.removeItem('brokeros_access_token');
           localStorage.removeItem('brokeros_refresh_token');
           if (window.location.pathname !== '/login') {
@@ -63,6 +67,8 @@ apiClient.interceptors.response.use(
           }
         }
       } else {
+        localStorage.removeItem('realvion_access_token');
+        localStorage.removeItem('realvion_refresh_token');
         localStorage.removeItem('brokeros_access_token');
         localStorage.removeItem('brokeros_refresh_token');
         if (window.location.pathname !== '/login') {
@@ -73,4 +79,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 

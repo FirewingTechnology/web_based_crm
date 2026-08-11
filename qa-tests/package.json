@@ -1,0 +1,14 @@
+{
+  "name": "realvion-qa-tests",
+  "version": "1.0.0",
+  "description": "End-to-end QA test suite for Realvion platform",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0"
+  }
+}

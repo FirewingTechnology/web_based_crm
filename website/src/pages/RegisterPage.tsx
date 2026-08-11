@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap, CreditCard, Lock, Check, ShieldAlert, LogIn, X } from 'lucide-react';
+import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap, CreditCard, Lock, Check, ShieldAlert, LogIn, X, Loader2 } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,19 +31,60 @@ export const RegisterPage: React.FC = () => {
     ? 'http://localhost:8001/api/v1'
     : 'https://web-based-crm.onrender.com/api/v1';
 
-  const handleProceedToPlan = (e: React.FormEvent) => {
+  const handleProceedToPlan = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.password || !formData.companyName) {
+    const emailTrim = formData.email.trim();
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.fullName.trim() || !emailTrim || !formData.phone.trim() || !formData.password || !formData.companyName.trim()) {
       setError('Please fill in all required account and company details.');
       return;
     }
+
+    if (!emailRegex.test(emailTrim)) {
+      setError('Please enter a valid work email address (e.g. name@company.com).');
+      return;
+    }
+
+    if (phoneDigits.length < 10) {
+      setError('Please enter a valid 10-digit mobile phone number.');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-    setStep(2);
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/saas/validate-registration`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailTrim,
+          phone: formData.phone,
+          company_name: formData.companyName,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Validation failed. Please review your details.');
+
+      setLoading(false);
+      setStep(2);
+    } catch (err: any) {
+      setLoading(false);
+      setError(err.message);
+    }
   };
 
   const handleCompleteRegistration = async () => {
@@ -282,9 +323,18 @@ export const RegisterPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full py-4 mt-6 rounded-xl font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition flex items-center justify-center gap-2 shadow-lg shadow-[#C8A45D]/20 text-sm"
+              disabled={loading}
+              className="w-full py-4 mt-6 rounded-xl font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition flex items-center justify-center gap-2 shadow-lg shadow-[#C8A45D]/20 text-sm disabled:opacity-60"
             >
-              Continue to Plan Selection <ArrowRight className="h-4 w-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-black" /> Verifying Security & Availability...
+                </>
+              ) : (
+                <>
+                  Continue to Plan Selection <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </button>
           </form>
         )}

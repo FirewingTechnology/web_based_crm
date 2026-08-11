@@ -12,7 +12,7 @@ from app.models import (
 )
 from app.schemas.saas import (
     SendOTPRequest, SendOTPResponse, VerifyOTPRequest, VerifyOTPResponse,
-    RegisterDemoRequest, RegisterDemoResponse, PlanSchema
+    RegisterDemoRequest, RegisterDemoResponse, ValidateRegistrationRequest, ValidateRegistrationResponse, PlanSchema
 )
 from app.utils.security import get_password_hash, create_access_token, create_refresh_token
 from app.services.email_service import send_otp_email
@@ -27,11 +27,84 @@ def clean_phone_number(phone: str) -> str:
     return digits[-10:] if len(digits) >= 10 else digits
 
 
+@router.post("/validate-registration", response_model=ValidateRegistrationResponse)
+def validate_registration(req: ValidateRegistrationRequest, db: Session = Depends(get_db)):
+    email = req.email.lower().strip()
+    raw_phone = req.phone.strip() if req.phone else ""
+    clean_phone = clean_phone_number(raw_phone)
+    company_name_clean = req.company_name.strip() if req.company_name else ""
+
+    if not clean_phone or len(clean_phone) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Please enter a valid 10-digit mobile number."
+        )
+
+    # 1. Email Check
+    existing_email_user = db.query(User).filter(func.lower(User.email) == email).first()
+    if existing_email_user:
+        raise HTTPException(
+            status_code=400,
+            detail="An account or free trial has already been created with this email address. Each user is allowed only 1 free trial. Please log in directly."
+        )
+
+    existing_demo_audit = db.query(DemoAudit).filter(func.lower(DemoAudit.email) == email).first()
+    if existing_demo_audit:
+        raise HTTPException(
+            status_code=400,
+            detail="This email address has already claimed a 1-hour free trial. Multiple trial accounts for the same email are prohibited. Please log in to your existing account."
+        )
+
+    existing_reg_req = db.query(RegistrationRequest).filter(func.lower(RegistrationRequest.email) == email).first()
+    if existing_reg_req and existing_reg_req.is_converted:
+        raise HTTPException(
+            status_code=400,
+            detail="An account with this email address already exists. Please log in directly."
+        )
+
+    # 2. Phone Check
+    all_users_with_phone = db.query(User).filter(User.phone.isnot(None), User.phone != "").all()
+    for u in all_users_with_phone:
+        if clean_phone_number(u.phone) == clean_phone:
+            raise HTTPException(
+                status_code=400,
+                detail=f"A trial workspace or account has already been registered with mobile number ending in ...{clean_phone[-4:]}. Each phone number is eligible for only 1 free trial. Please log in."
+            )
+
+    existing_phone_audit = db.query(DemoAudit).filter(DemoAudit.phone_clean == clean_phone).first()
+    if existing_phone_audit:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Mobile number ending in ...{clean_phone[-4:]} has already been used to claim a 1-hour free trial. Please log in to your account."
+        )
+
+    # 3. Company Name Check
+    if company_name_clean:
+        existing_org = db.query(Organization).filter(func.lower(Organization.name) == company_name_clean.lower()).first()
+        if existing_org:
+            raise HTTPException(
+                status_code=400,
+                detail=f"An agency workspace for '{company_name_clean}' already exists. Please contact your company administrator to invite you or log in directly."
+            )
+
+    return ValidateRegistrationResponse(
+        valid=True,
+        message="Registration details verified and available."
+    )
+
+
 @router.post("/send-otp", response_model=SendOTPResponse)
-def send_otp(req: SendOTPRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def send_otp(req: SendOTPRequest, request: Request, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     email = req.email.lower().strip()
 
-    # Validate if email already registered
+    # Extract Client IP for rate limiting
+    client_ip = request.headers.get("x-forwarded-for")
+    if client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    else:
+        client_ip = request.client.host if request.client else "unknown"
+
+    # 1. Validate if email already registered
     existing_user = db.query(User).filter(User.email.ilike(email)).first()
     if existing_user:
         raise HTTPException(
@@ -39,37 +112,52 @@ def send_otp(req: SendOTPRequest, background_tasks: BackgroundTasks, db: Session
             detail="An account with this email address already exists. Please log in directly."
         )
 
-    # Check DemoAudit
+    # 2. Check DemoAudit
     existing_audit = db.query(DemoAudit).filter(DemoAudit.email.ilike(email)).first()
     if existing_audit:
         raise HTTPException(
             status_code=400,
             detail="This email address has already been used for a free trial. Please log in to your existing account."
         )
-    
-    # Generate 6-digit OTP
+        
+    # 3. Check 60-second Resend Cooldown
+    now = datetime.utcnow()
+    latest_otp = db.query(OTP).filter(OTP.email == email).order_by(OTP.id.desc()).first()
+    if latest_otp and latest_otp.last_sent_at:
+        seconds_since_last = (now - latest_otp.last_sent_at).total_seconds()
+        if seconds_since_last < 60:
+            raise HTTPException(
+                status_code=429,
+                detail=f"Please wait {int(60 - seconds_since_last)} seconds before requesting another verification code."
+            )
+            
+    # 4. Generate Secure 6-digit OTP & Hash
     otp_code = "".join(random.choices(string.digits, k=6))
-    expires_at = datetime.utcnow() + timedelta(minutes=15)
+    otp_hash = get_password_hash(otp_code)
+    expires_at = now + timedelta(minutes=10)
     
     # Delete old unverified OTPs for this email
     db.query(OTP).filter(OTP.email == email, OTP.is_verified == False).delete()
     
     otp_entry = OTP(
         email=email,
-        otp_code=otp_code,
+        otp_code=otp_code, # Retained for email sending
+        otp_hash=otp_hash,
         expires_at=expires_at,
         is_verified=False,
-        attempts=0
+        is_used=False,
+        attempts=0,
+        last_sent_at=now
     )
     db.add(otp_entry)
     db.commit()
     
-    # Send Email asynchronously in background so API returns instantly
+    # Send Email asynchronously
     background_tasks.add_task(send_otp_email, email, otp_code)
     
     return SendOTPResponse(
         success=True,
-        message=f"Verification code sent to {email}. (Valid for 15 minutes)"
+        message=f"Verification code sent to {email}. (Valid for 10 minutes)"
     )
 
 
@@ -77,37 +165,42 @@ def send_otp(req: SendOTPRequest, background_tasks: BackgroundTasks, db: Session
 def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
     email = req.email.lower().strip()
     code = req.otp_code.strip()
+    now = datetime.utcnow()
     
-    # Fetch all unverified OTP entries for this email
-    otp_entries = db.query(OTP).filter(
+    # Fetch active unverified & unused OTP entry
+    otp_entry = db.query(OTP).filter(
         OTP.email == email,
-        OTP.is_verified == False
-    ).order_by(OTP.id.desc()).all()
+        OTP.is_verified == False,
+        OTP.is_used == False
+    ).order_by(OTP.id.desc()).first()
     
-    if not otp_entries:
-        # If already verified or test bypass
-        if code in ["123456", "999999", "000000"]:
-            return VerifyOTPResponse(success=True, message="Email successfully verified")
+    if not otp_entry:
         raise HTTPException(status_code=400, detail="No active verification code found. Please request a new code.")
-    
-    matched_otp = None
-    for entry in otp_entries:
-        if entry.otp_code == code or code in ["123456", "999999", "000000"]:
-            matched_otp = entry
-            break
-            
-    if not matched_otp:
-        latest_entry = otp_entries[0]
-        latest_entry.attempts += 1
+        
+    if otp_entry.expires_at < now:
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new code.")
+        
+    if otp_entry.attempts >= 5:
+        raise HTTPException(status_code=400, detail="Maximum verification attempts exceeded. Please request a new code.")
+        
+    # Strictly verify code - NO BYPASS ALLOWED
+    is_valid = (otp_entry.otp_code == code)
+    if not is_valid:
+        otp_entry.attempts += 1
         db.commit()
-        raise HTTPException(status_code=400, detail="Incorrect verification code")
-    
-    # Mark all unverified entries for this email as verified
-    for entry in otp_entries:
-        entry.is_verified = True
+        attempts_left = 5 - otp_entry.attempts
+        raise HTTPException(
+            status_code=400,
+            detail=f"Incorrect verification code. {attempts_left} attempt(s) remaining."
+        )
+        
+    # Mark as verified and single-use used
+    otp_entry.is_verified = True
+    otp_entry.is_used = True
     db.commit()
     
     return VerifyOTPResponse(success=True, message="Email successfully verified")
+
 
 
 

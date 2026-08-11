@@ -31,6 +31,15 @@ class RegisterDemoRequest(BaseModel):
     employees: Optional[str] = "1-10"
     selected_plan_code: str = "professional"
 
+class ValidateRegistrationRequest(BaseModel):
+    email: EmailStr
+    phone: str
+    company_name: str
+
+class ValidateRegistrationResponse(BaseModel):
+    valid: bool
+    message: str
+
 class RegisterDemoResponse(BaseModel):
     success: bool
     access_token: str
@@ -43,8 +52,14 @@ class RegisterDemoResponse(BaseModel):
 
 class CreateOrderRequest(BaseModel):
     plan_code: str = "professional"
+    plan_id: Optional[int] = None
+    organization_id: Optional[int] = None
+    workspace_id: Optional[int] = None
+    registration_id: Optional[int] = None
+    subscription_id: Optional[int] = None
     billing_cycle: str = "monthly" # monthly or yearly
     coupon_code: Optional[str] = None
+
 
 class CreateOrderResponse(BaseModel):
     order_id: str

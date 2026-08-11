@@ -14,7 +14,9 @@ class Booking(BaseModel):
     __tablename__ = "bookings"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     booking_number = Column(String(50), unique=True, nullable=False, index=True) # e.g. BK-2026-001
+
     lead_id = Column(Integer, ForeignKey("leads.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     builder_id = Column(Integer, ForeignKey("builders.id"), nullable=False)

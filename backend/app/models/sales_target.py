@@ -6,7 +6,9 @@ class SalesTarget(BaseModel):
     __tablename__ = "sales_targets"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
     month_year = Column(String(20), nullable=False, index=True) # Format: YYYY-MM e.g. "2026-07"
     target_amount = Column(Float, nullable=False) # In Lakhs / Crores
     achieved_amount = Column(Float, default=0.0, nullable=False)

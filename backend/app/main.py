@@ -29,23 +29,28 @@ def startup_db_seed():
     except Exception as e:
         print(f"[RENDER STARTUP] Seeding check: {e}")
 
-# CORS Middleware setup
+# CORS Middleware setup - Strict origins from config/env without wildcard when allow_credentials=True
 origins = [
+    settings.FRONTEND_URL,
+    settings.WEBSITE_URL,
+    settings.CRM_URL,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
     "http://localhost:3000",
-    "*"
 ]
+# Filter duplicates and empty strings
+allowed_origins = list(set([o.strip() for o in origins if o and o.strip() and o != "*"]))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Include API Routers
 api_v1 = settings.API_V1_STR

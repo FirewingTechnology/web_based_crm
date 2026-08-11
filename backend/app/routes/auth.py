@@ -4,7 +4,8 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from app.schemas.auth import LoginRequest, Token, RefreshRequest
 from app.schemas.user import UserResponse
-from app.utils.security import verify_password, create_access_token, create_refresh_token, decode_token
+from app.utils.security import verify_password, get_password_hash, create_access_token, create_refresh_token, decode_token
+
 from app.middleware.auth_middleware import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -165,6 +166,30 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
     resp_data["is_trial_expired"] = is_trial_expired
     resp_data["trial_seconds_remaining"] = trial_seconds_remaining
     return resp_data
+
+from pydantic import BaseModel
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+@router.post("/change-password")
+def change_password(
+    req: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not verify_password(req.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+    
+    if len(req.new_password) < 8:
+        raise HTTPException(status_code=400, detail="New password must be at least 8 characters long")
+        
+    current_user.hashed_password = get_password_hash(req.new_password)
+    current_user.force_password_change = False
+    db.commit()
+    return {"success": True, "message": "Password updated successfully"}
+
 
 
 

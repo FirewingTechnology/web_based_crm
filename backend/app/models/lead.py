@@ -23,7 +23,9 @@ class Lead(BaseModel):
     __tablename__ = "leads"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     name = Column(String(100), nullable=False, index=True)
+
     phone = Column(String(20), nullable=False, index=True)
     email = Column(String(150), nullable=True)
     source = Column(String(100), default="Direct", nullable=False, index=True) # Website, Referral, 99acres, Facebook Ads, Walk-in

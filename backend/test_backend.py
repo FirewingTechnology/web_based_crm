@@ -174,7 +174,9 @@ def test_trial_expiration_isolation():
     assert me_data["trial_seconds_remaining"] == 0
 
 def test_sales_executive_inherits_admin_trial():
+    seed_db()
     # 1. Register a Demo Admin
+
     reg = client.post("/api/v1/saas/register-demo", json={
         "full_name": "Trial Admin",
         "email": "trial.admin@agency.com",
@@ -216,6 +218,42 @@ def test_sales_executive_inherits_admin_trial():
     assert abs(se_data["trial_seconds_remaining"] - admin_me["trial_seconds_remaining"]) <= 5
     assert se_data["is_trial_expired"] == admin_me["is_trial_expired"]
 
+def test_validate_registration_precheck():
+    # 1. Valid unique precheck should pass
+    val_res = client.post("/api/v1/saas/validate-registration", json={
+        "email": "brand.new.precheck.user@example.com",
+        "phone": "+91 91111 99999",
+        "company_name": "Brand New Precheck Agency"
+    })
+    assert val_res.status_code == 200
+    assert val_res.json()["valid"] == True
+
+    # 2. Precheck with existing email (from previous test registration) should fail (400)
+    dup_email_res = client.post("/api/v1/saas/validate-registration", json={
+        "email": "TRIAL.ADMIN@agency.com",
+        "phone": "+91 99999 00000",
+        "company_name": "Another Company"
+    })
+    assert dup_email_res.status_code == 400
+    assert "already" in dup_email_res.json()["detail"].lower()
+
+    # 3. Precheck with existing phone (from previous test registration) should fail (400)
+    dup_phone_res = client.post("/api/v1/saas/validate-registration", json={
+        "email": "brand.new.user@example.com",
+        "phone": "9777711111",
+        "company_name": "Different Company"
+    })
+    assert dup_phone_res.status_code == 400
+    assert "mobile number" in dup_phone_res.json()["detail"].lower() or "trial" in dup_phone_res.json()["detail"].lower()
+
+    # 4. Precheck with invalid phone (too short) should fail (400)
+    invalid_phone_res = client.post("/api/v1/saas/validate-registration", json={
+        "email": "valid.email@example.com",
+        "phone": "123",
+        "company_name": "Short Phone Agency"
+    })
+    assert invalid_phone_res.status_code == 400
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
@@ -225,5 +263,6 @@ if __name__ == "__main__":
     test_demo_security_duplicate_prevention()
     test_trial_expiration_isolation()
     test_sales_executive_inherits_admin_trial()
+    test_validate_registration_precheck()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
 

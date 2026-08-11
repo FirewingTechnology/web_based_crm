@@ -23,7 +23,9 @@ class User(BaseModel):
     phone = Column(String(20), nullable=True)
     firm_name = Column(String(150), nullable=True) # For Brokers or CP firms
     is_active = Column(Boolean, default=True, nullable=False)
+    force_password_change = Column(Boolean, default=False, nullable=False)
     avatar_url = Column(String(255), nullable=True)
+
 
     # Relationships
     assigned_leads = relationship("Lead", back_populates="assigned_to", foreign_keys="Lead.assigned_to_id")

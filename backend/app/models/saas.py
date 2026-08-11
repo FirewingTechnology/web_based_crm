@@ -69,9 +69,12 @@ class Payment(BaseModel):
     
     id = Column(Integer, primary_key=True, index=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=True)
     subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=True)
+    registration_id = Column(Integer, ForeignKey("registration_requests.id"), nullable=True)
+    plan_id = Column(Integer, ForeignKey("plans.id"), nullable=True)
     razorpay_order_id = Column(String(255), unique=True, index=True, nullable=False)
-    razorpay_payment_id = Column(String(255), nullable=True, index=True)
+    razorpay_payment_id = Column(String(255), unique=True, nullable=True, index=True)
     razorpay_signature = Column(String(500), nullable=True)
     amount = Column(Float, nullable=False)
     platform_fee = Column(Float, default=0.0, nullable=False)
@@ -137,10 +140,14 @@ class OTP(BaseModel):
     
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), index=True, nullable=False)
-    otp_code = Column(String(10), index=True, nullable=False)
+    otp_code = Column(String(10), index=True, nullable=True)
+    otp_hash = Column(String(255), nullable=True)
     expires_at = Column(DateTime, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
+    is_used = Column(Boolean, default=False, nullable=False)
     attempts = Column(Integer, default=0, nullable=False)
+    last_sent_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
 
 class RegistrationRequest(BaseModel):
     __tablename__ = "registration_requests"

@@ -13,7 +13,9 @@ class Project(BaseModel):
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
     name = Column(String(150), nullable=False, index=True) # e.g. Godrej Woods
+
     builder_id = Column(Integer, ForeignKey("builders.id"), nullable=False)
     location = Column(String(200), nullable=False, index=True) # Sector 150, Noida
     configuration = Column(String(100), nullable=False) # e.g. 2, 3, 4 BHK Apartments
