@@ -9,3 +9,7 @@ pyjwt>=2.8.0
 passlib[bcrypt]>=1.7.4
 python-multipart>=0.0.9
 pytest>=8.0.2
+alembic>=1.13.1
+psycopg2-binary>=2.9.9
+sentry-sdk[fastapi]>=2.0.0
+razorpay>=1.4.1

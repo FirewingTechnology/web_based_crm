@@ -8,7 +8,8 @@ services:
     region: singapore
     plan: free
     buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -34,6 +35,10 @@ services:
         sync: false
       - key: SMTP_PASSWORD
         sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
 
   # -------------------------------------------------------------
   # 2. React Vite Frontend CRM Web App
@@ -51,6 +56,9 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://web-based-crm.onrender.com/api/v1
+      - key: VITE_SENTRY_DSN
+        sync: false
+
 
   # -------------------------------------------------------------
   # 3. Standalone REALVION Official Company Website
