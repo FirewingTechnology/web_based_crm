@@ -69,6 +69,16 @@ def get_followups(
     followups = query.order_by(Followup.scheduled_at.asc()).all()
     return [format_followup_response(f) for f in followups]
 
+@router.get("/{followup_id}", response_model=FollowupResponse)
+def get_followup(followup_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    query = db.query(Followup).filter(Followup.id == followup_id, Followup.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Followup.organization_id == current_user.organization_id)
+    f = query.first()
+    if not f:
+        raise HTTPException(status_code=404, detail="Followup not found")
+    return format_followup_response(f)
+
 @router.post("", response_model=FollowupResponse, status_code=status.HTTP_201_CREATED)
 def create_followup(
     followup_in: FollowupCreate,
@@ -79,12 +89,15 @@ def create_followup(
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
 
-    followup = Followup(**followup_in.model_dump())
+    f_data = followup_in.model_dump()
+    f_data["organization_id"] = current_user.organization_id
+    followup = Followup(**f_data)
     db.add(followup)
     db.commit()
     db.refresh(followup)
 
     return format_followup_response(followup)
+
 
 @router.put("/{followup_id}", response_model=FollowupResponse)
 def update_followup(
