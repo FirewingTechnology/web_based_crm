@@ -242,6 +242,7 @@ def seed_db():
         # 5. Leads
         now = datetime.now(timezone.utc)
         l1 = Lead(
+            organization_id=seed_org.id,
             name="Amitabh Mehra",
             phone="+91 98111 99887",
             email="amitabh.m@gmail.com",
@@ -257,6 +258,7 @@ def seed_db():
             tags="VIP, NRI, High Intent"
         )
         l2 = Lead(
+            organization_id=seed_org.id,
             name="Siddharth Kapoor",
             phone="+91 97222 88776",
             email="sid.kapoor@techcorp.io",
@@ -272,6 +274,7 @@ def seed_db():
             tags="Ready Buyer, Instant Token"
         )
         l3 = Lead(
+            organization_id=seed_org.id,
             name="Dr. Suniti Deshmukh",
             phone="+91 99333 77665",
             email="suniti.d@hospital.org",
@@ -287,6 +290,7 @@ def seed_db():
             tags="Doctor, Cash Buyer"
         )
         l4 = Lead(
+            organization_id=seed_org.id,
             name="Rajiv Singhania",
             phone="+91 98444 66554",
             email="singhania.r@textiles.com",
@@ -302,6 +306,7 @@ def seed_db():
             tags="Investor"
         )
         l5 = Lead(
+            organization_id=seed_org.id,
             name="Vikramaditya Rao",
             phone="+91 97555 55443",
             email="vikram.rao@fintech.co",
@@ -333,6 +338,7 @@ def seed_db():
 
         # 7. Followups (Today, Pending, Overdue, Completed)
         f1 = Followup(
+            organization_id=seed_org.id,
             lead_id=l1.id,
             assigned_to_id=sales_user.id,
             type=FollowupType.SITE_VISIT,
@@ -342,6 +348,7 @@ def seed_db():
             notes="Driver Ramesh assigned. Pickup from Radisson Blu Noida."
         )
         f2 = Followup(
+            organization_id=seed_org.id,
             lead_id=l3.id,
             assigned_to_id=sales_user2.id,
             type=FollowupType.CALL,
@@ -351,6 +358,7 @@ def seed_db():
             notes="Client requested updated price sheet with GST breakdown."
         )
         f3 = Followup(
+            organization_id=seed_org.id,
             lead_id=l4.id,
             assigned_to_id=sales_user.id,
             type=FollowupType.WHATSAPP,
@@ -367,6 +375,7 @@ def seed_db():
 
         # 8. Bookings & Commission
         bk1 = Booking(
+            organization_id=seed_org.id,
             booking_number="BK-2026-1001",
             lead_id=l2.id,
             project_id=p1.id,
@@ -445,6 +454,7 @@ def seed_db():
         print("[SEED] Database seeding completed successfully!")
         print("--------------------------------------------------")
         print("Default Credentials:")
+        print("SuperAdmin:       superadmin@realvion.com / SuperAdmin@123")
         print("Admin:            admin@brokeros.com    / Admin@123")
         print("Manager:          manager@brokeros.com  / Manager@123")
         print("Sales Executive:  sales@brokeros.com    / Sales@123")
@@ -458,5 +468,37 @@ def seed_db():
     finally:
         db.close()
 
+from sqlalchemy import func
+
+def ensure_seed_users(db):
+    """Ensures essential system admin & default accounts exist without wiping existing user data."""
+    try:
+        # 1. SuperAdmin User
+        superadmin = db.query(User).filter(func.lower(User.email) == "superadmin@realvion.com").first()
+        if not superadmin:
+            superadmin = User(
+                name="Platform Owner",
+                email="superadmin@realvion.com",
+                hashed_password=get_password_hash("SuperAdmin@123"),
+                role=UserRole.SUPERADMIN,
+                phone="+91 99999 88888",
+                firm_name="REALVION Master Control",
+                is_active=True,
+                is_deleted=False
+            )
+            db.add(superadmin)
+        else:
+            superadmin.hashed_password = get_password_hash("SuperAdmin@123")
+            superadmin.role = UserRole.SUPERADMIN
+            superadmin.is_active = True
+            superadmin.is_deleted = False
+
+        db.commit()
+        print("[SEED CHECK] Ensured superadmin@realvion.com exists and credentials are active.")
+    except Exception as e:
+        db.rollback()
+        print(f"[SEED CHECK ERROR] {e}")
+
 if __name__ == "__main__":
     seed_db()
+

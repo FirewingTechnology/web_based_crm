@@ -304,8 +304,14 @@ export const SuperAdminDashboard: React.FC = () => {
             <span className="text-xs text-slate-400 uppercase font-semibold">Monthly Recurring Revenue</span>
             <TrendingUp className="h-5 w-5 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-white">₹{analytics?.mrr?.toLocaleString() || '—'}</div>
-          <p className="text-[11px] text-emerald-400 font-medium">+{analytics?.growth_rate_pct || 34.5}% MoM</p>
+          <div className="text-3xl font-black text-white">
+            ₹{analytics?.mrr != null ? analytics.mrr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+          </div>
+          <p className="text-[11px] text-emerald-400 font-medium">
+            {analytics?.growth_rate_pct != null
+              ? `${analytics.growth_rate_pct >= 0 ? '+' : ''}${analytics.growth_rate_pct}% MoM`
+              : '0.0% MoM'}
+          </p>
         </div>
 
         <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
@@ -313,7 +319,9 @@ export const SuperAdminDashboard: React.FC = () => {
             <span className="text-xs text-slate-400 uppercase font-semibold">Annual Run Rate (ARR)</span>
             <IndianRupee className="h-5 w-5 text-[#C8A45D]" />
           </div>
-          <div className="text-3xl font-black text-[#C8A45D]">₹{analytics?.arr?.toLocaleString() || '—'}</div>
+          <div className="text-3xl font-black text-[#C8A45D]">
+            ₹{analytics?.arr != null ? analytics.arr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+          </div>
           <p className="text-[11px] text-slate-500 font-light">12-Month Projected</p>
         </div>
 
@@ -322,8 +330,12 @@ export const SuperAdminDashboard: React.FC = () => {
             <span className="text-xs text-slate-400 uppercase font-semibold">Total Tenants</span>
             <Building2 className="h-5 w-5 text-blue-400" />
           </div>
-          <div className="text-3xl font-black text-white">{organizations.length || analytics?.total_customers || '—'}</div>
-          <p className="text-[11px] text-blue-400 font-medium">{analytics?.active_subscriptions || '—'} Active Subscriptions</p>
+          <div className="text-3xl font-black text-white">
+            {analytics?.total_customers ?? organizations.length}
+          </div>
+          <p className="text-[11px] text-blue-400 font-medium">
+            {analytics?.active_subscriptions ?? 0} Active Subscriptions
+          </p>
         </div>
 
         <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
@@ -331,8 +343,12 @@ export const SuperAdminDashboard: React.FC = () => {
             <span className="text-xs text-slate-400 uppercase font-semibold">Total Revenue Collected</span>
             <BadgeCheck className="h-5 w-5 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-emerald-400">₹{analytics?.total_revenue?.toLocaleString() || '—'}</div>
-          <p className="text-[11px] text-slate-500">{payments.filter(p => p.status === 'Captured').length} captured payments</p>
+          <div className="text-3xl font-black text-emerald-400">
+            ₹{analytics?.total_revenue != null ? analytics.total_revenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+          </div>
+          <p className="text-[11px] text-slate-500">
+            {payments.filter(p => p.status === 'Captured').length} captured payments
+          </p>
         </div>
       </div>
 

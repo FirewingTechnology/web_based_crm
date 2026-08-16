@@ -48,6 +48,9 @@ class Subscription(BaseModel):
     id = Column(Integer, primary_key=True, index=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     plan_id = Column(Integer, ForeignKey("plans.id"), nullable=True)
+    plan_code = Column(String(100), default="professional", nullable=True)
+    max_users = Column(Integer, default=15, nullable=True)
+    max_leads = Column(Integer, default=5000, nullable=True)
     status = Column(String(50), default="Trial", nullable=False, index=True) # Trial, Demo, Active, Expired, Cancelled
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)

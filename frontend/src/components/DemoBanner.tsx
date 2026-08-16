@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, ShieldAlert, Clock, Lock } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldAlert, Clock, Lock, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { PaymentCheckoutModal } from './PaymentCheckoutModal';
 
 export const DemoBanner: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
-  if (user?.role === 'Super Admin' || (user?.role as any) === 'SUPERADMIN') {
+  const isSuperAdmin = user?.role === 'Super Admin' || (user?.role as any) === 'SUPERADMIN' || user?.email === 'superadmin@realvion.com';
+
+  if (isSuperAdmin) {
     return null;
   }
 
@@ -129,12 +131,20 @@ export const DemoBanner: React.FC = () => {
               </ul>
             </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-full py-4 rounded-2xl font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition shadow-lg shadow-[#C8A45D]/25 flex items-center justify-center gap-2 text-sm"
-            >
-              <Sparkles className="h-5 w-5" /> Upgrade to Paid Version Now <ArrowRight className="h-4 w-4" />
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full py-4 rounded-2xl font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition shadow-lg shadow-[#C8A45D]/25 flex items-center justify-center gap-2 text-sm"
+              >
+                <Sparkles className="h-5 w-5" /> Upgrade to Paid Version Now <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                onClick={logout}
+                className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/10 transition flex items-center justify-center gap-1.5"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Sign Out / Log In As Super Admin
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -24,10 +24,15 @@ def get_dashboard_stats(
     now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # Leads query
+    # Leads, Bookings, Followups queries with tenant & role scoping
     lead_query = db.query(Lead).filter(Lead.is_deleted == False)
     booking_query = db.query(Booking).filter(Booking.is_deleted == False)
     followup_query = db.query(Followup).filter(Followup.is_deleted == False)
+
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        lead_query = lead_query.filter(Lead.organization_id == current_user.organization_id)
+        booking_query = booking_query.filter(Booking.organization_id == current_user.organization_id)
+        followup_query = followup_query.filter(Followup.organization_id == current_user.organization_id)
 
     if current_user.role == UserRole.SALES_EXECUTIVE:
         lead_query = lead_query.filter(Lead.assigned_to_id == current_user.id)
@@ -36,19 +41,19 @@ def get_dashboard_stats(
 
     total_leads = lead_query.count()
     new_leads_today = lead_query.filter(Lead.created_at >= today_start).count()
-
     total_bookings = booking_query.count()
     
     # Calculate pipeline valuation (sum of budget_max of active leads)
     active_leads = lead_query.filter(Lead.status.notin_([LeadStatus.BOOKED, LeadStatus.LOST])).all()
-    pipeline_val = sum([(l.budget_max or l.budget_min or 50.0) for l in active_leads])
+    pipeline_val = sum([(l.budget_max or l.budget_min or 0.0) for l in active_leads])
 
     # Total revenue generated from bookings
     bookings = booking_query.all()
     total_rev = sum([b.total_deal_value for b in bookings])
 
-    # Total commission earned by company
-    commissions = db.query(Commission).filter(Commission.is_deleted == False).all()
+    # Total commission earned
+    booking_ids = [b.id for b in bookings]
+    commissions = db.query(Commission).filter(Commission.booking_id.in_(booking_ids), Commission.is_deleted == False).all() if booking_ids else []
     total_comm = sum([c.company_margin_amount for c in commissions])
 
     pending_followups = followup_query.filter(Followup.status == FollowupStatus.PENDING).count()
@@ -67,32 +72,45 @@ def get_dashboard_stats(
 
 @router.get("/monthly-sales", response_model=list[MonthlySalesChart])
 def get_monthly_sales_chart(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Group bookings by month for past 6 months
     results = []
     now = datetime.now()
     for i in range(5, -1, -1):
         month_dt = now - timedelta(days=i*30)
         m_str = month_dt.strftime("%b %Y")
         
-        # Filter for this month
-        b_list = db.query(Booking).filter(
+        q = db.query(Booking).filter(
             Booking.is_deleted == False,
             func.strftime("%Y-%m", Booking.booking_date) == month_dt.strftime("%Y-%m")
-        ).all()
-        
+        )
+        if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+            q = q.filter(Booking.organization_id == current_user.organization_id)
+        if current_user.role == UserRole.SALES_EXECUTIVE:
+            q = q.filter(Booking.assigned_executive_id == current_user.id)
+
+        b_list = q.all()
         rev = sum([b.total_deal_value for b in b_list])
         results.append(MonthlySalesChart(month=m_str, revenue=rev, bookings_count=len(b_list)))
     return results
 
 @router.get("/lead-sources", response_model=list[LeadSourceDistribution])
 def get_lead_sources_distribution(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    results = db.query(Lead.source, func.count(Lead.id)).filter(Lead.is_deleted == False).group_by(Lead.source).all()
+    q = db.query(Lead.source, func.count(Lead.id)).filter(Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        q = q.filter(Lead.organization_id == current_user.organization_id)
+    if current_user.role == UserRole.SALES_EXECUTIVE:
+        q = q.filter(Lead.assigned_to_id == current_user.id)
+    results = q.group_by(Lead.source).all()
     return [LeadSourceDistribution(source=r[0] or "Direct", count=r[1]) for r in results]
 
 @router.get("/lead-statuses", response_model=list[LeadStatusDistribution])
 def get_lead_statuses_distribution(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    results = db.query(Lead.status, func.count(Lead.id)).filter(Lead.is_deleted == False).group_by(Lead.status).all()
-    return [LeadStatusDistribution(status=r[0].value, count=r[1]) for r in results]
+    q = db.query(Lead.status, func.count(Lead.id)).filter(Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        q = q.filter(Lead.organization_id == current_user.organization_id)
+    if current_user.role == UserRole.SALES_EXECUTIVE:
+        q = q.filter(Lead.assigned_to_id == current_user.id)
+    results = q.group_by(Lead.status).all()
+    return [LeadStatusDistribution(status=r[0].value if hasattr(r[0], 'value') else str(r[0]), count=r[1]) for r in results]
 
 @router.get("/export/{report_type}")
 def export_report_csv(report_type: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

@@ -35,9 +35,6 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
     setMousePos({ x, y });
   };
 
-  const logos = [
-    "Lodha Group", "DLF Limited", "Godrej Properties", "Sobha Developers", "Prestige Group", "Oberoi Realty"
-  ];
 
   const questions = [
     "How many follow-ups were missed in your sales team this week?",
@@ -196,21 +193,6 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
         </div>
       </section>
 
-      {/* Customer Logos Bar */}
-      <section className="py-12 border-y border-white/[0.08] bg-[#080808]">
-        <div className="max-w-7xl mx-auto px-6 text-center space-y-6">
-          <p className="text-xs font-semibold text-slate-400 tracking-widest uppercase">
-            Trusted by Leading Real Estate Agencies & Developers
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-70">
-            {logos.map((logo, i) => (
-              <span key={i} className="text-sm font-bold text-slate-300 tracking-wider">
-                {logo}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Feature Timeline Section */}
       <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-16">

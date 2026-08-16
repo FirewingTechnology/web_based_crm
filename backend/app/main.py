@@ -45,12 +45,15 @@ def startup_db_seed():
     try:
         from app.database import SessionLocal
         from app.models.user import User
-        from app.seed import seed_db
+        from app.seed import seed_db, ensure_seed_users
         db = SessionLocal()
         user_count = db.query(User).count()
         if user_count == 0:
             print("[RENDER STARTUP] Database empty. Seeding initial admin and sales accounts...")
             seed_db()
+        else:
+            print("[RENDER STARTUP] Database active. Ensuring superadmin@realvion.com exists...")
+            ensure_seed_users(db)
         db.close()
     except Exception as e:
         print(f"[RENDER STARTUP] Seeding check: {e}")

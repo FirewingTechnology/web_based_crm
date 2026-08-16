@@ -38,8 +38,11 @@ def get_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Auto-sync any existing leads marked as Booked that don't have a Booking record
-    booked_leads = db.query(Lead).filter(Lead.status == LeadStatus.BOOKED, Lead.is_deleted == False).all()
+    # Auto-sync any existing leads marked as Booked for this organization that don't have a Booking record
+    booked_leads_query = db.query(Lead).filter(Lead.status == LeadStatus.BOOKED, Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        booked_leads_query = booked_leads_query.filter(Lead.organization_id == current_user.organization_id)
+    booked_leads = booked_leads_query.all()
     for lead in booked_leads:
         existing = db.query(Booking).filter(Booking.lead_id == lead.id, Booking.is_deleted == False).first()
         if not existing:
@@ -54,6 +57,7 @@ def get_bookings(
                 exec_id = lead.assigned_to_id or current_user.id
 
                 booking = Booking(
+                    organization_id=lead.organization_id or current_user.organization_id,
                     booking_number=booking_num,
                     lead_id=lead.id,
                     project_id=project.id,
@@ -75,6 +79,7 @@ def get_bookings(
                 company_margin = builder_comm - exec_comm
 
                 commission = Commission(
+                    organization_id=lead.organization_id or current_user.organization_id,
                     booking_id=booking.id,
                     builder_commission_rate=builder_rate,
                     builder_commission_amount=builder_comm,
@@ -140,6 +145,7 @@ def create_booking(
     booking_num = f"BK-{datetime.now().year}-{random.randint(1000, 9999)}"
 
     booking = Booking(
+        organization_id=lead.organization_id or current_user.organization_id,
         booking_number=booking_num,
         lead_id=booking_in.lead_id,
         project_id=booking_in.project_id,

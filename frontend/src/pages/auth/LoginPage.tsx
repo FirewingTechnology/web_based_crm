@@ -37,7 +37,8 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
     try {
       const user = await login(email, password);
-      if (user.role === 'Super Admin') {
+      const isSuperAdmin = user.role === 'Super Admin' || (user.role as any) === 'SUPERADMIN' || user.email === 'superadmin@realvion.com';
+      if (isSuperAdmin) {
         navigate('/admin/saas');
       } else if (user.role === 'Sales Executive') {
         navigate('/sales/dashboard');

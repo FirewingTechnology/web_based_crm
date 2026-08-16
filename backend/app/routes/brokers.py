@@ -15,7 +15,11 @@ def get_brokers(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(BrokerProfile).filter(BrokerProfile.is_deleted == False)
+    query = db.query(BrokerProfile).join(User).filter(BrokerProfile.is_deleted == False)
+
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(User.organization_id == current_user.organization_id)
+
     if search:
         query = query.filter(
             (BrokerProfile.firm_name.ilike(f"%{search}%")) | (BrokerProfile.contact_person.ilike(f"%{search}%"))

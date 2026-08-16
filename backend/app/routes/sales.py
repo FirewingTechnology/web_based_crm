@@ -68,9 +68,9 @@ def get_sales_targets(
             new_target = SalesTarget(
                 user_id=exec_user.id,
                 month_year=curr_month,
-                target_amount=200.0,
+                target_amount=0.0,
                 achieved_amount=0.0,
-                target_bookings=5,
+                target_bookings=0,
                 achieved_bookings=0
             )
             db.add(new_target)

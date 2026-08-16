@@ -25,24 +25,46 @@ def get_saas_analytics(
     db: Session = Depends(get_db),
     admin: User = Depends(check_superadmin_access)
 ):
-    total_customers = db.query(Organization).count()
-    active_subscriptions = db.query(Subscription).filter(Subscription.status == "Active").count()
-    demo_workspaces = db.query(Workspace).filter(Workspace.is_demo == True).count()
+    total_customers = db.query(Organization).filter(Organization.is_deleted == False).count()
+    active_subscriptions = db.query(Subscription).filter(Subscription.status == "Active", Subscription.is_deleted == False).count()
+    demo_workspaces = db.query(Workspace).filter(Workspace.is_demo == True, Workspace.is_deleted == False).count()
     
-    payments = db.query(Payment).filter(Payment.status == "Captured").all()
-    total_revenue = sum(p.total_amount for p in payments) if payments else 49990.0
+    payments = db.query(Payment).filter(Payment.status == "Captured", Payment.is_deleted == False).all()
+    total_revenue = sum(p.total_amount for p in payments) if payments else 0.0
     
-    mrr = round(total_revenue / 12, 2) if total_revenue > 0 else 24995.0
+    mrr = round(total_revenue / 12, 2) if total_revenue > 0 else 0.0
     arr = round(mrr * 12, 2)
     
+    # Real dynamic MoM growth rate calculation
+    now = datetime.now(timezone.utc)
+    this_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month_end = this_month_start - timedelta(seconds=1)
+    last_month_start = last_month_end.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    this_month_rev = sum(
+        p.total_amount for p in payments 
+        if p.created_at and (p.created_at.replace(tzinfo=timezone.utc) if getattr(p.created_at, 'tzinfo', None) is None else p.created_at) >= this_month_start
+    )
+    last_month_rev = sum(
+        p.total_amount for p in payments 
+        if p.created_at and last_month_start <= (p.created_at.replace(tzinfo=timezone.utc) if getattr(p.created_at, 'tzinfo', None) is None else p.created_at) <= last_month_end
+    )
+    
+    if last_month_rev > 0:
+        growth_rate_pct = round(((this_month_rev - last_month_rev) / last_month_rev) * 100, 1)
+    elif this_month_rev > 0:
+        growth_rate_pct = 100.0
+    else:
+        growth_rate_pct = 0.0
+
     return SaaSAnalyticsResponse(
         mrr=mrr,
         arr=arr,
-        total_customers=max(total_customers, 12),
-        active_subscriptions=max(active_subscriptions, 8),
-        demo_workspaces=max(demo_workspaces, 15),
-        total_revenue=total_revenue if total_revenue > 0 else 299940.0,
-        growth_rate_pct=34.5
+        total_customers=total_customers,
+        active_subscriptions=active_subscriptions,
+        demo_workspaces=demo_workspaces,
+        total_revenue=total_revenue,
+        growth_rate_pct=growth_rate_pct
     )
 
 @router.get("/organizations")
@@ -55,6 +77,16 @@ def list_organizations(
     for org in orgs:
         sub = db.query(Subscription).filter(Subscription.organization_id == org.id).first()
         admin_user = db.query(User).filter(User.firm_name == org.name, User.role == UserRole.ADMIN).first()
+        
+        plan_code = getattr(sub, 'plan_code', None) if sub else None
+        max_users = getattr(sub, 'max_users', None) if sub else None
+        
+        if sub and not plan_code and getattr(sub, 'plan_id', None):
+            plan = db.query(Plan).filter(Plan.id == sub.plan_id).first()
+            if plan:
+                plan_code = plan.code
+                max_users = plan.max_users
+                
         result.append({
             "id": org.id,
             "name": org.name,
@@ -65,9 +97,9 @@ def list_organizations(
             "admin_name": admin_user.name if admin_user else "System Admin",
             "admin_email": admin_user.email if admin_user else "N/A",
             "subscription_status": sub.status if sub else "Trial",
-            "plan_code": sub.plan_code if sub else "professional",
-            "seats_limit": sub.max_users if sub else 15,
-            "created_at": org.created_at.strftime("%Y-%m-%d")
+            "plan_code": plan_code or "professional",
+            "seats_limit": max_users or 15,
+            "created_at": org.created_at.strftime("%Y-%m-%d") if getattr(org, 'created_at', None) else "2026-01-01"
         })
     return result
 
@@ -79,15 +111,30 @@ def list_tenant_admins(
     admins = db.query(User).filter(User.role.in_([UserRole.ADMIN, UserRole.SUPERADMIN])).all()
     result = []
     for u in admins:
-        org = db.query(Organization).filter(Organization.name == u.firm_name).first()
+        org = None
+        if u.firm_name:
+            org = db.query(Organization).filter(Organization.name == u.firm_name).first()
+        if not org and u.organization_id:
+            org = db.query(Organization).filter(Organization.id == u.organization_id).first()
+            
         sub = db.query(Subscription).filter(Subscription.organization_id == org.id).first() if org else None
         
-        # Calculate team seats used & leads count
-        team_seats_used = db.query(User).filter(User.firm_name == u.firm_name).count()
+        team_seats_used = db.query(User).filter(User.firm_name == u.firm_name).count() if u.firm_name else 1
         total_leads = db.query(Lead).count() if u.role == UserRole.ADMIN else 0
         
-        seats_limit = sub.max_users if sub else 15
-        max_leads = sub.max_leads if sub else 5000
+        plan_code = getattr(sub, 'plan_code', None) if sub else None
+        seats_limit = getattr(sub, 'max_users', None) if sub else None
+        max_leads = getattr(sub, 'max_leads', None) if sub else None
+        
+        if sub and not plan_code and getattr(sub, 'plan_id', None):
+            plan = db.query(Plan).filter(Plan.id == sub.plan_id).first()
+            if plan:
+                plan_code = plan.code
+                seats_limit = plan.max_users
+                max_leads = plan.max_leads
+
+        seats_limit = seats_limit or 15
+        max_leads = max_leads or 5000
         has_reached_quota = team_seats_used >= seats_limit
         
         result.append({
@@ -98,13 +145,13 @@ def list_tenant_admins(
             "firm_name": u.firm_name or "REALVION Platform",
             "role": u.role.value if hasattr(u.role, 'value') else u.role,
             "is_active": u.is_active,
-            "plan_name": sub.plan_code.upper() if sub else "ENTERPRISE",
+            "plan_name": (plan_code or "ENTERPRISE").upper(),
             "team_seats_used": team_seats_used,
             "seats_limit": seats_limit,
             "total_leads": total_leads,
             "max_leads": max_leads,
             "has_reached_quota": has_reached_quota,
-            "created_at": u.created_at.strftime("%Y-%m-%d") if u.created_at else "2026-01-01"
+            "created_at": u.created_at.strftime("%Y-%m-%d") if getattr(u, 'created_at', None) else "2026-01-01"
         })
     return result
 
@@ -123,8 +170,15 @@ def create_offline_tenant(
         raise HTTPException(status_code=400, detail="An account with this email address already exists.")
 
     # 1. Create Organization
+    now = datetime.now(timezone.utc)
+    base_slug = req.company_name.lower().strip().replace(" ", "-")
+    import re
+    cleaned_slug = re.sub(r'[^a-z0-9\-]', '', base_slug) or "org"
+    unique_slug = f"{cleaned_slug}-{int(now.timestamp())}"
+    
     org = Organization(
         name=req.company_name,
+        slug=unique_slug,
         company_type=req.company_type,
         city=req.city,
         state=req.state,
@@ -138,7 +192,6 @@ def create_offline_tenant(
     workspace = Workspace(
         organization_id=org.id,
         name=f"{req.company_name} Main Workspace",
-        slug=req.company_name.lower().replace(" ", "-"),
         is_demo=False
     )
     db.add(workspace)
@@ -177,8 +230,10 @@ def create_offline_tenant(
     # 5. Log Payment record (Offline Cash / Manual Sales Override)
     pay = Payment(
         organization_id=org.id,
-        order_id=f"order_offline_{now.strftime('%Y%m%d%H%M%S')}",
-        payment_id=f"pay_offline_{now.strftime('%Y%m%d%H%M%S')}",
+        workspace_id=workspace.id,
+        subscription_id=sub.id,
+        razorpay_order_id=f"order_offline_{int(now.timestamp())}",
+        razorpay_payment_id=f"pay_offline_{int(now.timestamp())}",
         amount=4999.0 if req.plan_code == "professional" else 14999.0,
         platform_fee=499.0,
         gst_amount=989.64,
@@ -375,8 +430,8 @@ def get_recent_payments(
         ).first() if p.organization_id else None
         result.append({
             "id": p.id,
-            "payment_id": p.payment_id or "N/A",
-            "order_id": p.order_id or "N/A",
+            "payment_id": getattr(p, 'razorpay_payment_id', None) or f"PAY-{p.id}",
+            "order_id": getattr(p, 'razorpay_order_id', None) or f"ORD-{p.id}",
             "org_name": org.name if org else "Unknown",
             "admin_name": adm.name if adm else "N/A",
             "admin_email": adm.email if adm else "N/A",

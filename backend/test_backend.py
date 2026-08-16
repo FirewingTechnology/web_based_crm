@@ -21,6 +21,20 @@ def test_admin_login():
     assert "access_token" in data
     assert "refresh_token" in data
 
+def test_superadmin_login():
+    res = client.post("/api/v1/auth/login", json={"email": "superadmin@realvion.com", "password": "SuperAdmin@123"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
+
+    headers = {"Authorization": f"Bearer {data['access_token']}"}
+    me_res = client.get("/api/v1/auth/me", headers=headers)
+    assert me_res.status_code == 200
+    user = me_res.json()
+    assert user["email"] == "superadmin@realvion.com"
+    assert user["role"] == "Super Admin"
+
 def test_get_me():
     login_res = client.post("/api/v1/auth/login", json={"email": "admin@brokeros.com", "password": "Admin@123"})
     token = login_res.json()["access_token"]
@@ -257,6 +271,7 @@ def test_validate_registration_precheck():
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
+    test_superadmin_login()
     test_get_me()
     test_saas_otp_and_demo_register()
     test_get_dashboard_stats()

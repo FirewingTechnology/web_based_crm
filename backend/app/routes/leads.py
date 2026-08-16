@@ -166,6 +166,13 @@ async def import_leads_csv(
 
     return {"message": f"Successfully imported {imported_count} leads", "count": imported_count}
 
+@router.get("/my-leads", response_model=list[LeadResponse])
+def get_my_leads(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return get_leads(my_leads_only=True, db=db, current_user=current_user)
+
 @router.get("/{lead_id}", response_model=LeadResponse)
 def get_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     query = db.query(Lead).filter(Lead.id == lead_id, Lead.is_deleted == False)
@@ -278,6 +285,7 @@ def update_lead(
                 builder_rate = builder.commission_rate if builder else 3.5
 
                 booking = Booking(
+                    organization_id=lead.organization_id or current_user.organization_id,
                     booking_number=booking_num,
                     lead_id=lead.id,
                     project_id=project.id,
@@ -299,6 +307,7 @@ def update_lead(
                 company_margin = builder_comm - exec_comm
 
                 commission = Commission(
+                    organization_id=lead.organization_id or current_user.organization_id,
                     booking_id=booking.id,
                     builder_commission_rate=builder_rate,
                     builder_commission_amount=builder_comm,

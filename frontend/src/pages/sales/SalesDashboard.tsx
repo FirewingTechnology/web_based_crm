@@ -85,8 +85,8 @@ export const SalesDashboard: React.FC = () => {
         />
         <StatCard
           title="Monthly Target Progress"
-          value={`${targetPct}%`}
-          subtext={`₹${myTarget?.achieved_amount || 0}L of ₹${myTarget?.target_amount || 300}L`}
+          value={myTarget?.target_amount && myTarget.target_amount > 0 ? `${targetPct}%` : 'Not Set'}
+          subtext={myTarget?.target_amount && myTarget.target_amount > 0 ? `₹${myTarget.achieved_amount}L of ₹${myTarget.target_amount}L` : 'Awaiting Admin Target'}
           icon={<Target className="h-6 w-6" />}
           color="amber"
         />
@@ -94,24 +94,54 @@ export const SalesDashboard: React.FC = () => {
 
       {/* Target Progress Card */}
       {myTarget && (
-        <Card className="space-y-3 bg-gradient-to-r from-blue-950/40 to-slate-900 border-blue-500/20">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-amber-400" /> Current Month Target ({myTarget.month_year})
-            </h3>
-            <Badge variant="amber">{targetPct}% Goal Reached</Badge>
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#0e0e0e] to-slate-900 border border-amber-500/30 shadow-lg space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <Trophy className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-white tracking-wide flex items-center gap-2">
+                  Current Month Target <span className="text-xs font-normal text-slate-400">({myTarget.month_year})</span>
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  {myTarget.target_amount > 0 
+                    ? `Goal: ₹${myTarget.target_amount} Lakhs (${myTarget.target_bookings} Deals)` 
+                    : 'Target limit is not assigned by admin yet'}
+                </p>
+              </div>
+            </div>
+            
+            <div>
+              {myTarget.target_amount > 0 ? (
+                <span className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                  {targetPct}% Goal Reached
+                </span>
+              ) : (
+                <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800/80 text-slate-400 border border-white/10 flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-slate-500"></span>
+                  Target Not Set (₹0 Goal)
+                </span>
+              )}
+            </div>
           </div>
-          <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-500"
-              style={{ width: `${Math.min(targetPct, 100)}%` }}
-            />
+
+          {/* Progress bar */}
+          <div className="space-y-1.5 pt-1">
+            <div className="w-full bg-slate-800/80 h-2.5 rounded-full overflow-hidden p-0.5 border border-white/5">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-emerald-400 rounded-full transition-all duration-500 shadow-sm shadow-amber-500/50"
+                style={{ width: `${myTarget.target_amount > 0 ? Math.min(targetPct, 100) : 0}%` }}
+              />
+            </div>
+            
+            <div className="flex justify-between text-[11px] font-medium text-slate-400">
+              <span>Closed: <strong className="text-emerald-400 font-bold">₹{myTarget.achieved_amount} Lakhs</strong> ({myTarget.achieved_bookings} Deals)</span>
+              <span>Target: <strong className="text-white font-bold">{myTarget.target_amount > 0 ? `₹${myTarget.target_amount} Lakhs (${myTarget.target_bookings} Deals)` : 'Not Set by Admin'}</strong></span>
+            </div>
           </div>
-          <div className="flex justify-between text-xs text-slate-400 font-medium">
-            <span>Closed: ₹{myTarget.achieved_amount} Lakhs ({myTarget.achieved_bookings} Deals)</span>
-            <span>Goal: ₹{myTarget.target_amount} Lakhs ({myTarget.target_bookings} Deals)</span>
-          </div>
-        </Card>
+        </div>
       )}
 
       {/* Grid: My Leads & Today's Followups */}

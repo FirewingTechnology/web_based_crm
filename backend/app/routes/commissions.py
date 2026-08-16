@@ -17,8 +17,9 @@ def get_commissions(
 ):
     query = db.query(Commission).join(Booking).filter(Commission.is_deleted == False, Booking.is_deleted == False)
 
+    from sqlalchemy import or_
     if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
-        query = query.filter(Commission.organization_id == current_user.organization_id)
+        query = query.filter(or_(Commission.organization_id == current_user.organization_id, Booking.organization_id == current_user.organization_id))
 
 
     if current_user.role == UserRole.SALES_EXECUTIVE:
