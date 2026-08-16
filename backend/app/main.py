@@ -17,9 +17,8 @@ if SENTRY_DSN:
         integrations=[FastApiIntegration()]
     )
 
-# Gate auto table creation — Alembic migrations are canonical for production PostgreSQL
-if os.getenv("ENABLE_AUTO_CREATE_ALL", "false").lower() == "true":
-    Base.metadata.create_all(bind=engine)
+# Ensure database tables exist (idempotent in SQLAlchemy)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -53,8 +52,7 @@ def trigger_sentry_test_error(current_user=Depends(RequireRole([UserRole.SUPERAD
 @app.on_event("startup")
 def startup_db_seed():
 
-    if os.getenv("ENABLE_AUTO_CREATE_ALL", "false").lower() == "true":
-        Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     try:
         from app.database import SessionLocal
