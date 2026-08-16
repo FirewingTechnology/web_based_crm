@@ -48,7 +48,13 @@ export const LoginPage: React.FC = () => {
 
 
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid email or password credentials');
+      if (err.response?.status >= 500) {
+        setError('Server error during authentication (500). Please try again or contact administrator.');
+      } else if (typeof err.response?.data?.detail === 'string') {
+        setError(err.response.data.detail);
+      } else {
+        setError('Invalid email or password credentials');
+      }
     } finally {
       setIsLoading(false);
     }
