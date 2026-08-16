@@ -1,6 +1,9 @@
 import os
 from pydantic_settings import BaseSettings
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_DB_PATH = os.path.join(BASE_DIR, "brokeros.db").replace("\\", "/")
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "REALVION - Real Estate Sales Operating System"
     API_V1_STR: str = "/api/v1"
@@ -11,7 +14,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 24 hours
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7 # 7 days
     
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./brokeros.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}")
     
     RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "")
     RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "")
