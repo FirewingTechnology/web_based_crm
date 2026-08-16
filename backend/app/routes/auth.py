@@ -51,7 +51,8 @@ async def login(request: Request, db: Session = Depends(get_db)):
             detail="Account is deactivated. Contact Administrator."
         )
 
-    token_data = {"user_id": user.id, "email": user.email, "role": user.role.value}
+    role_str = user.role.value if hasattr(user.role, 'value') else str(user.role)
+    token_data = {"user_id": user.id, "email": user.email, "role": role_str}
     access_token = create_access_token(data=token_data)
     refresh_token = create_refresh_token(data=token_data)
 
@@ -74,7 +75,8 @@ def refresh_token(request: RefreshRequest, db: Session = Depends(get_db)):
             detail="User no longer active"
         )
 
-    token_data = {"user_id": user.id, "email": user.email, "role": user.role.value}
+    role_str = user.role.value if hasattr(user.role, 'value') else str(user.role)
+    token_data = {"user_id": user.id, "email": user.email, "role": role_str}
     new_access_token = create_access_token(data=token_data)
     new_refresh_token = create_refresh_token(data=token_data)
 

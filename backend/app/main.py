@@ -27,6 +27,20 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs"
 )
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import traceback
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = str(exc) or exc.__class__.__name__
+    print(f"[UNHANDLED EXCEPTION] {request.method} {request.url.path}: {error_msg}")
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {error_msg}"}
+    )
+
 from app.middleware.auth_middleware import RequireRole
 from app.models.user import UserRole
 
