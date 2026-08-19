@@ -337,6 +337,33 @@ def test_create_and_fetch_broker():
     assert get_res.status_code == 200
     assert get_res.json()["contact_person"] == "Ramesh Kumar Sharma"
 
+def test_booking_lead_budget_sync():
+    login_res = client.post("/api/v1/auth/login", json={"email": "admin@brokeros.com", "password": "Admin@123"})
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Create a lead with budget 20L - 30L
+    lead_res = client.post("/api/v1/leads", json={
+        "name": "Kishan Kumar Budget Test",
+        "phone": "9811122233",
+        "budget_min": 20.0,
+        "budget_max": 30.0,
+        "preferred_location": "Pune",
+        "preferred_configuration": "1 BHK",
+        "status": "Booked"
+    }, headers=headers)
+    assert lead_res.status_code == 201
+    lead_data = lead_res.json()
+    lead_id = lead_data["id"]
+
+    # 2. Query bookings -> The auto-synced booking MUST have deal_value = 3,000,000 (30 Lakhs), NOT 1.5 Cr!
+    bookings_res = client.get("/api/v1/bookings", headers=headers)
+    assert bookings_res.status_code == 200
+    kishan_booking = next((b for b in bookings_res.json() if b["lead_id"] == lead_id), None)
+    assert kishan_booking is not None
+    assert kishan_booking["total_deal_value"] == 3000000.0 # 30 Lakhs in INR
+    assert kishan_booking["booking_amount"] == 150000.0 # 5% token (1.5 Lakhs)
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
@@ -350,5 +377,6 @@ if __name__ == "__main__":
     test_validate_registration_precheck()
     test_create_and_fetch_project()
     test_create_and_fetch_broker()
+    test_booking_lead_budget_sync()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
 

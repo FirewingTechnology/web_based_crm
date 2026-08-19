@@ -46,15 +46,35 @@ def get_bookings(
     for lead in booked_leads:
         existing = db.query(Booking).filter(Booking.lead_id == lead.id, Booking.is_deleted == False).first()
         if not existing:
-            project = db.query(Project).filter(Project.is_deleted == False).first()
+            project = None
+            if lead.preferred_project_id:
+                project = db.query(Project).filter(Project.id == lead.preferred_project_id, Project.is_deleted == False).first()
+            if not project:
+                p_query = db.query(Project).filter(Project.is_deleted == False)
+                if current_user.organization_id:
+                    p_query = p_query.filter(
+                        (Project.organization_id == current_user.organization_id) | (Project.organization_id.is_(None))
+                    )
+                project = p_query.first()
+
             if project:
                 builder = project.builder
-                deal_val = lead.budget_max or lead.budget_min or 15000000.0
-                if deal_val < 100000:
-                    deal_val = 15000000.0
-                booking_amt = deal_val * 0.05
+                raw_budget = lead.budget_max or lead.budget_min
+                if raw_budget:
+                    # Convert budget from Lakhs to INR (e.g. 30 -> 30,00,000 INR)
+                    deal_val = float(raw_budget * 100000.0) if raw_budget <= 1000.0 else float(raw_budget)
+                else:
+                    # Fallback to project pricing in Lakhs converted to INR
+                    proj_lakhs = project.max_price or project.min_price or 50.0
+                    deal_val = float(proj_lakhs * 100000.0) if proj_lakhs <= 1000.0 else float(proj_lakhs)
+
+                booking_amt = round(deal_val * 0.05) # 5% token booking amount
                 booking_num = f"BK-{datetime.now().year}-{random.randint(1000, 9999)}"
                 exec_id = lead.assigned_to_id or current_user.id
+
+                unit_label = f"Unit {random.randint(101, 1509)}"
+                if lead.preferred_configuration:
+                    unit_label = f"{lead.preferred_configuration} - {unit_label}"
 
                 booking = Booking(
                     organization_id=lead.organization_id or current_user.organization_id,
@@ -63,11 +83,11 @@ def get_bookings(
                     project_id=project.id,
                     builder_id=builder.id,
                     assigned_executive_id=exec_id,
-                    unit_number=f"Tower B - {random.randint(101, 1509)}",
+                    unit_number=unit_label,
                     booking_amount=booking_amt,
                     total_deal_value=deal_val,
                     status=BookingStatus.CONFIRMED,
-                    notes=f"Auto-created booking for lead '{lead.name}'"
+                    notes=f"Auto-created booking matched with customer budget (₹{deal_val/100000:.2f} Lakhs)"
                 )
                 db.add(booking)
                 db.flush()
@@ -141,6 +161,15 @@ def create_booking(
 
     builder = project.builder
 
+    # Auto-normalize deal value & booking amount if entered in Lakhs (e.g. 30 -> 30,00,000 INR)
+    deal_val = float(booking_in.total_deal_value)
+    if deal_val <= 1000.0:
+        deal_val = deal_val * 100000.0
+
+    booking_amt = float(booking_in.booking_amount)
+    if booking_amt <= 100.0:
+        booking_amt = booking_amt * 100000.0
+
     # Generate Booking Number e.g. BK-2026-8941
     booking_num = f"BK-{datetime.now().year}-{random.randint(1000, 9999)}"
 
@@ -153,8 +182,8 @@ def create_booking(
         assigned_executive_id=booking_in.assigned_executive_id,
         broker_id=booking_in.broker_id,
         unit_number=booking_in.unit_number,
-        booking_amount=booking_in.booking_amount,
-        total_deal_value=booking_in.total_deal_value,
+        booking_amount=booking_amt,
+        total_deal_value=deal_val,
         status=BookingStatus.CONFIRMED,
         notes=booking_in.notes
     )
@@ -166,10 +195,10 @@ def create_booking(
 
     # Calculate Commission Split
     builder_rate = builder.commission_rate if builder else 3.0
-    builder_comm = booking_in.total_deal_value * (builder_rate / 100.0)
+    builder_comm = deal_val * (builder_rate / 100.0)
 
     exec_rate = 0.5
-    exec_comm = booking_in.total_deal_value * (exec_rate / 100.0)
+    exec_comm = deal_val * (exec_rate / 100.0)
 
     broker_rate = 0.0
     broker_comm = 0.0
@@ -177,9 +206,9 @@ def create_booking(
         broker_prof = db.query(BrokerProfile).filter(BrokerProfile.id == booking_in.broker_id).first()
         if broker_prof:
             broker_rate = broker_prof.commission_rate
-            broker_comm = booking_in.total_deal_value * (broker_rate / 100.0)
+            broker_comm = deal_val * (broker_rate / 100.0)
             broker_prof.total_deals += 1
-            broker_prof.total_revenue_generated += booking_in.total_deal_value
+            broker_prof.total_revenue_generated += deal_val
 
     company_margin = builder_comm - exec_comm - broker_comm
 
