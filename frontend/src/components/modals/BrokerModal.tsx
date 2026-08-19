@@ -57,18 +57,31 @@ export const BrokerModal: React.FC<BrokerModalProps> = ({
     }
   }, [initialBroker, isOpen, defaultSingleMode, reset]);
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const onFormSubmit = async (data: BrokerCreateInput) => {
-    const payload = { ...data };
-    if (brokerCategory === 'single') {
-      if (!payload.firm_name && payload.contact_person) {
-        payload.firm_name = `${payload.contact_person} (Independent Broker)`;
-      } else if (!payload.contact_person && payload.firm_name) {
-        payload.contact_person = payload.firm_name;
-        payload.firm_name = `${payload.firm_name} (Independent Broker)`;
+    setSubmitError(null);
+    try {
+      const payload = {
+        ...data,
+        commission_rate: Number(data.commission_rate) || 1.5,
+      };
+      if (brokerCategory === 'single') {
+        if (!payload.firm_name && payload.contact_person) {
+          payload.firm_name = `${payload.contact_person} (Independent Broker)`;
+        } else if (!payload.contact_person && payload.firm_name) {
+          payload.contact_person = payload.firm_name;
+          payload.firm_name = `${payload.firm_name} (Independent Broker)`;
+        }
       }
+      await onSubmit(payload);
+      onClose();
+    } catch (err: any) {
+      console.error('Broker submit error:', err);
+      const detail = err.response?.data?.detail;
+      const msg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ') : err.message || 'Failed to save broker. Please check required fields.');
+      setSubmitError(msg);
     }
-    await onSubmit(payload);
-    onClose();
   };
 
   return (
@@ -86,6 +99,12 @@ export const BrokerModal: React.FC<BrokerModalProps> = ({
       maxWidth="md"
     >
       <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        {submitError && (
+          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center justify-between">
+            <span>⚠️ {submitError}</span>
+            <button type="button" onClick={() => setSubmitError(null)} className="text-rose-400 hover:text-white font-bold ml-2">✕</button>
+          </div>
+        )}
         {/* Category Radio Toggle */}
         <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
           <span className="font-semibold text-slate-300">Broker Category:</span>

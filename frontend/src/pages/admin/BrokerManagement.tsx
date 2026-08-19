@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, UserCheck, Phone, Mail, Award, Coins, Edit, Trash2 } from 'lucide-react';
+import { Plus, UserCheck, Phone, Mail, Award, Coins, Edit, Trash2, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { DataTable } from '../../components/ui/DataTable';
@@ -12,13 +12,21 @@ export const BrokerManagement: React.FC = () => {
   const [brokers, setBrokers] = useState<BrokerProfile[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBroker, setEditingBroker] = useState<BrokerProfile | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => {
+      setNotification((curr) => (curr?.message === message ? null : curr));
+    }, 5000);
+  };
 
   const fetchBrokers = async () => {
     try {
       const data = await brokersApi.getBrokers();
       setBrokers(data);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch brokers:', err);
     }
   };
 
@@ -29,16 +37,24 @@ export const BrokerManagement: React.FC = () => {
   const handleCreateOrUpdateBroker = async (data: BrokerCreateInput) => {
     if (editingBroker) {
       await brokersApi.updateBroker(editingBroker.id, data);
+      showNotification('success', `Broker "${data.firm_name || data.contact_person}" updated successfully!`);
     } else {
       await brokersApi.createBroker(data);
+      showNotification('success', `Broker "${data.firm_name || data.contact_person}" registered successfully!`);
     }
-    fetchBrokers();
+    await fetchBrokers();
   };
 
   const handleDeleteBroker = async (id: number) => {
-    if (confirm('Delete this broker firm?')) {
-      await brokersApi.deleteBroker(id);
-      fetchBrokers();
+    const b = brokers.find((x) => x.id === id);
+    if (confirm(`Delete broker "${b?.firm_name || b?.contact_person || 'this broker'}"?`)) {
+      try {
+        await brokersApi.deleteBroker(id);
+        showNotification('success', `Broker "${b?.firm_name || b?.contact_person || ''}" removed successfully.`);
+        await fetchBrokers();
+      } catch (err: any) {
+        showNotification('error', err.response?.data?.detail || 'Failed to delete broker.');
+      }
     }
   };
 
@@ -121,6 +137,32 @@ export const BrokerManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification Banner */}
+      {notification && (
+        <div
+          className={`p-4 rounded-xl border flex items-center justify-between text-sm shadow-lg transition-all duration-300 ${
+            notification.type === 'success'
+              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-200'
+              : 'bg-rose-950/70 border-rose-500/40 text-rose-200'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {notification.type === 'success' ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+            )}
+            <span className="font-medium">{notification.message}</span>
+          </div>
+          <button
+            onClick={() => setNotification(null)}
+            className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">External Broker Network</h1>

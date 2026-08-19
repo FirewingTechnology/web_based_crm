@@ -305,6 +305,38 @@ def test_create_and_fetch_project():
     assert get_res.status_code == 200
     assert get_res.json()["name"] == "Emerald Heights Luxury Residency"
 
+def test_create_and_fetch_broker():
+    login_res = client.post("/api/v1/auth/login", json={"email": "admin@brokeros.com", "password": "Admin@123"})
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Create a single independent broker
+    create_single_res = client.post("/api/v1/brokers", json={
+        "firm_name": "",
+        "contact_person": "Ramesh Kumar Sharma",
+        "phone": "+91 98765 12345",
+        "email": "ramesh.broker@example.com",
+        "password": "Broker@123",
+        "address": "Sector 62, Noida",
+        "commission_rate": 2.0
+    }, headers=headers)
+    assert create_single_res.status_code == 201
+    single_data = create_single_res.json()
+    assert single_data["contact_person"] == "Ramesh Kumar Sharma"
+    assert "Independent Broker" in single_data["firm_name"]
+    broker_id = single_data["id"]
+
+    # 2. Get brokers list -> Should contain Ramesh Kumar Sharma
+    list_res = client.get("/api/v1/brokers", headers=headers)
+    assert list_res.status_code == 200
+    contacts = [b["contact_person"] for b in list_res.json()]
+    assert "Ramesh Kumar Sharma" in contacts
+
+    # 3. Get single broker
+    get_res = client.get(f"/api/v1/brokers/{broker_id}", headers=headers)
+    assert get_res.status_code == 200
+    assert get_res.json()["contact_person"] == "Ramesh Kumar Sharma"
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
@@ -317,5 +349,6 @@ if __name__ == "__main__":
     test_sales_executive_inherits_admin_trial()
     test_validate_registration_precheck()
     test_create_and_fetch_project()
+    test_create_and_fetch_broker()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
 
