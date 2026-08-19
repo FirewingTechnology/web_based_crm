@@ -19,7 +19,9 @@ def get_projects(
 ):
     query = db.query(Project).filter(Project.is_deleted == False)
     if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
-        query = query.filter(Project.organization_id == current_user.organization_id)
+        query = query.filter(
+            (Project.organization_id == current_user.organization_id) | (Project.organization_id.is_(None))
+        )
     if builder_id:
         query = query.filter(Project.builder_id == builder_id)
     if status:
@@ -41,7 +43,9 @@ def get_projects(
 def get_project(project_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     query = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False)
     if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
-        query = query.filter(Project.organization_id == current_user.organization_id)
+        query = query.filter(
+            (Project.organization_id == current_user.organization_id) | (Project.organization_id.is_(None))
+        )
     project = query.first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -59,15 +63,21 @@ def create_project(
     builder = None
     if project_in.new_builder_name and project_in.new_builder_name.strip():
         b_name = project_in.new_builder_name.strip()
-        builder = db.query(Builder).filter(Builder.name.ilike(b_name), Builder.is_deleted == False).first()
+        builder_query = db.query(Builder).filter(Builder.name.ilike(b_name), Builder.is_deleted == False)
+        if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+            builder_query = builder_query.filter(
+                (Builder.organization_id == current_user.organization_id) | (Builder.organization_id.is_(None))
+            )
+        builder = builder_query.first()
         if not builder:
             builder = Builder(
+                organization_id=current_user.organization_id,
                 name=b_name,
                 company=b_name,
                 contact_person="Admin",
                 email=f"info@{b_name.lower().replace(' ', '')}.com",
                 phone="+91 98100 00000",
-                address="Noida, Uttar Pradesh",
+                address="Corporate Office",
                 commission_rate=3.5,
                 notes="Registered via Project Creation"
             )
@@ -77,15 +87,21 @@ def create_project(
     if not builder and project_in.builder_id:
         builder = db.query(Builder).filter(Builder.id == project_in.builder_id, Builder.is_deleted == False).first()
     if not builder:
-        builder = db.query(Builder).filter(Builder.is_deleted == False).first()
+        builder_query = db.query(Builder).filter(Builder.is_deleted == False)
+        if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+            builder_query = builder_query.filter(
+                (Builder.organization_id == current_user.organization_id) | (Builder.organization_id.is_(None))
+            )
+        builder = builder_query.first()
     if not builder:
         builder = Builder(
+            organization_id=current_user.organization_id,
             name="General Real Estate Developer",
             company="General Real Estate Developer",
             contact_person="Admin",
             email="developer@brokeros.com",
             phone="+91 98100 00000",
-            address="Noida, Uttar Pradesh",
+            address="Corporate Office",
             commission_rate=3.5,
             notes="Default Developer"
         )
@@ -94,6 +110,7 @@ def create_project(
 
     project_data = project_in.model_dump(exclude={"new_builder_name"})
     project_data["builder_id"] = builder.id
+    project_data["organization_id"] = current_user.organization_id
     project = Project(**project_data)
     db.add(project)
     db.commit()
@@ -110,7 +127,12 @@ def update_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(RequireRole([UserRole.ADMIN, UserRole.MANAGER]))
 ):
-    project = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False).first()
+    query = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(
+            (Project.organization_id == current_user.organization_id) | (Project.organization_id.is_(None))
+        )
+    project = query.first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
@@ -129,7 +151,12 @@ def delete_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(RequireRole([UserRole.ADMIN]))
 ):
-    project = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False).first()
+    query = db.query(Project).filter(Project.id == project_id, Project.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(
+            (Project.organization_id == current_user.organization_id) | (Project.organization_id.is_(None))
+        )
+    project = query.first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 

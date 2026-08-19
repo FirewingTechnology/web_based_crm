@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, Building2, Phone, Mail, MapPin, Edit, Trash2, FolderKanban } from 'lucide-react';
+import { Plus, Building2, Phone, Mail, MapPin, Edit, Trash2, FolderKanban, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
@@ -13,13 +13,21 @@ export const BuilderManagement: React.FC = () => {
   const [builders, setBuilders] = useState<Builder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBuilder, setEditingBuilder] = useState<Builder | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => {
+      setNotification((curr) => (curr?.message === message ? null : curr));
+    }, 5000);
+  };
 
   const fetchBuilders = async () => {
     try {
       const data = await buildersApi.getBuilders();
       setBuilders(data);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch builders:', err);
     }
   };
 
@@ -30,16 +38,24 @@ export const BuilderManagement: React.FC = () => {
   const handleCreateOrUpdateBuilder = async (data: BuilderCreateInput) => {
     if (editingBuilder) {
       await buildersApi.updateBuilder(editingBuilder.id, data);
+      showNotification('success', `Builder "${data.name}" updated successfully!`);
     } else {
       await buildersApi.createBuilder(data);
+      showNotification('success', `Builder "${data.name}" added successfully!`);
     }
-    fetchBuilders();
+    await fetchBuilders();
   };
 
   const handleDeleteBuilder = async (id: number) => {
-    if (confirm('Delete this builder partner?')) {
-      await buildersApi.deleteBuilder(id);
-      fetchBuilders();
+    const b = builders.find((x) => x.id === id);
+    if (confirm(`Delete builder "${b?.name || 'this builder'}"?`)) {
+      try {
+        await buildersApi.deleteBuilder(id);
+        showNotification('success', `Builder "${b?.name || ''}" removed successfully.`);
+        await fetchBuilders();
+      } catch (err: any) {
+        showNotification('error', err.response?.data?.detail || 'Failed to delete builder.');
+      }
     }
   };
 
@@ -115,6 +131,32 @@ export const BuilderManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification Banner */}
+      {notification && (
+        <div
+          className={`p-4 rounded-xl border flex items-center justify-between text-sm shadow-lg transition-all duration-300 ${
+            notification.type === 'success'
+              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-200'
+              : 'bg-rose-950/70 border-rose-500/40 text-rose-200'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {notification.type === 'success' ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+            )}
+            <span className="font-medium">{notification.message}</span>
+          </div>
+          <button
+            onClick={() => setNotification(null)}
+            className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

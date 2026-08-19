@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, FolderKanban, MapPin, ShieldCheck, Download, Edit, Trash2, Building2 } from 'lucide-react';
+import { Plus, FolderKanban, MapPin, ShieldCheck, Download, Edit, Trash2, Building2, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
@@ -16,34 +16,60 @@ export const ProjectManagement: React.FC = () => {
   const [builders, setBuilders] = useState<Builder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => {
+      setNotification((curr) => (curr?.message === message ? null : curr));
+    }, 5000);
+  };
 
   const fetchProjects = async () => {
     try {
       const data = await projectsApi.getProjects();
       setProjects(data);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch projects:', err);
+    }
+  };
+
+  const fetchBuilders = async () => {
+    try {
+      const data = await buildersApi.getBuilders();
+      setBuilders(data);
+    } catch (err) {
+      console.error('Failed to fetch builders:', err);
     }
   };
 
   useEffect(() => {
     fetchProjects();
-    buildersApi.getBuilders().then(setBuilders).catch(console.error);
+    fetchBuilders();
   }, []);
 
   const handleCreateOrUpdateProject = async (data: ProjectCreateInput) => {
     if (editingProject) {
       await projectsApi.updateProject(editingProject.id, data);
+      showNotification('success', `Project "${data.name}" updated successfully!`);
     } else {
       await projectsApi.createProject(data);
+      showNotification('success', `Project "${data.name}" created and published successfully!`);
     }
-    fetchProjects();
+    await fetchProjects();
+    await fetchBuilders();
   };
 
   const handleDeleteProject = async (id: number) => {
-    if (confirm('Delete this project?')) {
-      await projectsApi.deleteProject(id);
-      fetchProjects();
+    const proj = projects.find((p) => p.id === id);
+    if (confirm(`Delete project "${proj?.name || 'this project'}"?`)) {
+      try {
+        await projectsApi.deleteProject(id);
+        showNotification('success', `Project "${proj?.name || ''}" removed successfully.`);
+        await fetchProjects();
+      } catch (err: any) {
+        showNotification('error', err.response?.data?.detail || 'Failed to delete project.');
+      }
     }
   };
 
@@ -135,6 +161,32 @@ export const ProjectManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification Banner */}
+      {notification && (
+        <div
+          className={`p-4 rounded-xl border flex items-center justify-between text-sm shadow-lg transition-all duration-300 ${
+            notification.type === 'success'
+              ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-200'
+              : 'bg-rose-950/70 border-rose-500/40 text-rose-200'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {notification.type === 'success' ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
+            )}
+            <span className="font-medium">{notification.message}</span>
+          </div>
+          <button
+            onClick={() => setNotification(null)}
+            className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

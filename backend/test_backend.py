@@ -268,6 +268,43 @@ def test_validate_registration_precheck():
     })
     assert invalid_phone_res.status_code == 400
 
+def test_create_and_fetch_project():
+    login_res = client.post("/api/v1/auth/login", json={"email": "admin@brokeros.com", "password": "Admin@123"})
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Create new project with a new builder
+    create_res = client.post("/api/v1/projects", json={
+        "name": "Emerald Heights Luxury Residency",
+        "new_builder_name": "Apex Skyline Infrastructure",
+        "location": "Golf Course Road, Gurgaon",
+        "configuration": "3 & 4 BHK Apartments",
+        "min_price": 250.0,
+        "max_price": 450.0,
+        "possession_date": "Dec 2028",
+        "rera_id": "HARERAGGM2026",
+        "status": "New Launch",
+        "amenities": "Infinity Pool, Sky Lounge, EV Charging",
+        "brochure_url": "https://example.com/brochure.pdf",
+        "description": "Ultra luxury living overlooking the golf course."
+    }, headers=headers)
+    assert create_res.status_code == 201
+    proj_data = create_res.json()
+    assert proj_data["name"] == "Emerald Heights Luxury Residency"
+    assert proj_data["builder_name"] == "Apex Skyline Infrastructure"
+    proj_id = proj_data["id"]
+
+    # 2. Get list of projects as the Admin -> Must include newly created project
+    list_res = client.get("/api/v1/projects", headers=headers)
+    assert list_res.status_code == 200
+    names = [p["name"] for p in list_res.json()]
+    assert "Emerald Heights Luxury Residency" in names
+
+    # 3. Get single project
+    get_res = client.get(f"/api/v1/projects/{proj_id}", headers=headers)
+    assert get_res.status_code == 200
+    assert get_res.json()["name"] == "Emerald Heights Luxury Residency"
+
 if __name__ == "__main__":
     test_api_health()
     test_admin_login()
@@ -279,5 +316,6 @@ if __name__ == "__main__":
     test_trial_expiration_isolation()
     test_sales_executive_inherits_admin_trial()
     test_validate_registration_precheck()
+    test_create_and_fetch_project()
     print("ALL BACKEND TEST CLIENT CHECKS PASSED PERFECTLY!")
 

@@ -66,13 +66,25 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     }
   }, [initialProject, isOpen, builders, reset]);
 
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
+
   const onFormSubmit = async (data: ProjectCreateInput) => {
-    const payload = {
-      ...data,
-      builder_id: (data.builder_id && String(data.builder_id) !== 'NEW') ? Number(data.builder_id) : undefined,
-    };
-    await onSubmit(payload as any);
-    onClose();
+    setSubmitError(null);
+    try {
+      const payload = {
+        ...data,
+        builder_id: (data.builder_id && String(data.builder_id) !== 'NEW') ? Number(data.builder_id) : undefined,
+        min_price: Number(data.min_price),
+        max_price: Number(data.max_price),
+      };
+      await onSubmit(payload as any);
+      onClose();
+    } catch (err: any) {
+      console.error("Project submission error:", err);
+      const detail = err.response?.data?.detail;
+      const msg = typeof detail === 'string' ? detail : (Array.isArray(detail) ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ') : err.message || 'Failed to save project. Please check required fields.');
+      setSubmitError(msg);
+    }
   };
 
   const builderOptions = builders.map((b) => ({ label: b.name, value: b.id }));
@@ -93,6 +105,12 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        {submitError && (
+          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center justify-between">
+            <span>⚠️ {submitError}</span>
+            <button type="button" onClick={() => setSubmitError(null)} className="text-rose-400 hover:text-white font-bold ml-2">✕</button>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Input
             label="Project Name *"

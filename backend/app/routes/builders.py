@@ -16,7 +16,9 @@ def get_builders(
 ):
     query = db.query(Builder).filter(Builder.is_deleted == False)
     if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
-        query = query.filter(Builder.organization_id == current_user.organization_id)
+        query = query.filter(
+            (Builder.organization_id == current_user.organization_id) | (Builder.organization_id.is_(None))
+        )
 
     if search:
         query = query.filter(
@@ -35,7 +37,9 @@ def get_builders(
 def get_builder(builder_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     query = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False)
     if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
-        query = query.filter(Builder.organization_id == current_user.organization_id)
+        query = query.filter(
+            (Builder.organization_id == current_user.organization_id) | (Builder.organization_id.is_(None))
+        )
     builder = query.first()
     if not builder:
         raise HTTPException(status_code=404, detail="Builder not found")
@@ -67,7 +71,12 @@ def update_builder(
     db: Session = Depends(get_db),
     current_user: User = Depends(RequireRole([UserRole.ADMIN, UserRole.MANAGER]))
 ):
-    builder = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False).first()
+    query = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(
+            (Builder.organization_id == current_user.organization_id) | (Builder.organization_id.is_(None))
+        )
+    builder = query.first()
     if not builder:
         raise HTTPException(status_code=404, detail="Builder not found")
 
@@ -86,7 +95,12 @@ def delete_builder(
     db: Session = Depends(get_db),
     current_user: User = Depends(RequireRole([UserRole.ADMIN]))
 ):
-    builder = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False).first()
+    query = db.query(Builder).filter(Builder.id == builder_id, Builder.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(
+            (Builder.organization_id == current_user.organization_id) | (Builder.organization_id.is_(None))
+        )
+    builder = query.first()
     if not builder:
         raise HTTPException(status_code=404, detail="Builder not found")
 
