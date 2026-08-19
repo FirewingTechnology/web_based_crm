@@ -181,7 +181,7 @@ export const WebsiteFooter: React.FC = () => {
               { name: 'For Brokerage Firms', path: '/industries' },
               { name: 'For Developers', path: '/industries' },
               { name: 'Pricing & Plans', path: '/pricing' },
-              { name: 'System Security', path: '/faq' },
+              { name: 'System Security', path: '/security' },
             ].map((item, idx) => (
               <li key={idx}>
                 <button
@@ -267,9 +267,9 @@ export const WebsiteFooter: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-6">
-          <button onClick={() => navigate('/faq')} className="hover:text-white transition">Privacy Policy</button>
-          <button onClick={() => navigate('/faq')} className="hover:text-white transition">Terms of Service</button>
-          <button onClick={() => navigate('/faq')} className="hover:text-white transition">Security Specs</button>
+          <button onClick={() => navigate('/privacy')} className="hover:text-[#C8A45D] transition">Privacy Policy</button>
+          <button onClick={() => navigate('/terms')} className="hover:text-[#C8A45D] transition">Terms of Service</button>
+          <button onClick={() => navigate('/security')} className="hover:text-[#C8A45D] transition">Security Specs</button>
         </div>
       </div>
     </footer>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Building2, CheckCircle2, ShieldCheck, ArrowRight, Sparkles, AlertCircle, Clock, Zap, CreditCard, Lock, Check, ShieldAlert, LogIn, X, Loader2 } from 'lucide-react';
+import { setRegisteredUser } from '../utils/auth';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -109,6 +110,19 @@ export const RegisterPage: React.FC = () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Failed to create workspace.');
+
+      setRegisteredUser(
+        {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          companyName: formData.companyName,
+          companyType: formData.companyType,
+          registeredAt: new Date().toISOString()
+        },
+        data.access_token,
+        data.refresh_token
+      );
 
       const PORTAL_LOGIN_URL = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
         ? `http://localhost:5173/login?registered=true&email=${encodeURIComponent(formData.email)}`

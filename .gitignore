@@ -37,5 +37,6 @@ backend/*.db
 .DS_Store
 Thumbs.db
 
-# Raw Screen Recordings
-Screen Recording*.mp4
+# Raw Screen Recordings & Video Files
+*.mp4
+website/public/*.mp4

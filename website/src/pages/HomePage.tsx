@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -21,14 +21,28 @@ import {
   Zap,
   Users,
   Star,
-  Rocket
+  Rocket,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { VideoPlayer } from '../components/VideoPlayer';
+import { isUserRegistered } from '../utils/auth';
 
 export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) => {
   const navigate = useNavigate();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [registered, setRegistered] = useState<boolean>(isUserRegistered());
+
+  useEffect(() => {
+    const checkAuth = () => setRegistered(isUserRegistered());
+    window.addEventListener('brokeros_auth_changed', checkAuth);
+    window.addEventListener('storage', checkAuth);
+    return () => {
+      window.removeEventListener('brokeros_auth_changed', checkAuth);
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
@@ -36,7 +50,6 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
     const y = (clientY / window.innerHeight - 0.5) * 20;
     setMousePos({ x, y });
   };
-
 
   const questions = [
     "How many follow-ups were missed in your sales team this week?",
@@ -58,35 +71,36 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
     { name: "Dual-Harmonic Audio & Speech Alarms", realvion: true, legacy: false },
     { name: "Inline Builder & Developer Creation", realvion: true, legacy: false },
     { name: "Automated Self-Onboarding & Instant Demo", realvion: true, legacy: false },
-    { name: "Lakhs & Crores (INR) Revenue Metrics", realvion: true, legacy: false },
-    { name: "Role-Based Access Control (RBAC)", realvion: true, legacy: true },
-    { name: "CSV Data Export & Detailed Audits", realvion: true, legacy: false }
+    { name: "Native Lakhs/Crores Revenue Calculators", realvion: true, legacy: false },
+    { name: "Multi-Tier Role Scoping (Exec vs Admin)", realvion: true, legacy: true },
+    { name: "Zero Cloud Bloat (Sub-second load times)", realvion: true, legacy: false },
   ];
 
   const faqs = [
-    { q: "How fast can my real estate agency get started?", a: "You can register and launch your demo workspace in under 2 minutes. Instant 50 sample leads, builders, and analytics are preloaded automatically." },
-    { q: "Is payment mandatory to test the system?", a: "No! You get instant access to a full Demo Workspace to test all features. Payment is only required when you activate your live workspace via Razorpay." },
-    { q: "Does REALVION support multi-tenant team members?", a: "Yes. Admins can create Sales Executives, Managers, and Broker Partners with role-scoped permissions." },
-    { q: "How do the voice follow-up reminders work?", a: "REALVION checks your agenda every 8 seconds and synthesizes a 4-note sound chime followed by spoken voice alerts ('Reminder Alert! You have a scheduled call with Lead Name')." }
+    {
+      q: "Why is REALVION different from Salesforce, Zoho, or LeadSquared?",
+      a: "General CRMs are built for generic software companies. REALVION is tailored exclusively for Real Estate Channel Partners in India—with built-in Lakhs/Crores revenue logic, RERA registration numbers, site visit scheduling, and audio voice alarms for follow-ups."
+    },
+    {
+      q: "How does the Voice Follow-Up Alarm work?",
+      a: "When a lead follow-up deadline is reached, REALVION uses HTML5 Web Audio synthesis and Text-to-Speech to read out the client's name and project aloud to your sales executive so no high-value buyer is forgotten."
+    },
+    {
+      q: "How does the demo access work?",
+      a: "The complete platform demo video and interactive sandbox are available to all registered users. Simply register your agency free of charge to immediately unlock the full walkthrough recording and hands-on test workspace."
+    },
+    {
+      q: "Can I manage my builders and project inventory in REALVION?",
+      a: "Yes! REALVION allows you to catalog builders (Godrej, DLF, Lodha, Prestige, etc.) and create projects on-the-fly directly inside lead drawers."
+    }
   ];
 
   return (
-    <div className="bg-[#050505] text-slate-100 selection:bg-[#C8A45D] selection:text-black relative" onMouseMove={handleMouseMove}>
-      
-      {/* Floating CTA Bar */}
-      <div className="fixed bottom-6 right-6 z-40 hidden md:flex items-center gap-3 p-3 rounded-2xl bg-[#0a0a0a]/90 border border-[#C8A45D]/40 backdrop-blur-xl shadow-2xl">
-        <span className="text-xs font-semibold text-slate-200 pl-2">Ready to transform your sales?</span>
-        <button
-          onClick={() => navigate('/register')}
-          className="px-4 py-2 rounded-xl text-xs font-bold text-black bg-[#C8A45D] hover:brightness-110 shadow-lg shadow-[#C8A45D]/25 transition flex items-center gap-1"
-        >
-          Get Started <ArrowRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-
+    <div className="bg-[#050505] text-slate-100 min-h-screen selection:bg-[#C8A45D] selection:text-black" onMouseMove={handleMouseMove}>
       {/* Hero Section */}
-      <section className="relative pt-36 pb-24 px-6 lg:px-12 max-w-7xl mx-auto min-h-screen flex flex-col justify-center overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#C8A45D]/10 rounded-full blur-[140px] pointer-events-none" />
+      <section className="relative pt-36 pb-20 px-6 lg:px-12 max-w-7xl mx-auto overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#C8A45D]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
           <div className="lg:col-span-7 space-y-6 text-left">
@@ -117,7 +131,15 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
                 onClick={onOpenDemo}
                 className="px-6 py-4 rounded-2xl text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-2"
               >
-                <Play className="h-4 w-4 text-[#C8A45D] fill-[#C8A45D]" /> Watch Live Demo
+                {registered ? (
+                  <>
+                    <Play className="h-4 w-4 text-[#C8A45D] fill-[#C8A45D]" /> Watch Live Demo
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-4 w-4 text-[#C8A45D]" /> Register to Watch Demo
+                  </>
+                )}
               </button>
             </div>
 
@@ -195,31 +217,95 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
         </div>
       </section>
 
-
       {/* Dedicated Demo Video Showcase Section */}
       <section id="demo-video" className="py-20 px-6 lg:px-12 max-w-7xl mx-auto space-y-10 relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-[#C8A45D]/10 rounded-full blur-[150px] pointer-events-none" />
 
         <div className="text-center space-y-4 relative z-10 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C8A45D]/30 bg-[#C8A45D]/10 text-[#C8A45D] text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5" /> Full Product Walkthrough
+            {registered ? (
+              <>
+                <Sparkles className="h-3.5 w-3.5" /> Full Product Walkthrough (Unlocked)
+              </>
+            ) : (
+              <>
+                <Lock className="h-3.5 w-3.5" /> Registration Required for Demo
+              </>
+            )}
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
             See REALVION in Action
           </h2>
           <p className="text-sm sm:text-base text-slate-400 font-light leading-relaxed">
-            Watch the complete end-to-end recording of lead workflows, audio follow-up alarms, developer catalogs, and executive performance analytics.
+            {registered
+              ? 'Watch the complete end-to-end recording of lead workflows, audio follow-up alarms, developer catalogs, and executive performance analytics.'
+              : 'Register your real estate agency or channel partner profile to unlock the high-definition product walkthrough and interactive sandbox.'}
           </p>
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto">
-          <div className="p-2 sm:p-4 rounded-3xl bg-gradient-to-b from-white/10 to-white/[0.02] border border-[#C8A45D]/30 shadow-2xl shadow-black">
-            <VideoPlayer
-              src="/demo-video.mp4"
-              title="REALVION Official Product Demonstration & Walkthrough"
-              showChapters={true}
-            />
-          </div>
+          {registered ? (
+            <div className="p-2 sm:p-4 rounded-3xl bg-gradient-to-b from-white/10 to-white/[0.02] border border-[#C8A45D]/30 shadow-2xl shadow-black">
+              <VideoPlayer
+                src="/demo-video.mp4"
+                title="REALVION Official Product Demonstration & Walkthrough"
+                showChapters={true}
+              />
+            </div>
+          ) : (
+            <div className="relative rounded-3xl bg-[#0e0e0e] border border-[#C8A45D]/30 overflow-hidden shadow-2xl shadow-black p-8 sm:p-14 text-center">
+              {/* Blurred background aesthetic elements */}
+              <div className="absolute inset-0 bg-gradient-to-b from-[#C8A45D]/5 via-black/80 to-black backdrop-blur-md" />
+              <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#C8A45D]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 max-w-xl mx-auto space-y-6">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-[#C8A45D]/10 border border-[#C8A45D]/40 text-[#C8A45D] shadow-lg shadow-[#C8A45D]/10">
+                  <Lock className="h-8 w-8" />
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[11px] font-bold tracking-widest text-[#C8A45D] uppercase">
+                    Demo Gated for Registered Users
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+                    Register to Unlock Live Demo & Sandbox
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+                    The full product video walkthrough, interactive lead pipeline demo, and audio reminder simulation are exclusively available to registered partners.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <button
+                    onClick={onOpenDemo}
+                    className="w-full sm:w-auto px-8 py-4 rounded-2xl text-sm font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 shadow-xl shadow-[#C8A45D]/25 transition flex items-center justify-center gap-2"
+                  >
+                    <Unlock className="h-4 w-4" /> Register & Unlock Demo Now
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/register')}
+                    className="w-full sm:w-auto px-6 py-4 rounded-2xl text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center justify-center gap-2"
+                  >
+                    <ArrowRight className="h-4 w-4" /> Full Registration Wizard
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#C8A45D]" /> 0-Second Instant Unlock
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#C8A45D]" /> 1080p Full Demo Walkthrough
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#C8A45D]" /> Pre-seeded 50 Lead Sandbox
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-6 relative z-10">
@@ -233,7 +319,7 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
             onClick={onOpenDemo}
             className="px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-2"
           >
-            <Rocket className="h-4 w-4 text-[#C8A45D]" /> Open Interactive Sandbox Modal
+            <Rocket className="h-4 w-4 text-[#C8A45D]" /> {registered ? 'Open Interactive Sandbox' : 'Register to Open Demo'}
           </button>
         </div>
       </section>
@@ -258,27 +344,59 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
         </div>
       </section>
 
-      {/* Comparison Table */}
-      <section className="py-20 px-6 lg:px-12 bg-[#080808] border-t border-white/[0.08]">
-        <div className="max-w-5xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
-            <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Why Choose REALVION</span>
-            <h2 className="text-3xl font-bold text-white">REALVION vs Generic CRMs</h2>
+      {/* Reality Check Interactive Diagnostic */}
+      <section className="py-24 px-6 lg:px-12 max-w-5xl mx-auto space-y-12">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs font-semibold">
+            <AlertCircle className="h-3.5 w-3.5" /> 5-Point Business Diagnostic
           </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-white">
+            The 5 Questions Every Agency Owner Must Answer
+          </h2>
+        </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0a0a0a]">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-900/80 text-white font-semibold">
-                <tr>
-                  <th className="p-4">Feature / Capability</th>
-                  <th className="p-4 text-center text-[#C8A45D]">REALVION Platform</th>
-                  <th className="p-4 text-center text-slate-400">Legacy / Generic CRMs</th>
+        <div className="space-y-4">
+          {questions.map((q, idx) => (
+            <div
+              key={idx}
+              className="p-5 rounded-2xl bg-[#0e0e0e] border border-white/[0.08] hover:border-[#C8A45D]/50 transition flex items-start gap-4"
+            >
+              <span className="text-rose-500 font-black text-sm font-mono mt-0.5">Q{idx + 1}.</span>
+              <div className="space-y-1 text-left flex-1">
+                <p className="text-sm font-semibold text-white">{q}</p>
+                <p className="text-xs text-slate-400 font-light">
+                  If you answered "I don't know" or "No", your agency loses up to ₹15 Lakhs every single month in unclosed deals.
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-slate-600 shrink-0 mt-1" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Feature Comparison Matrix */}
+      <section className="py-24 px-6 lg:px-12 max-w-5xl mx-auto space-y-12">
+        <div className="text-center space-y-4">
+          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Unfair Advantage</span>
+          <h2 className="text-3xl sm:text-4xl font-black text-white">
+            REALVION vs. Generic Legacy CRMs
+          </h2>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-[#0a0a0a] border border-white/10 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-slate-400">
+                  <th className="pb-4 font-semibold">Platform Feature</th>
+                  <th className="pb-4 font-bold text-[#C8A45D] text-center">REALVION OS</th>
+                  <th className="pb-4 font-semibold text-center text-slate-500">Generic Legacy CRMs</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {comparisonFeatures.map((f, i) => (
-                  <tr key={i} className="hover:bg-white/[0.02]">
-                    <td className="p-4 font-medium text-white">{f.name}</td>
+                {comparisonFeatures.map((f, idx) => (
+                  <tr key={idx} className="hover:bg-white/[0.02]">
+                    <td className="py-4 text-white font-medium">{f.name}</td>
                     <td className="p-4 text-center">
                       {f.realvion ? <CheckCircle2 className="h-5 w-5 text-emerald-400 inline" /> : <XCircle className="h-5 w-5 text-rose-500 inline" />}
                     </td>

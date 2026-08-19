@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { WebsiteNavbar } from './components/WebsiteNavbar';
 import { WebsiteFooter } from './components/WebsiteFooter';
 import { DemoModal } from './components/DemoModal';
+import { ScrollToTop } from './components/ScrollToTop';
 
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -15,6 +16,9 @@ import { BlogPage } from './pages/BlogPage';
 import { FaqPage } from './pages/FaqPage';
 import { ContactPage } from './pages/ContactPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { SecuritySpecsPage } from './pages/SecuritySpecsPage';
 
 export const App: React.FC = () => {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
@@ -23,6 +27,7 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div className="bg-[#050505] min-h-screen text-slate-100 flex flex-col justify-between selection:bg-[#C8A45D] selection:text-black">
         <WebsiteNavbar onOpenDemo={openDemo} />
         <main className="flex-1">
@@ -37,6 +42,15 @@ export const App: React.FC = () => {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            
+            {/* Legal & Compliance Routes */}
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            <Route path="/security" element={<SecuritySpecsPage />} />
+            <Route path="/security-specs" element={<SecuritySpecsPage />} />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
