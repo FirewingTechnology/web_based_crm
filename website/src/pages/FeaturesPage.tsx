@@ -37,6 +37,20 @@ export const FeaturesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo 
             </div>
           ))}
         </div>
+
+        <div className="p-10 rounded-3xl bg-gradient-to-r from-[#101010] via-[#14120c] to-[#101010] border border-[#C8A45D]/30 text-center space-y-6">
+          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">See Capabilities Live</span>
+          <h2 className="text-3xl font-bold text-white">Experience All Features in Full HD Video</h2>
+          <p className="text-xs text-slate-400 max-w-lg mx-auto font-light">
+            Watch our step-by-step product walkthrough covering lead pipeline, voice reminders, developer inventory, and analytics.
+          </p>
+          <button
+            onClick={onOpenDemo}
+            className="px-8 py-3.5 rounded-xl text-xs font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition mx-auto flex items-center gap-2"
+          >
+            Watch Full Video Demo
+          </button>
+        </div>
       </div>
     </div>
   );

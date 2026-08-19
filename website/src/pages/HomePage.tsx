@@ -20,8 +20,10 @@ import {
   Shield,
   Zap,
   Users,
-  Star
+  Star,
+  Rocket
 } from 'lucide-react';
+import { VideoPlayer } from '../components/VideoPlayer';
 
 export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) => {
   const navigate = useNavigate();
@@ -193,6 +195,48 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
         </div>
       </section>
 
+
+      {/* Dedicated Demo Video Showcase Section */}
+      <section id="demo-video" className="py-20 px-6 lg:px-12 max-w-7xl mx-auto space-y-10 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-[#C8A45D]/10 rounded-full blur-[150px] pointer-events-none" />
+
+        <div className="text-center space-y-4 relative z-10 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C8A45D]/30 bg-[#C8A45D]/10 text-[#C8A45D] text-xs font-semibold">
+            <Sparkles className="h-3.5 w-3.5" /> Full Product Walkthrough
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            See REALVION in Action
+          </h2>
+          <p className="text-sm sm:text-base text-slate-400 font-light leading-relaxed">
+            Watch the complete end-to-end recording of lead workflows, audio follow-up alarms, developer catalogs, and executive performance analytics.
+          </p>
+        </div>
+
+        <div className="relative z-10 max-w-5xl mx-auto">
+          <div className="p-2 sm:p-4 rounded-3xl bg-gradient-to-b from-white/10 to-white/[0.02] border border-[#C8A45D]/30 shadow-2xl shadow-black">
+            <VideoPlayer
+              src="/demo-video.mp4"
+              title="REALVION Official Product Demonstration & Walkthrough"
+              showChapters={true}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-4 pt-6 relative z-10">
+          <button
+            onClick={() => navigate('/register')}
+            className="px-8 py-3.5 rounded-2xl text-xs sm:text-sm font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 shadow-lg shadow-[#C8A45D]/25 transition flex items-center gap-2"
+          >
+            Start Free 14-Day Trial <ArrowRight className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onOpenDemo}
+            className="px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition flex items-center gap-2"
+          >
+            <Rocket className="h-4 w-4 text-[#C8A45D]" /> Open Interactive Sandbox Modal
+          </button>
+        </div>
+      </section>
 
       {/* Feature Timeline Section */}
       <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto space-y-16">
