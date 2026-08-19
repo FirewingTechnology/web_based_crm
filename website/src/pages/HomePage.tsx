@@ -124,7 +124,7 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
                 onClick={() => navigate('/register')}
                 className="px-8 py-4 rounded-2xl text-sm font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:shadow-xl hover:shadow-[#C8A45D]/30 transition transform hover:-translate-y-0.5 flex items-center gap-2"
               >
-                Start Free Trial <ArrowRight className="h-5 w-5" />
+                Start 1-Hour Free Trial <ArrowRight className="h-5 w-5" />
               </button>
 
               <button
@@ -313,7 +313,7 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
             onClick={() => navigate('/register')}
             className="px-8 py-3.5 rounded-2xl text-xs sm:text-sm font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 shadow-lg shadow-[#C8A45D]/25 transition flex items-center gap-2"
           >
-            Start Free 14-Day Trial <ArrowRight className="h-4 w-4" />
+            Start 1-Hour Free Trial <ArrowRight className="h-4 w-4" />
           </button>
           <button
             onClick={onOpenDemo}
