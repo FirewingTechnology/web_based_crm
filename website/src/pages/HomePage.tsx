@@ -123,16 +123,16 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
 
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-white/[0.08] text-xs">
               <div>
-                <p className="text-2xl font-bold text-white">50,000+</p>
-                <p className="text-slate-500 mt-0.5">Leads Managed</p>
+                <p className="text-2xl font-bold text-white">7-Stage</p>
+                <p className="text-slate-400 mt-0.5">Pipeline CRM</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#C8A45D]">₹1,200 Cr+</p>
-                <p className="text-slate-500 mt-0.5">GMV Processed</p>
+                <p className="text-2xl font-bold text-[#C8A45D]">Real-Time</p>
+                <p className="text-slate-400 mt-0.5">Voice Reminders</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">99.9%</p>
-                <p className="text-slate-500 mt-0.5">System Uptime</p>
+                <p className="text-2xl font-bold text-white">INR Native</p>
+                <p className="text-slate-400 mt-0.5">Lakhs & Crores</p>
               </div>
             </div>
           </div>
