@@ -53,6 +53,7 @@ class RegisterDemoResponse(BaseModel):
 class CreateOrderRequest(BaseModel):
     plan_code: str = "professional"
     plan_id: Optional[int] = None
+    email: Optional[EmailStr] = None
     organization_id: Optional[int] = None
     workspace_id: Optional[int] = None
     registration_id: Optional[int] = None
@@ -77,6 +78,8 @@ class VerifyPaymentRequest(BaseModel):
     razorpay_order_id: str
     razorpay_payment_id: str
     razorpay_signature: str
+    email: Optional[EmailStr] = None
+
 
 class PlanSchema(BaseModel):
     id: int

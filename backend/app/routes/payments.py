@@ -18,9 +18,11 @@ from app.models import (
     Payment, PaymentLog, PaymentWebhook, Organization, Workspace, Plan, Subscription, SubscriptionHistory, User, UserRole, RegistrationRequest
 )
 from app.schemas.saas import CreateOrderRequest, CreateOrderResponse, VerifyPaymentRequest
-from app.utils.security import get_password_hash
+from app.schemas.user import UserResponse
+from app.utils.security import get_password_hash, create_access_token, create_refresh_token
 from app.services.email_service import send_welcome_credentials_email
-from app.middleware.auth_middleware import get_current_user
+from app.middleware.auth_middleware import get_current_user, get_optional_current_user
+
 
 router = APIRouter(prefix="/payments", tags=["Razorpay Payments & Webhooks"])
 
@@ -31,7 +33,11 @@ PLAN_PRICES = {
 }
 
 @router.post("/create-order", response_model=CreateOrderResponse)
-def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
+def create_order(
+    req: CreateOrderRequest, 
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user)
+):
     plan_info = PLAN_PRICES.get(req.plan_code.lower(), PLAN_PRICES["professional"])
     subtotal = plan_info["subtotal"]
     
@@ -44,6 +50,21 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
     
     key_id = settings.RAZORPAY_KEY_ID
     key_secret = settings.RAZORPAY_KEY_SECRET
+
+    user_email = (req.email or (current_user.email if current_user else None) or "").strip().lower()
+    org_id = req.organization_id or (current_user.organization_id if current_user else None)
+
+    if not org_id and user_email:
+        u = db.query(User).filter(func.lower(User.email) == user_email, User.is_deleted == False).first()
+        if u:
+            if u.organization_id:
+                org_id = u.organization_id
+            elif u.firm_name:
+                org_match = db.query(Organization).filter(func.lower(Organization.name) == u.firm_name.lower().strip()).first()
+                if org_match:
+                    org_id = org_match.id
+                    u.organization_id = org_match.id
+                    db.commit()
 
     order_id = None
     if key_id and key_secret and not key_id.startswith("rzp_test_mock"):
@@ -59,7 +80,8 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
                 "receipt": f"rcpt_{int(datetime.now(timezone.utc).timestamp())}",
                 "notes": {
                     "plan_code": req.plan_code,
-                    "organization_id": str(req.organization_id or ""),
+                    "email": user_email,
+                    "organization_id": str(org_id or ""),
                     "workspace_id": str(req.workspace_id or ""),
                     "registration_id": str(req.registration_id or ""),
                 }
@@ -75,7 +97,7 @@ def create_order(req: CreateOrderRequest, db: Session = Depends(get_db)):
         order_id = f"order_realvion_{int(datetime.now(timezone.utc).timestamp())}_{random.randint(1000, 9999)}"
     
     payment = Payment(
-        organization_id=req.organization_id,
+        organization_id=org_id,
         workspace_id=req.workspace_id,
         registration_id=req.registration_id,
         plan_id=req.plan_id,
@@ -187,7 +209,7 @@ async def razorpay_webhook(
 def verify_payment(
     req: VerifyPaymentRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_optional_current_user)
 ):
     key_secret = settings.RAZORPAY_KEY_SECRET
     
@@ -223,9 +245,25 @@ def verify_payment(
     payment.razorpay_signature = req.razorpay_signature
     db.commit()
 
-    _activate_tenant_post_payment(payment, current_user.email, db)
+    target_email = req.email or (current_user.email if current_user else None)
+    activated_org, target_user = _activate_tenant_post_payment(payment, target_email, db)
 
-    return {"success": True, "message": "Subscription activated successfully! Full enterprise features unlocked."}
+    resp = {
+        "success": True, 
+        "message": "Subscription activated successfully! 1-Year Full Enterprise features unlocked."
+    }
+
+    user_for_token = target_user or current_user
+    if user_for_token:
+        role_str = user_for_token.role.value if hasattr(user_for_token.role, 'value') else str(user_for_token.role)
+        token_data = {"user_id": user_for_token.id, "email": user_for_token.email, "role": role_str}
+        access_token = create_access_token(data=token_data)
+        refresh_token = create_refresh_token(data=token_data)
+        resp["access_token"] = access_token
+        resp["refresh_token"] = refresh_token
+        resp["user"] = UserResponse.from_orm(user_for_token).dict()
+
+    return resp
 
 @router.get("/history")
 def get_payment_history(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -236,33 +274,54 @@ def get_payment_history(db: Session = Depends(get_db), current_user: User = Depe
     return payments
 
 
-def _activate_tenant_post_payment(payment: Optional[Payment], email: str, db: Session):
+def _activate_tenant_post_payment(payment: Optional[Payment], email: Optional[str], db: Session):
     """
     Sub-routine triggered post-payment to activate subscription for 1 full year using payment metadata.
-    Never infers org via 'latest organization' query.
+    Preserves all user passwords, leads, bookings, and database records safely without deletion.
     """
     if not payment:
-        return
+        return None, None
         
     org = None
+    user = None
+
+    # 1. Try finding org by payment.organization_id
     if payment.organization_id:
         org = db.query(Organization).filter(Organization.id == payment.organization_id).first()
-    elif payment.workspace_id:
+
+    # 2. Try finding org by payment.workspace_id
+    if not org and payment.workspace_id:
         ws = db.query(Workspace).filter(Workspace.id == payment.workspace_id).first()
         if ws and ws.organization_id:
             org = db.query(Organization).filter(Organization.id == ws.organization_id).first()
-            payment.organization_id = org.id
-            
-    if not org and email:
-        email = email.lower().strip()
-        user = db.query(User).filter(func.lower(User.email) == email, User.is_deleted == False).first()
-        if user and user.organization_id:
-            org = db.query(Organization).filter(Organization.id == user.organization_id).first()
             if org:
                 payment.organization_id = org.id
 
+    # 3. Try finding user by email
+    clean_email = (email or "").lower().strip()
+    if clean_email:
+        user = db.query(User).filter(func.lower(User.email) == clean_email, User.is_deleted == False).first()
+        if user:
+            if not org and user.organization_id:
+                org = db.query(Organization).filter(Organization.id == user.organization_id).first()
+            if not org and user.firm_name:
+                org = db.query(Organization).filter(func.lower(Organization.name) == user.firm_name.lower().strip()).first()
+                if org:
+                    user.organization_id = org.id
+                    payment.organization_id = org.id
+                    db.commit()
+
+    # 4. If org found but user not yet resolved, find admin user for that org
+    if org and not user:
+        user = db.query(User).filter(User.organization_id == org.id, User.is_deleted == False).first()
+        if not user and org.name:
+            user = db.query(User).filter(func.lower(User.firm_name) == org.name.lower().strip(), User.is_deleted == False).first()
+
+    # 5. Activate Organization & Subscription for 1 Full Year
     if org:
         org.is_active = True
+        payment.organization_id = org.id
+        
         sub = db.query(Subscription).filter(Subscription.organization_id == org.id).order_by(Subscription.id.desc()).first()
         if not sub:
             sub = Subscription(
@@ -275,12 +334,34 @@ def _activate_tenant_post_payment(payment: Optional[Payment], email: str, db: Se
             db.add(sub)
         else:
             sub.status = "Active"
+            sub.start_date = datetime.utcnow()
             sub.end_date = datetime.utcnow() + timedelta(days=365)
+            sub.auto_renew = True
             
+        # Ensure all users in this org remain active, not deleted, and keep their password intact
+        org_users = db.query(User).filter(User.organization_id == org.id).all()
+        for u in org_users:
+            u.is_active = True
+            u.is_deleted = False
+
+        if user:
+            user.is_active = True
+            user.is_deleted = False
+            if not user.organization_id:
+                user.organization_id = org.id
+
         if payment.workspace_id:
             ws = db.query(Workspace).filter(Workspace.id == payment.workspace_id).first()
             if ws:
                 ws.is_demo = False
+        else:
+            ws_list = db.query(Workspace).filter(Workspace.organization_id == org.id).all()
+            for ws in ws_list:
+                ws.is_demo = False
+
         db.commit()
+
+    return org, user
+
 
 

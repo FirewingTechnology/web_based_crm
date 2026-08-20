@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -6,6 +7,7 @@ from app.models.user import User, UserRole
 from app.utils.security import decode_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(
@@ -29,6 +31,21 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     
     return user
 
+def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)) -> Optional[User]:
+    if not token:
+        return None
+    try:
+        payload = decode_token(token)
+        if payload is None or payload.get("type") != "access":
+            return None
+        user_id: int = payload.get("user_id")
+        if user_id is None:
+            return None
+        user = db.query(User).filter(User.id == user_id, User.is_deleted == False).first()
+        return user
+    except Exception:
+        return None
+
 class RequireRole:
     def __init__(self, allowed_roles: list[UserRole]):
         self.allowed_roles = allowed_roles
@@ -40,3 +57,4 @@ class RequireRole:
                 detail=f"User with role '{current_user.role}' does not have permission to access this resource"
             )
         return current_user
+

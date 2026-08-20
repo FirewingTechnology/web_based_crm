@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, Zap, Sparkles, CheckCircle2, Lock } from 'lucide-react';
+import { X, ShieldCheck, Zap, Sparkles, CheckCircle2, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface PaymentCheckoutModalProps {
@@ -18,6 +18,13 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'professional' | 'enterprise'>('professional');
   const [couponCode, setCouponCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [customerEmail, setCustomerEmail] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlEmail = new URLSearchParams(window.location.search).get('email');
+      if (urlEmail) return urlEmail;
+    }
+    return '';
+  });
   const [loading, setLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +41,8 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
   const basePrice = Math.round(planObj.price * (1 - appliedDiscount));
   const razorpayFee = Math.round(basePrice * 0.02); // 2% Razorpay Transaction Fee
   const total = basePrice + razorpayFee;
+
+  const userEmailToUse = (user?.email || customerEmail || '').trim().toLowerCase();
 
   const handleApplyCoupon = () => {
     if (couponCode.trim().toUpperCase() === 'REALVION20') {
@@ -57,21 +66,38 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
     const token = localStorage.getItem('realvion_access_token') || localStorage.getItem('brokeros_access_token') || '';
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const verifyRes = await fetch(`${API_BASE}/payments/verify`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify({
           razorpay_order_id: orderId,
           razorpay_payment_id: paymentId,
           razorpay_signature: signature,
+          email: userEmailToUse || undefined,
         }),
       });
 
       const verifyData = await verifyRes.json();
       if (!verifyRes.ok) throw new Error(verifyData.detail || 'Payment verification failed.');
+
+      if (verifyData.access_token) {
+        localStorage.setItem('brokeros_access_token', verifyData.access_token);
+        localStorage.setItem('realvion_access_token', verifyData.access_token);
+      }
+      if (verifyData.refresh_token) {
+        localStorage.setItem('brokeros_refresh_token', verifyData.refresh_token);
+      }
+      if (verifyData.user) {
+        localStorage.setItem('brokeros_user', JSON.stringify(verifyData.user));
+        localStorage.setItem('realvion_user', JSON.stringify(verifyData.user));
+      }
 
       localStorage.removeItem('realvion_is_demo');
       localStorage.removeItem('brokeros_is_demo');
@@ -84,20 +110,32 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
   };
 
   const handlePayNow = async () => {
+    if (!user?.email && !customerEmail.trim()) {
+      setError('Please enter your registered workspace email address to activate your account.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     const API_BASE = getApiBase();
     const userObj = JSON.parse(localStorage.getItem('realvion_user') || localStorage.getItem('brokeros_user') || '{}');
+    const token = localStorage.getItem('realvion_access_token') || localStorage.getItem('brokeros_access_token') || '';
 
     try {
       // Step 1: Create Order
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_BASE}/payments/create-order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           plan_code: selectedPlan,
           coupon_code: couponCode,
+          email: userEmailToUse || undefined,
         }),
       });
 
@@ -126,7 +164,7 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
         order_id: orderData.order_id,
         prefill: {
           name: user?.name || userObj.name || '',
-          email: user?.email || userObj.email || '',
+          email: userEmailToUse,
           contact: user?.phone || userObj.phone || '',
         },
         theme: { color: '#C8A45D' },
@@ -165,7 +203,6 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
     }
   };
 
-
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <div className="relative w-full max-w-xl p-6 md:p-8 rounded-3xl bg-[#0a0a0a] border border-white/10 shadow-2xl space-y-6">
@@ -181,18 +218,18 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-2xl font-bold text-white">Payment Successful!</h3>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Your <strong>{planObj.name}</strong> subscription is now active for 1 full year. Your enterprise workspace access has been unlocked.
+            <h3 className="text-2xl font-bold text-white">Subscription Activated Successfully!</h3>
+            <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+              Your <strong className="text-[#C8A45D]">{planObj.name}</strong> 1-Year Full Enterprise License is now active. All your leads, settings, and workspace data are preserved and completely unlocked.
             </p>
             <button
               onClick={() => {
                 onClose();
-                window.location.reload();
+                window.location.href = '/admin/dashboard';
               }}
-              className="px-6 py-3 rounded-xl font-bold text-black bg-[#C8A45D] hover:brightness-110 shadow-lg shadow-[#C8A45D]/20"
+              className="px-6 py-3 rounded-xl font-bold text-black bg-[#C8A45D] hover:brightness-110 shadow-lg shadow-[#C8A45D]/20 transition"
             >
-              Continue to Enterprise Workspace
+              Launch Enterprise Workspace
             </button>
           </div>
         ) : (
@@ -210,6 +247,23 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
             {error && (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
                 {error}
+              </div>
+            )}
+
+            {/* Email input if not already logged in */}
+            {!user?.email && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-[#C8A45D]" /> Registered Account Email Address:
+                </label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="admin@company.com"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A45D]"
+                  required
+                />
               </div>
             )}
 
@@ -281,3 +335,4 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
     </div>
   );
 };
+
