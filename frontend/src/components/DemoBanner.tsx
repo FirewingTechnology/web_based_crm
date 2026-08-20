@@ -81,7 +81,7 @@ export const DemoBanner: React.FC = () => {
             <>
               <Lock className="h-4 w-4 text-red-400 shrink-0" />
               <span className="font-bold text-white">
-                🚨 1-HOUR TRIAL EXPIRED: Your workspace trial has ended. Upgrade to keep full access.
+                🚨 1-HOUR FREE TRIAL COMPLETED: Your workspace trial has ended. Your data is safely saved in the database. Upgrade to restore full access.
               </span>
             </>
           ) : (
@@ -102,32 +102,37 @@ export const DemoBanner: React.FC = () => {
               : 'bg-[#C8A45D] text-black hover:brightness-110'
           }`}
         >
-          <Sparkles className="h-3 w-3" /> Upgrade to Paid Version Now <ArrowRight className="h-3 w-3" />
+          <Sparkles className="h-3 w-3" /> Upgrade / Renew Subscription <ArrowRight className="h-3 w-3" />
         </button>
       </div>
 
       {/* Trial Expired Lockout Popup Modal */}
       {isExpired && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="max-w-md w-full rounded-3xl bg-[#0e0e0e] border border-red-500/40 p-6 sm:p-8 text-center space-y-5 shadow-2xl shadow-red-500/20">
-            <div className="w-16 h-16 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center mx-auto text-red-400">
+          <div className="max-w-md w-full rounded-3xl bg-[#0e0e0e] border border-amber-500/40 p-6 sm:p-8 text-center space-y-5 shadow-2xl shadow-amber-500/10">
+            <div className="w-16 h-16 rounded-full bg-[#C8A45D]/20 border border-[#C8A45D]/40 flex items-center justify-center mx-auto text-[#C8A45D]">
               <Lock className="h-8 w-8" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-xl font-extrabold text-white">1-Hour Free Trial Has Expired!</h2>
+              <h2 className="text-xl font-extrabold text-white">1-Hour Free Trial is Completed</h2>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Your 1-hour real-time trial for <span className="text-[#C8A45D] font-bold">{user?.firm_name || 'REALVION Workspace'}</span> has reached its time limit. 
-                Please upgrade to a paid version to restore access to your leads, phone, email, and sales tools.
+                Your 1-hour free trial period for <span className="text-[#C8A45D] font-bold">{user?.firm_name || 'REALVION Workspace'}</span> has completed.
               </p>
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium">
+                ✅ <strong>Your data is 100% safe:</strong> All your leads, team members, bookings, and pipeline data are securely saved in our database and will never be deleted.
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-300 text-left space-y-1">
-              <p className="font-bold text-white">🔒 Locked Features:</p>
-              <ul className="list-disc list-inside space-y-0.5 text-slate-300 text-[11px]">
-                <li>Lead Management & Exporting</li>
-                <li>WhatsApp & SMS Followup Triggers</li>
-                <li>Broker & Sales Executive Allocation</li>
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-slate-300 text-left space-y-1.5">
+              <p className="font-bold text-white flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-[#C8A45D]" /> Upgrade now to unlock:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px]">
+                <li>Unrestricted Lead Management & Exporting</li>
+                <li>WhatsApp & SMS Followup Automation</li>
+                <li>Full Sales Executive & Broker Team Access</li>
+                <li>Continuous Cloud Sync & 24/7 Priority Support</li>
               </ul>
             </div>
 
@@ -136,13 +141,13 @@ export const DemoBanner: React.FC = () => {
                 onClick={() => setIsModalOpen(true)}
                 className="w-full py-4 rounded-2xl font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition shadow-lg shadow-[#C8A45D]/25 flex items-center justify-center gap-2 text-sm"
               >
-                <Sparkles className="h-5 w-5" /> Upgrade to Paid Version Now <ArrowRight className="h-4 w-4" />
+                <Sparkles className="h-5 w-5" /> Upgrade / Activate Subscription Now <ArrowRight className="h-4 w-4" />
               </button>
               <button
                 onClick={logout}
                 className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/10 transition flex items-center justify-center gap-1.5"
               >
-                <LogOut className="h-3.5 w-3.5" /> Sign Out / Log In As Super Admin
+                <LogOut className="h-3.5 w-3.5" /> Sign Out / Switch Account
               </button>
             </div>
           </div>
