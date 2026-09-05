@@ -229,13 +229,11 @@ def verify_payment(
         hashlib.sha256
     ).hexdigest()
     
-    is_mock_order = (
-        not key_secret or 
-        req.razorpay_order_id.startswith("order_realvion_") or 
-        req.razorpay_signature.startswith("sig_mock_")
+    is_mock_signature = req.razorpay_signature.startswith("sig_mock_") and (
+        not key_secret or req.razorpay_order_id.startswith("order_realvion_")
     )
 
-    if not is_mock_order and not hmac.compare_digest(expected_signature, req.razorpay_signature):
+    if not is_mock_signature and not hmac.compare_digest(expected_signature, req.razorpay_signature):
         payment.status = "Failed"
         db.commit()
         raise HTTPException(status_code=401, detail="Invalid payment signature. Verification failed.")

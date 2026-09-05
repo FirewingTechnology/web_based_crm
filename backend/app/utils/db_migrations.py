@@ -85,3 +85,40 @@ def run_auto_migrations(engine):
                         logger.info(f"Successfully migrated 'broker_profiles' table: added column '{col_name}'")
                     except Exception as e:
                         logger.warning(f"Column migration '{col_name}' on 'broker_profiles' skipped or error: {e}")
+
+        # 5. Commissions lifecycle, aging & GST/TDS ledger
+        if "commissions" in tables:
+            comm_columns = {col["name"] for col in inspector.get_columns("commissions")}
+            new_comm_cols = [
+                ("stage", "VARCHAR(50) DEFAULT 'EXPECTED'"),
+                ("invoice_number", "VARCHAR(100)"),
+                ("invoice_date", "DATETIME"),
+                ("due_date", "DATETIME"),
+                ("paid_date", "DATETIME"),
+                ("payment_reference", "VARCHAR(100)"),
+                ("gst_rate", "FLOAT DEFAULT 18.0"),
+                ("gst_amount", "FLOAT DEFAULT 0.0"),
+                ("tds_rate", "FLOAT DEFAULT 5.0"),
+                ("tds_amount", "FLOAT DEFAULT 0.0"),
+                ("net_receivable", "FLOAT"),
+                ("aging_bucket", "VARCHAR(50) DEFAULT '0-30 Days'"),
+                ("days_overdue", "INTEGER DEFAULT 0"),
+            ]
+            for col_name, col_type in new_comm_cols:
+                if col_name not in comm_columns:
+                    try:
+                        conn.execute(text(f"ALTER TABLE commissions ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Successfully migrated 'commissions' table: added column '{col_name}'")
+                    except Exception as e:
+                        logger.warning(f"Column migration '{col_name}' on 'commissions' skipped or error: {e}")
+
+            # Normalize any existing rows in commissions table
+            try:
+                conn.execute(text("UPDATE commissions SET stage = UPPER(stage) WHERE stage IS NOT NULL;"))
+                conn.execute(text("UPDATE commissions SET stage = 'EXPECTED' WHERE stage IS NULL;"))
+                conn.commit()
+            except Exception as e:
+                logger.warning(f"Failed to normalize commissions.stage column: {e}")
+
+
