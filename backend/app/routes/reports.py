@@ -11,10 +11,23 @@ from app.models.builder import Builder
 from app.models.project import Project
 from app.models.user import User, UserRole
 from app.schemas.report import DashboardStats, MonthlySalesChart, LeadSourceDistribution, LeadStatusDistribution
+from app.schemas.revenue_analytics import RevenueAnalyticsResponse
+from app.services.revenue_analytics_service import RevenueAnalyticsService
 from app.middleware.auth_middleware import get_current_user
 from app.utils.csv_utils import generate_csv_response
 
 router = APIRouter(prefix="/reports", tags=["Reports & Analytics"])
+
+@router.get("/revenue-funnel", response_model=RevenueAnalyticsResponse)
+def get_revenue_funnel_analytics(
+    time_period: str = "All Time",
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns end-to-end sales funnel conversion metrics, stage-by-stage drop-off leakage, and marketing source attribution.
+    """
+    return RevenueAnalyticsService.get_revenue_funnel_analytics(db, current_user, time_period=time_period)
 
 @router.get("/dashboard-stats", response_model=DashboardStats)
 def get_dashboard_stats(
