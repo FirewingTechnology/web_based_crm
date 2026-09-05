@@ -17,4 +17,8 @@ export const notificationsApi = {
     const res = await apiClient.get<ActivityLogItem[]>('/activity-logs', { params: { module } });
     return res.data;
   },
+  generateAlerts: async (): Promise<{ alerts_generated: number }> => {
+    const res = await apiClient.post<{ alerts_generated: number }>('/notifications/generate-alerts');
+    return res.data;
+  },
 };

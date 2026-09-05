@@ -19,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
+        await notificationsApi.generateAlerts().catch(() => {});
         const data = await notificationsApi.getNotifications();
         setNotifications(data);
       } catch (err) {
@@ -113,28 +114,49 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               </div>
               <div className="max-h-64 overflow-y-auto space-y-2">
                 {notifications.length > 0 ? (
-                  notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`p-2.5 rounded-xl border text-xs transition ${
-                        n.is_read
-                          ? 'bg-white/[0.02] border-white/[0.05] opacity-60'
-                          : 'bg-[#C8A45D]/08 border-[#C8A45D]/20 text-slate-100'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        {n.type === 'success' ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4 text-[#C8A45D] shrink-0 mt-0.5" />
-                        )}
-                        <div>
-                          <p className="font-semibold">{n.title}</p>
-                          <p className="text-slate-400 text-[11px] mt-0.5">{n.message}</p>
+                  notifications.map((n) => {
+                    const isCritical = n.severity === 'CRITICAL' || n.type === 'critical';
+                    const isHigh = n.severity === 'HIGH' || n.type === 'warning';
+                    return (
+                      <div
+                        key={n.id}
+                        className={`p-2.5 rounded-xl border text-xs transition ${
+                          n.is_read
+                            ? 'bg-white/[0.02] border-white/[0.05] opacity-60'
+                            : isCritical
+                            ? 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+                            : isHigh
+                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
+                            : 'bg-[#C8A45D]/08 border-[#C8A45D]/20 text-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          {isCritical ? (
+                            <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                          ) : isHigh ? (
+                            <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                          ) : n.type === 'success' ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4 text-[#C8A45D] shrink-0 mt-0.5" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-white leading-tight">{n.title}</p>
+                            <p className="text-slate-400 text-[11px] mt-0.5 leading-snug">{n.message}</p>
+                            {n.action_url && (
+                              <a
+                                href={n.action_url}
+                                onClick={() => setShowNotifications(false)}
+                                className="inline-block mt-1 text-[10px] font-semibold text-blue-400 hover:underline"
+                              >
+                                View Details →
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="text-xs text-slate-500 text-center py-4">No notifications</p>
                 )}

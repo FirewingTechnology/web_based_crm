@@ -121,4 +121,23 @@ def run_auto_migrations(engine):
             except Exception as e:
                 logger.warning(f"Failed to normalize commissions.stage column: {e}")
 
+        # 6. Notifications severity, action_url & entity fields
+        if "notifications" in tables:
+            notif_columns = {col["name"] for col in inspector.get_columns("notifications")}
+            new_notif_cols = [
+                ("severity", "VARCHAR(20) DEFAULT 'INFO'"),
+                ("action_url", "VARCHAR(255)"),
+                ("entity_type", "VARCHAR(50)"),
+                ("entity_id", "INTEGER"),
+            ]
+            for col_name, col_type in new_notif_cols:
+                if col_name not in notif_columns:
+                    try:
+                        conn.execute(text(f"ALTER TABLE notifications ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Successfully migrated 'notifications' table: added column '{col_name}'")
+                    except Exception as e:
+                        logger.warning(f"Column migration '{col_name}' on 'notifications' skipped or error: {e}")
+
+
 

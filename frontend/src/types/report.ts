@@ -32,6 +32,10 @@ export interface NotificationItem {
   message: string;
   type: string;
   is_read: boolean;
+  severity?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' | string;
+  action_url?: string;
+  entity_type?: string;
+  entity_id?: number;
   created_at: string;
 }
 

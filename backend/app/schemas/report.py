@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel
 
 class DashboardStats(BaseModel):
@@ -31,6 +32,10 @@ class NotificationResponse(BaseModel):
     message: str
     type: str
     is_read: bool
+    severity: Optional[str] = "INFO"
+    action_url: Optional[str] = None
+    entity_type: Optional[str] = None
+    entity_id: Optional[int] = None
     created_at: datetime
 
     class Config:

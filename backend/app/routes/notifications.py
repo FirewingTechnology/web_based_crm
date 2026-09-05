@@ -48,3 +48,17 @@ def mark_all_notifications_read(
     ).update({"is_read": True}, synchronize_session=False)
     db.commit()
     return {"message": "All notifications marked as read"}
+
+from app.services.alert_engine import AlertEngine
+
+@router.post("/generate-alerts")
+def evaluate_and_generate_alerts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Evaluates pipeline risks, overdue site visits, high-value leads and aged commissions,
+    generating prioritized notifications.
+    """
+    return AlertEngine.evaluate_and_generate_alerts(db, current_user)
+

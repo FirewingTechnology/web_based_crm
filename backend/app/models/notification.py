@@ -11,7 +11,11 @@ class Notification(BaseModel):
 
     title = Column(String(150), nullable=False)
     message = Column(Text, nullable=False)
-    type = Column(String(50), default="info", nullable=False) # info, warning, success
+    type = Column(String(50), default="info", nullable=False) # info, warning, success, critical
     is_read = Column(Boolean, default=False, nullable=False)
+    severity = Column(String(20), default="INFO", nullable=False) # CRITICAL, HIGH, MEDIUM, LOW, INFO
+    action_url = Column(String(255), nullable=True)
+    entity_type = Column(String(50), nullable=True) # LEAD, SITE_VISIT, COMMISSION, BOOKING
+    entity_id = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="notifications")
