@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "REALVION - Real Estate Sales Operating System"
     API_V1_STR: str = "/api/v1"
     
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+    
     SECRET_KEY: str = os.getenv("JWT_SECRET", os.getenv("SECRET_KEY", "realvion_dev_secret_key_change_in_prod"))
     REFRESH_SECRET_KEY: str = os.getenv("JWT_REFRESH_SECRET", os.getenv("REFRESH_SECRET_KEY", "realvion_dev_refresh_secret_key_change_in_prod"))
     ALGORITHM: str = "HS256"

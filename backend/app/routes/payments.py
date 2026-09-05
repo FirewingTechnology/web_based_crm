@@ -229,7 +229,8 @@ def verify_payment(
         hashlib.sha256
     ).hexdigest()
     
-    is_mock_signature = req.razorpay_signature.startswith("sig_mock_") and (
+    is_prod = settings.ENVIRONMENT.lower() == "production"
+    is_mock_signature = not is_prod and req.razorpay_signature.startswith("sig_mock_") and (
         not key_secret or req.razorpay_order_id.startswith("order_realvion_")
     )
 
