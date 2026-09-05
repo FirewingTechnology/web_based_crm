@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, FileCheck2, Building2, FolderKanban, User, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Plus, FileCheck2, Building2, FolderKanban, User, CheckCircle2, AlertCircle, X, Calculator } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { DataTable } from '../../components/ui/DataTable';
 import { BookingModal } from '../../components/modals/BookingModal';
+import { CostSheetModal } from '../../components/modals/CostSheetModal';
 import { bookingsApi } from '../../api/bookings';
 import { leadsApi } from '../../api/leads';
 import { projectsApi } from '../../api/projects';
@@ -23,7 +24,9 @@ export const BookingManagement: React.FC = () => {
   const [executives, setExecutives] = useState<UserType[]>([]);
   const [brokers, setBrokers] = useState<BrokerProfile[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCostSheetOpen, setIsCostSheetOpen] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -165,14 +168,25 @@ export const BookingManagement: React.FC = () => {
           <p className="text-xs text-slate-400 mt-1">Confirmed property deals, token records & automated commission calculations</p>
         </div>
 
-        <Button
-          size="sm"
-          variant="primary"
-          icon={<Plus className="h-4 w-4" />}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Create Booking Token
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            icon={<Calculator className="h-4 w-4 text-amber-400" />}
+            onClick={() => setIsCostSheetOpen(true)}
+            className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+          >
+            Cost Sheet Generator
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            icon={<Plus className="h-4 w-4" />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Create Booking Token
+          </Button>
+        </div>
       </div>
 
       <DataTable columns={columns} data={bookings} searchPlaceholder="Search booking ref, lead name, unit number..." />
@@ -185,6 +199,12 @@ export const BookingManagement: React.FC = () => {
         projects={projects}
         executives={executives}
         brokers={brokers}
+      />
+
+      <CostSheetModal
+        isOpen={isCostSheetOpen}
+        onClose={() => setIsCostSheetOpen(false)}
+        onBookingCreated={fetchBookings}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Phone, Mail, MapPin, Tag, Calendar, Plus, MessageSquare, History, User,
   ShieldAlert, Activity, AlertTriangle, Zap, CheckCircle2, Clock, Sparkles,
-  ArrowRight, Lightbulb, Compass, MessageCircle, Car
+  ArrowRight, Lightbulb, Compass, MessageCircle, Car, Calculator
 } from 'lucide-react';
 import { Lead } from '../../types/lead';
 import { NextBestAction } from '../../types/advisor';
@@ -13,6 +13,7 @@ import { Button } from '../ui/Button';
 import { WhatsAppButton } from '../common/WhatsAppButton';
 import { SiteVisitScheduleModal } from './SiteVisitScheduleModal';
 import { MatchedInventoryTab } from './MatchedInventoryTab';
+import { CostSheetModal } from './CostSheetModal';
 
 interface LeadDrawerProps {
   lead: Lead | null;
@@ -39,6 +40,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   const [isSiteVisitModalOpen, setIsSiteVisitModalOpen] = useState(false);
   const [selectedVisitProjectId, setSelectedVisitProjectId] = useState<number | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'advisor' | 'inventory'>('advisor');
+  const [isCostSheetModalOpen, setIsCostSheetModalOpen] = useState(false);
 
   const fetchLeadData = async () => {
     if (!lead?.id) return;
@@ -211,6 +213,15 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
 
                 <div className="flex items-center gap-2">
                   <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="button" onMessageSent={onLeadUpdated} />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                    icon={<Calculator className="h-4 w-4 text-amber-400" />}
+                    onClick={() => setIsCostSheetModalOpen(true)}
+                  >
+                    Cost Sheet
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -558,6 +569,19 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
           leadName={activeLead.name}
           preferredProjectId={selectedVisitProjectId || activeLead.preferred_project_id}
           onVisitScheduled={() => {
+            fetchLeadData();
+          }}
+        />
+      )}
+
+      {/* Embedded Indian Real Estate Cost Sheet Modal */}
+      {activeLead && isCostSheetModalOpen && (
+        <CostSheetModal
+          isOpen={isCostSheetModalOpen}
+          onClose={() => setIsCostSheetModalOpen(false)}
+          initialLeadId={activeLead.id}
+          initialProjectId={selectedVisitProjectId || activeLead.preferred_project_id || undefined}
+          onBookingCreated={() => {
             fetchLeadData();
           }}
         />

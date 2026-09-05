@@ -14,6 +14,8 @@ from app.models.user import User, UserRole
 from app.models.sales_target import SalesTarget
 from app.models.activity_log import ActivityLog
 from app.schemas.booking import BookingCreate, BookingUpdate, BookingResponse, CommissionResponse
+from app.schemas.cost_sheet import CostSheetCalculateRequest, CostSheetResponse, QuickBookFromCostSheetRequest
+from app.services.cost_sheet_service import CostSheetService
 from app.middleware.auth_middleware import get_current_user
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
@@ -29,6 +31,41 @@ def format_booking_response(b: Booking) -> BookingResponse:
     if b.commission:
         res.commission = CommissionResponse.model_validate(b.commission)
     return res
+
+@router.get("/cost-sheet/defaults/{project_id}")
+def get_cost_sheet_defaults(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return CostSheetService.get_project_defaults(project_id, db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.post("/cost-sheet/calculate", response_model=CostSheetResponse)
+def calculate_cost_sheet(
+    req: CostSheetCalculateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return CostSheetService.calculate_cost_sheet(req, db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/cost-sheet/quick-book", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
+def quick_book_from_cost_sheet(
+    req: QuickBookFromCostSheetRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        booking = CostSheetService.quick_book_from_cost_sheet(req, db, current_user)
+        return format_booking_response(booking)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("", response_model=list[BookingResponse])
 def get_bookings(
