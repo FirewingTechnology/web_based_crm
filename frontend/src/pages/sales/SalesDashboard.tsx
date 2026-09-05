@@ -14,6 +14,9 @@ import { Followup } from '../../types/followup';
 import { Booking } from '../../types/booking';
 import { SalesTarget } from '../../types/sales';
 import { LeadModal } from '../../components/modals/LeadModal';
+import { LeadDrawer } from '../../components/modals/LeadDrawer';
+import { FollowupModal } from '../../components/modals/FollowupModal';
+import { TodayPriorityBoard } from '../../components/dashboard/TodayPriorityBoard';
 
 export const SalesDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -22,6 +25,9 @@ export const SalesDashboard: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [myTarget, setMyTarget] = useState<SalesTarget | null>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isFollowupModalOpen, setIsFollowupModalOpen] = useState(false);
 
   useEffect(() => {
     leadsApi.getLeads({ my_leads_only: true }).then((data) => setLeads(data.slice(0, 5))).catch(console.error);
@@ -41,13 +47,39 @@ export const SalesDashboard: React.FC = () => {
 
   const targetPct = myTarget?.achievement_percentage || 0;
 
+  const handleOpenLeadDrawer = async (leadId: number) => {
+    try {
+      const l = await leadsApi.getLead(leadId);
+      setSelectedLead(l);
+      setIsDrawerOpen(true);
+    } catch (err) {
+      console.error('Failed to open lead drawer:', err);
+    }
+  };
+
+  const handleOpenFollowupModal = async (leadId: number) => {
+    try {
+      const l = await leadsApi.getLead(leadId);
+      setSelectedLead(l);
+      setIsFollowupModalOpen(true);
+    } catch (err) {
+      console.error('Failed to open followup modal:', err);
+    }
+  };
+
+  const handleScheduleFollowup = async (data: any) => {
+    await followupsApi.createFollowup(data);
+    const updated = await followupsApi.getFollowups({ my_followups_only: true, filter_period: 'today' });
+    setFollowups(updated);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Welcome back, {user?.name}!</h1>
-          <p className="text-xs text-slate-400 mt-1">Here is your daily performance summary & scheduled followups</p>
+          <p className="text-xs text-slate-400 mt-1">Real Estate Revenue Operating System • Daily action priorities & performance tracker</p>
         </div>
 
         <Button
@@ -144,6 +176,12 @@ export const SalesDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* TODAY'S PRIORITY & ACTION BOARD (EXECUTION SYSTEM) */}
+      <TodayPriorityBoard
+        onOpenLeadDrawer={handleOpenLeadDrawer}
+        onOpenFollowupModal={handleOpenFollowupModal}
+      />
+
       {/* Grid: My Leads & Today's Followups */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="space-y-3">
@@ -195,6 +233,29 @@ export const SalesDashboard: React.FC = () => {
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
         onSubmit={handleCreateLead}
+      />
+
+      <LeadDrawer
+        lead={selectedLead}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onAddNote={async (leadId, text) => {
+          await leadsApi.addNote(leadId, text);
+          const updated = await leadsApi.getLead(leadId);
+          setSelectedLead(updated);
+        }}
+        onOpenFollowupModal={(l) => {
+          setSelectedLead(l);
+          setIsFollowupModalOpen(true);
+        }}
+      />
+
+      <FollowupModal
+        isOpen={isFollowupModalOpen}
+        onClose={() => setIsFollowupModalOpen(false)}
+        onSubmit={handleScheduleFollowup}
+        preselectedLead={selectedLead}
+        leads={leads}
       />
     </div>
   );

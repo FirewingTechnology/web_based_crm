@@ -14,4 +14,8 @@ export const salesApi = {
     const res = await apiClient.put<SalesTarget>(`/sales/targets/${id}`, data);
     return res.data;
   },
+  getTodayPriorities: async (): Promise<import('../types/priority').TodayPrioritiesResponse> => {
+    const res = await apiClient.get<import('../types/priority').TodayPrioritiesResponse>('/sales/today-priorities');
+    return res.data;
+  },
 };

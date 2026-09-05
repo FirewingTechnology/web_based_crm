@@ -5,9 +5,21 @@ from app.database import get_db
 from app.models.sales_target import SalesTarget
 from app.models.user import User, UserRole
 from app.schemas.sales_target import SalesTargetCreate, SalesTargetUpdate, SalesTargetResponse
+from app.schemas.priority import TodayPrioritiesResponse
+from app.services.priority_engine import get_today_priorities
 from app.middleware.auth_middleware import get_current_user, RequireRole
 
 router = APIRouter(prefix="/sales", tags=["Sales Management"])
+
+@router.get("/today-priorities", response_model=TodayPrioritiesResponse)
+def get_user_today_priorities(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns prioritized operational actions for the authenticated user/organization today.
+    """
+    return get_today_priorities(current_user, db)
 
 from app.models.booking import Booking, BookingStatus
 
