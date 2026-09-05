@@ -40,6 +40,16 @@ class Lead(BaseModel):
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     tags = Column(String(255), nullable=True) # Comma-separated tags e.g. "NRI, High Intent, Ready Buyer"
 
+    # Real Estate Revenue Operating System - Health & Revenue Leakage Engine
+    health_score = Column(Integer, default=100, nullable=False, index=True)
+    health_category = Column(String(50), default="Healthy", nullable=False, index=True) # Excellent, Healthy, At Risk, Critical, Lost Risk
+    health_reasons_json = Column(Text, nullable=True) # JSON list of detected risk reasons
+    recommended_action = Column(String(255), nullable=True) # Recommended next action
+    last_activity_at = Column(DateTime, nullable=True)
+    stage_entered_at = Column(DateTime, nullable=True)
+    postponement_count = Column(Integer, default=0, nullable=False)
+    lost_reason = Column(String(255), nullable=True)
+
     # Relationships
     assigned_to = relationship("User", back_populates="assigned_leads", foreign_keys=[assigned_to_id])
     created_by = relationship("User", back_populates="created_leads", foreign_keys=[created_by_id])

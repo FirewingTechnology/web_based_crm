@@ -50,4 +50,16 @@ export const leadsApi = {
     link.click();
     link.remove();
   },
+  getHealthSummary: async (): Promise<import('../types/lead').LeadHealthSummary> => {
+    const res = await apiClient.get<import('../types/lead').LeadHealthSummary>('/leads/health/summary');
+    return res.data;
+  },
+  recalculateHealth: async (): Promise<{ message: string; count: number }> => {
+    const res = await apiClient.post<{ message: string; count: number }>('/leads/health/recalculate');
+    return res.data;
+  },
+  getLeadHealth: async (id: number): Promise<import('../types/lead').LeadHealthDetail> => {
+    const res = await apiClient.get<import('../types/lead').LeadHealthDetail>(`/leads/${id}/health`);
+    return res.data;
+  },
 };

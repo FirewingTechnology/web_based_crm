@@ -32,6 +32,7 @@ class Followup(BaseModel):
     completed_at = Column(DateTime, nullable=True)
     notes = Column(Text, nullable=True)
     outcome = Column(Text, nullable=True)
+    rescheduled_count = Column(Integer, default=0, nullable=False)
 
     # Relationships
     lead = relationship("Lead", back_populates="followups")

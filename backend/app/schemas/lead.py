@@ -62,6 +62,8 @@ class LeadUpdate(BaseModel):
     preferred_project_id: int | None = None
     assigned_to_id: int | None = None
     tags: str | None = None
+    lost_reason: str | None = None
+    postponement_count: int | None = None
 
 class LeadResponse(LeadBase):
     id: int
@@ -74,5 +76,42 @@ class LeadResponse(LeadBase):
     notes_list: list[LeadNoteResponse] = []
     history_list: list[LeadStatusHistoryResponse] = []
 
+    # Health & Leakage Engine
+    health_score: int = 100
+    health_category: str = "Healthy"
+    health_reasons: list[str] = []
+    recommended_action: str | None = None
+    last_activity_at: datetime | None = None
+    stage_entered_at: datetime | None = None
+    postponement_count: int = 0
+    lost_reason: str | None = None
+
     class Config:
         from_attributes = True
+
+class LeadHealthDetailResponse(BaseModel):
+    lead_id: int
+    lead_name: str
+    health_score: int
+    health_category: str
+    health_reasons: list[str]
+    recommended_action: str | None
+    is_high_value: bool
+    days_in_stage: int
+    days_since_last_activity: int
+
+class LeakageReasonCount(BaseModel):
+    reason: str
+    count: int
+
+class LeadHealthSummaryResponse(BaseModel):
+    total_leads: int
+    excellent_count: int
+    healthy_count: int
+    at_risk_count: int
+    critical_count: int
+    lost_risk_count: int
+    pipeline_value_at_risk: float
+    high_value_at_risk_count: int
+    top_leakage_reasons: list[LeakageReasonCount]
+

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, Mail, MapPin, Tag, Calendar, Plus, MessageSquare, History, User } from 'lucide-react';
+import { 
+  X, Phone, Mail, MapPin, Tag, Calendar, Plus, MessageSquare, History, User,
+  ShieldAlert, Activity, AlertTriangle, Zap, CheckCircle2, Clock, Sparkles
+} from 'lucide-react';
 import { Lead } from '../../types/lead';
 import { leadsApi } from '../../api/leads';
 import { Badge } from '../ui/Badge';
@@ -180,6 +183,98 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                   >
                     Schedule Followup
                   </Button>
+                </div>
+              </div>
+
+              {/* Revenue Operating System - Lead Health & Revenue Leakage Engine */}
+              <div className="mb-4 p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 shadow-md">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-blue-400" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-200">Revenue Health Score</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {((activeLead.budget_max || activeLead.budget_min || 0) >= 100) && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        ₹1Cr+ High Value
+                      </span>
+                    )}
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                      (activeLead.health_score ?? 100) >= 90
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        : (activeLead.health_score ?? 100) >= 70
+                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                        : (activeLead.health_score ?? 100) >= 50
+                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                        : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                    }`}>
+                      {activeLead.health_score ?? 100}/100 • {activeLead.health_category || 'Healthy'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Visual Health Score Bar */}
+                <div className="w-full bg-slate-800 rounded-full h-2 mb-3 overflow-hidden">
+                  <div 
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      (activeLead.health_score ?? 100) >= 90
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                        : (activeLead.health_score ?? 100) >= 70
+                        ? 'bg-gradient-to-r from-blue-500 to-cyan-400'
+                        : (activeLead.health_score ?? 100) >= 50
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
+                        : 'bg-gradient-to-r from-rose-600 to-red-400'
+                    }`}
+                    style={{ width: `${Math.max(5, Math.min(100, activeLead.health_score ?? 100))}%` }}
+                  />
+                </div>
+
+                {/* Recommended Action Pill */}
+                {activeLead.recommended_action && (
+                  <div className="p-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 mb-2.5 flex items-start gap-2">
+                    <Zap className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] font-bold tracking-wider text-blue-400 uppercase block">Next Recommended Action</span>
+                      <p className="text-xs font-semibold text-white mt-0.5">{activeLead.recommended_action}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Detected Risk Leakage Drivers */}
+                {activeLead.health_reasons && activeLead.health_reasons.length > 0 && (
+                  <div className="space-y-1 mt-2">
+                    <span className="text-[11px] font-semibold text-slate-400 block">Health Audit & Leakage Factors:</span>
+                    {activeLead.health_reasons.map((reason, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 text-xs text-slate-300">
+                        {(activeLead.health_score ?? 100) < 70 ? (
+                          <AlertTriangle className="h-3 w-3 text-amber-400 shrink-0" />
+                        ) : (
+                          <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
+                        )}
+                        <span className="text-[11px] leading-tight">{reason}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Postponement & Activity Metadata */}
+                <div className="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-slate-800 text-[11px] text-slate-400">
+                  <div>
+                    <span className="block text-[10px] text-slate-500">Postponements</span>
+                    <span className="font-semibold text-slate-200">{activeLead.postponement_count || 0} times</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-slate-500">Stage Entered</span>
+                    <span className="font-semibold text-slate-200">
+                      {activeLead.stage_entered_at ? new Date(activeLead.stage_entered_at).toLocaleDateString() : 'Initial'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-slate-500">Last Action</span>
+                    <span className="font-semibold text-slate-200">
+                      {activeLead.last_activity_at ? new Date(activeLead.last_activity_at).toLocaleDateString() : 'Recent'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

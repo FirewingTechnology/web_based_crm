@@ -1,4 +1,5 @@
 import random
+import json
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
@@ -12,7 +13,13 @@ from app.models.commission import Commission, PayoutStatus
 from app.models.project import Project
 from app.models.sales_target import SalesTarget
 from app.models.notification import Notification
-from app.schemas.lead import LeadCreate, LeadUpdate, LeadResponse, LeadNoteCreate, LeadNoteResponse, LeadStatusHistoryResponse
+from app.schemas.lead import (
+    LeadCreate, LeadUpdate, LeadResponse, LeadNoteCreate, LeadNoteResponse,
+    LeadStatusHistoryResponse, LeadHealthSummaryResponse, LeadHealthDetailResponse
+)
+from app.services.lead_health_service import (
+    calculate_lead_health, update_lead_health, bulk_recalculate_health, get_health_summary
+)
 from app.middleware.auth_middleware import get_current_user
 from app.utils.csv_utils import generate_csv_response, parse_leads_csv
 
@@ -37,6 +44,14 @@ def format_lead_response(lead: Lead) -> LeadResponse:
         h_res.changed_by_name = h.changed_by.name if h.changed_by else "System"
         formatted_history.append(h_res)
     res.history_list = formatted_history
+
+    if lead.health_reasons_json:
+        try:
+            res.health_reasons = json.loads(lead.health_reasons_json)
+        except Exception:
+            res.health_reasons = []
+    else:
+        res.health_reasons = []
     
     return res
 
@@ -173,6 +188,49 @@ def get_my_leads(
 ):
     return get_leads(my_leads_only=True, db=db, current_user=current_user)
 
+@router.get("/health/summary", response_model=LeadHealthSummaryResponse)
+def get_leads_health_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    org_id = current_user.organization_id if current_user.role != UserRole.SUPERADMIN else None
+    return get_health_summary(db, organization_id=org_id)
+
+@router.post("/health/recalculate")
+def recalculate_leads_health(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    org_id = current_user.organization_id if current_user.role != UserRole.SUPERADMIN else None
+    count = bulk_recalculate_health(db, organization_id=org_id)
+    return {"message": f"Successfully recalculated health scores for {count} leads", "count": count}
+
+@router.get("/{lead_id}/health", response_model=LeadHealthDetailResponse)
+def get_lead_health_detail(
+    lead_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Lead).filter(Lead.id == lead_id, Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Lead.organization_id == current_user.organization_id)
+    lead = query.first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    health = calculate_lead_health(lead, db)
+    return LeadHealthDetailResponse(
+        lead_id=lead.id,
+        lead_name=lead.name,
+        health_score=health["health_score"],
+        health_category=health["health_category"],
+        health_reasons=health["health_reasons"],
+        recommended_action=health["recommended_action"],
+        is_high_value=health["is_high_value"],
+        days_in_stage=health["days_in_stage"],
+        days_since_last_activity=health["days_since_last_activity"]
+    )
+
 @router.get("/{lead_id}", response_model=LeadResponse)
 def get_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     query = db.query(Lead).filter(Lead.id == lead_id, Lead.is_deleted == False)
@@ -197,9 +255,16 @@ def create_lead(
         lead_dict["assigned_to_id"] = current_user.id
     lead_dict["created_by_id"] = current_user.id
 
+    now = datetime.utcnow()
+    lead_dict["stage_entered_at"] = now
+    lead_dict["last_activity_at"] = now
 
     lead = Lead(**lead_dict)
     db.add(lead)
+    db.flush()
+
+    # Calculate initial health score
+    update_lead_health(lead, db, now=now, commit=False)
     db.commit()
     db.refresh(lead)
 
@@ -247,6 +312,9 @@ def update_lead(
     old_status = lead.status.value if hasattr(lead.status, "value") else str(lead.status)
     update_data = lead_in.model_dump(exclude_unset=True)
 
+    now = datetime.utcnow()
+    lead.last_activity_at = now
+
     for field, value in update_data.items():
         setattr(lead, field, value)
 
@@ -254,6 +322,7 @@ def update_lead(
     if "status" in update_data:
         new_status_str = update_data["status"].value if hasattr(update_data["status"], "value") else str(update_data["status"])
         if new_status_str != old_status:
+            lead.stage_entered_at = now
             db.add(LeadStatusHistory(
                 lead_id=lead.id,
                 changed_by_id=current_user.id,
@@ -347,6 +416,9 @@ def update_lead(
                     type="deal_closed"
                 ))
 
+    # Recalculate lead health score
+    update_lead_health(lead, db, now=now, commit=False)
+
     db.commit()
     db.refresh(lead)
     return format_lead_response(lead)
@@ -368,6 +440,12 @@ def add_lead_note(
         note_text=note_in.note_text
     )
     db.add(note)
+    
+    # Update lead activity and recalculate health score
+    now = datetime.utcnow()
+    lead.last_activity_at = now
+    update_lead_health(lead, db, now=now, commit=False)
+
     db.commit()
     db.refresh(note)
 

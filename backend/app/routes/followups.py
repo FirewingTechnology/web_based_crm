@@ -8,6 +8,7 @@ from app.models.lead import Lead
 from app.models.user import User, UserRole
 from app.schemas.followup import FollowupCreate, FollowupUpdate, FollowupResponse
 from app.middleware.auth_middleware import get_current_user
+from app.services.lead_health_service import update_lead_health
 
 router = APIRouter(prefix="/followups", tags=["Followups"])
 
@@ -93,6 +94,12 @@ def create_followup(
     f_data["organization_id"] = current_user.organization_id
     followup = Followup(**f_data)
     db.add(followup)
+
+    now = datetime.utcnow()
+    lead.last_activity_at = now
+    db.flush()
+    update_lead_health(lead, db, now=now, commit=False)
+
     db.commit()
     db.refresh(followup)
 
@@ -111,13 +118,26 @@ def update_followup(
         raise HTTPException(status_code=404, detail="Followup not found")
 
     update_data = followup_in.model_dump(exclude_unset=True)
+
+    # Track postponement / reschedule
+    if "scheduled_at" in update_data and update_data["scheduled_at"]:
+        new_sched = update_data["scheduled_at"]
+        if followup.scheduled_at and str(new_sched) != str(followup.scheduled_at):
+            followup.rescheduled_count = (followup.rescheduled_count or 0) + 1
+            if followup.lead:
+                followup.lead.postponement_count = (followup.lead.postponement_count or 0) + 1
     
     # If marking as completed
     if update_data.get("status") == FollowupStatus.COMPLETED and followup.status != FollowupStatus.COMPLETED:
-        followup.completed_at = datetime.now(timezone.utc)
+        followup.completed_at = datetime.utcnow()
 
     for field, value in update_data.items():
         setattr(followup, field, value)
+
+    now = datetime.utcnow()
+    if followup.lead:
+        followup.lead.last_activity_at = now
+        update_lead_health(followup.lead, db, now=now, commit=False)
 
     db.commit()
     db.refresh(followup)

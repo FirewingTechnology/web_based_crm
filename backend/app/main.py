@@ -19,6 +19,8 @@ if SENTRY_DSN:
 
 # Ensure database tables exist (idempotent in SQLAlchemy)
 Base.metadata.create_all(bind=engine)
+from app.utils.db_migrations import run_auto_migrations
+run_auto_migrations(engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

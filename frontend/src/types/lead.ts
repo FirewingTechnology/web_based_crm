@@ -44,6 +44,45 @@ export interface Lead {
   updated_at: string;
   notes_list: LeadNote[];
   history_list: LeadStatusHistory[];
+
+  // Revenue Health & Leakage Engine
+  health_score: number;
+  health_category: "Excellent" | "Healthy" | "At Risk" | "Critical" | "Lost Risk";
+  health_reasons?: string[];
+  recommended_action?: string;
+  last_activity_at?: string;
+  stage_entered_at?: string;
+  postponement_count?: number;
+  lost_reason?: string;
+}
+
+export interface TopLeakageReason {
+  reason: string;
+  count: number;
+}
+
+export interface LeadHealthSummary {
+  total_leads: number;
+  excellent_count: number;
+  healthy_count: number;
+  at_risk_count: number;
+  critical_count: number;
+  lost_risk_count: number;
+  pipeline_value_at_risk: number;
+  high_value_at_risk_count: number;
+  top_leakage_reasons: TopLeakageReason[];
+}
+
+export interface LeadHealthDetail {
+  lead_id: number;
+  lead_name: string;
+  health_score: number;
+  health_category: string;
+  health_reasons: string[];
+  recommended_action?: string;
+  is_high_value: boolean;
+  days_in_stage: number;
+  days_since_last_activity: number;
 }
 
 export interface LeadCreateInput {
