@@ -50,3 +50,21 @@ def run_auto_migrations(engine):
                         logger.info(f"Successfully migrated 'followups' table: added column '{col_name}'")
                     except Exception as e:
                         logger.warning(f"Column migration '{col_name}' on 'followups' skipped or error: {e}")
+
+        # 3. WhatsApp messages table verification
+        if "whatsapp_messages" in tables:
+            wa_columns = {col["name"] for col in inspector.get_columns("whatsapp_messages")}
+            new_wa_cols = [
+                ("metadata_json", "TEXT"),
+                ("delivered_at", "DATETIME"),
+                ("read_at", "DATETIME"),
+                ("replied_at", "DATETIME"),
+            ]
+            for col_name, col_type in new_wa_cols:
+                if col_name not in wa_columns:
+                    try:
+                        conn.execute(text(f"ALTER TABLE whatsapp_messages ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Successfully migrated 'whatsapp_messages' table: added column '{col_name}'")
+                    except Exception as e:
+                        logger.warning(f"Column migration '{col_name}' on 'whatsapp_messages' skipped or error: {e}")

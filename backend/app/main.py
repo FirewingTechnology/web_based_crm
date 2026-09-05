@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
-from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route, registration, payments, saas_admin
+from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route, registration, payments, saas_admin, whatsapp
 
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -128,6 +128,7 @@ app.include_router(settings_route.router, prefix=api_v1)
 app.include_router(registration.router, prefix=api_v1)
 app.include_router(payments.router, prefix=api_v1)
 app.include_router(saas_admin.router, prefix=api_v1)
+app.include_router(whatsapp.router, prefix=api_v1)
 
 @app.get("/")
 def root():

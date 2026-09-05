@@ -166,7 +166,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                     <Phone className="h-4 w-4 text-blue-400 shrink-0" />
                     <span className="font-semibold text-white truncate">{activeLead.phone}</span>
                   </div>
-                  <WhatsAppButton phone={activeLead.phone} leadName={activeLead.name} variant="icon" />
+                  <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="icon" onMessageSent={onLeadUpdated} />
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <Mail className="h-4 w-4 text-purple-400 shrink-0" />
@@ -202,7 +202,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <WhatsAppButton phone={activeLead.phone} leadName={activeLead.name} variant="button" />
+                  <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="button" onMessageSent={onLeadUpdated} />
                   <Button
                     size="sm"
                     variant="primary"
@@ -321,15 +321,23 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        advisorData.suggested_channel === 'WhatsApp'
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                          : advisorData.suggested_channel === 'Call'
-                          ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                          : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
-                      }`}>
-                        {advisorData.suggested_channel}
-                      </span>
+                      {advisorData.suggested_channel === 'WhatsApp' ? (
+                        <WhatsAppButton
+                          leadId={activeLead.id}
+                          phone={activeLead.phone}
+                          leadName={activeLead.name}
+                          variant="compact"
+                          onMessageSent={onLeadUpdated}
+                        />
+                      ) : (
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          advisorData.suggested_channel === 'Call'
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                            : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                        }`}>
+                          {advisorData.suggested_channel}
+                        </span>
+                      )}
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                         advisorData.urgency === 'Urgent'
                           ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'

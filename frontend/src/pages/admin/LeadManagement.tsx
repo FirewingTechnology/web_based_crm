@@ -234,7 +234,13 @@ export const LeadManagement: React.FC = () => {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
-          <WhatsAppButton phone={row.original.phone} leadName={row.original.name} variant="icon" />
+          <WhatsAppButton 
+            leadId={row.original.id}
+            phone={row.original.phone} 
+            leadName={row.original.name} 
+            variant="icon" 
+            onMessageSent={loadLeads}
+          />
           <button
             onClick={() => {
               setSelectedLead(row.original);

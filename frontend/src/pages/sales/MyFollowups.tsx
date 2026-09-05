@@ -70,7 +70,13 @@ export const MyFollowups: React.FC = () => {
             <p className="font-medium text-slate-200">{row.original.lead_name}</p>
             <p className="text-slate-400 text-[11px]">{row.original.lead_phone}</p>
           </div>
-          <WhatsAppButton phone={row.original.lead_phone} leadName={row.original.lead_name} variant="icon" />
+          <WhatsAppButton 
+            leadId={row.original.lead_id}
+            phone={row.original.lead_phone} 
+            leadName={row.original.lead_name} 
+            variant="icon" 
+            onMessageSent={loadFollowups}
+          />
         </div>
       ),
     },

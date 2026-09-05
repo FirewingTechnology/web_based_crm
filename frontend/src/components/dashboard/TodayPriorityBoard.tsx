@@ -300,7 +300,13 @@ export const TodayPriorityBoard: React.FC<TodayPriorityBoardProps> = ({
                 {/* Bottom Action Bar */}
                 <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
                   <div className="flex items-center gap-1.5">
-                    <WhatsAppButton phone={item.lead_phone} leadName={item.lead_name} variant="icon" />
+                    <WhatsAppButton 
+                      leadId={item.lead_id} 
+                      phone={item.lead_phone} 
+                      leadName={item.lead_name} 
+                      variant="icon" 
+                      onMessageSent={loadPriorities}
+                    />
                     <a
                       href={`tel:${item.lead_phone}`}
                       className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition"

@@ -15,6 +15,7 @@ from app.models.saas import (
     Payment, PaymentLog, PaymentWebhook, License, OrganizationSetting,
     EmailLog, OTP, RegistrationRequest, DemoAudit, WebsiteVisit
 )
+from app.models.whatsapp import WhatsAppMessage
 
 __all__ = [
     "Base",
@@ -54,6 +55,7 @@ __all__ = [
     "OTP",
     "RegistrationRequest",
     "DemoAudit",
-    "WebsiteVisit"
+    "WebsiteVisit",
+    "WhatsAppMessage"
 ]
 

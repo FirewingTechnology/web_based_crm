@@ -10,6 +10,11 @@ from app.models.followup import Followup, FollowupStatus, FollowupType
 def get_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
+def normalize_dt(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is not None and dt.tzinfo is not None:
+        return dt.replace(tzinfo=None)
+    return dt
+
 def calculate_lead_health(lead: Lead, db: Session, now: Optional[datetime] = None) -> Dict[str, Any]:
     """
     Computes real estate revenue health score (0-100), health category,
@@ -17,6 +22,8 @@ def calculate_lead_health(lead: Lead, db: Session, now: Optional[datetime] = Non
     """
     if now is None:
         now = get_now()
+    else:
+        now = normalize_dt(now)
 
     # Terminal state: Booked Deal
     status_val = lead.status.value if hasattr(lead.status, "value") else str(lead.status)
@@ -40,17 +47,17 @@ def calculate_lead_health(lead: Lead, db: Session, now: Optional[datetime] = Non
             "health_reasons": [f"Deal marked lost: {lost_cause}"],
             "recommended_action": "Evaluate lost reason or schedule for 90-day cold database re-engagement.",
             "is_high_value": (lead.budget_max or lead.budget_min or 0) >= 100,
-            "days_in_stage": max(0, (now - (lead.stage_entered_at or lead.updated_at or lead.created_at or now)).days),
-            "days_since_last_activity": max(0, (now - (lead.last_activity_at or lead.updated_at or lead.created_at or now)).days)
+            "days_in_stage": max(0, (now - normalize_dt(lead.stage_entered_at or lead.updated_at or lead.created_at or now)).days),
+            "days_since_last_activity": max(0, (now - normalize_dt(lead.last_activity_at or lead.updated_at or lead.created_at or now)).days)
         }
 
     score = 100
     reasons: List[str] = []
     actions: List[str] = []
 
-    created_at = lead.created_at or now
-    last_act = lead.last_activity_at or lead.updated_at or created_at
-    stage_entered = lead.stage_entered_at or lead.updated_at or created_at
+    created_at = normalize_dt(lead.created_at or now)
+    last_act = normalize_dt(lead.last_activity_at or lead.updated_at or created_at)
+    stage_entered = normalize_dt(lead.stage_entered_at or lead.updated_at or created_at)
 
     days_since_last_activity = max(0, (now - last_act).days)
     hours_since_last_activity = max(0, (now - last_act).total_seconds() / 3600.0)
@@ -88,7 +95,7 @@ def calculate_lead_health(lead: Lead, db: Session, now: Optional[datetime] = Non
         if f.status == FollowupStatus.OVERDUE or (f.scheduled_at and f.scheduled_at < now)
     ]
     if overdue_followups:
-        max_overdue_hours = max((now - f.scheduled_at).total_seconds() / 3600.0 for f in overdue_followups if f.scheduled_at)
+        max_overdue_hours = max((now - normalize_dt(f.scheduled_at)).total_seconds() / 3600.0 for f in overdue_followups if f.scheduled_at)
         if max_overdue_hours >= 72:
             score -= 35
             reasons.append(f"Severe overdue follow-up: Task pending for {int(max_overdue_hours // 24)} days past schedule.")
