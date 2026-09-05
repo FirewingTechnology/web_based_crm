@@ -68,3 +68,20 @@ def run_auto_migrations(engine):
                         logger.info(f"Successfully migrated 'whatsapp_messages' table: added column '{col_name}'")
                     except Exception as e:
                         logger.warning(f"Column migration '{col_name}' on 'whatsapp_messages' skipped or error: {e}")
+
+        # 4. Broker profiles CP tiers & hierarchy
+        if "broker_profiles" in tables:
+            broker_columns = {col["name"] for col in inspector.get_columns("broker_profiles")}
+            new_broker_cols = [
+                ("tier", "VARCHAR(50) DEFAULT 'Silver'"),
+                ("parent_broker_id", "INTEGER"),
+                ("rera_number", "VARCHAR(100)"),
+            ]
+            for col_name, col_type in new_broker_cols:
+                if col_name not in broker_columns:
+                    try:
+                        conn.execute(text(f"ALTER TABLE broker_profiles ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Successfully migrated 'broker_profiles' table: added column '{col_name}'")
+                    except Exception as e:
+                        logger.warning(f"Column migration '{col_name}' on 'broker_profiles' skipped or error: {e}")

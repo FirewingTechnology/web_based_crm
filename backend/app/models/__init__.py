@@ -4,7 +4,7 @@ from app.models.builder import Builder
 from app.models.project import Project, ProjectStatus
 from app.models.lead import Lead, LeadNote, LeadStatusHistory, LeadStatus, LeadPriority
 from app.models.followup import Followup, FollowupType, FollowupStatus
-from app.models.broker import BrokerProfile
+from app.models.broker import BrokerProfile, CoBrokingDeal
 from app.models.sales_target import SalesTarget
 from app.models.booking import Booking, BookingStatus
 from app.models.commission import Commission, PayoutStatus
@@ -34,6 +34,7 @@ __all__ = [
     "FollowupType",
     "FollowupStatus",
     "BrokerProfile",
+    "CoBrokingDeal",
     "SalesTarget",
     "Booking",
     "BookingStatus",
