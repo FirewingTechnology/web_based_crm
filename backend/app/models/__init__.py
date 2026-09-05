@@ -17,6 +17,7 @@ from app.models.saas import (
 )
 from app.models.whatsapp import WhatsAppMessage
 from app.models.site_visit import SiteVisit, SiteVisitStatus, BuyerInterestLevel
+from app.models.document import BuyerDocument, DocumentType, VerificationStatus
 
 __all__ = [
     "Base",

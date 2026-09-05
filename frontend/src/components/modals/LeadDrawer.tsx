@@ -14,6 +14,7 @@ import { WhatsAppButton } from '../common/WhatsAppButton';
 import { SiteVisitScheduleModal } from './SiteVisitScheduleModal';
 import { MatchedInventoryTab } from './MatchedInventoryTab';
 import { CostSheetModal } from './CostSheetModal';
+import { BuyerKYCTab } from './BuyerKYCTab';
 
 interface LeadDrawerProps {
   lead: Lead | null;
@@ -39,7 +40,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   const [isAdvancingStage, setIsAdvancingStage] = useState(false);
   const [isSiteVisitModalOpen, setIsSiteVisitModalOpen] = useState(false);
   const [selectedVisitProjectId, setSelectedVisitProjectId] = useState<number | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'advisor' | 'inventory'>('advisor');
+  const [activeTab, setActiveTab] = useState<'advisor' | 'inventory' | 'kyc'>('advisor');
   const [isCostSheetModalOpen, setIsCostSheetModalOpen] = useState(false);
 
   const fetchLeadData = async () => {
@@ -362,6 +363,19 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                 <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                 <span>AI Matched Inventory</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('kyc')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  activeTab === 'kyc'
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                <ShieldAlert className="h-3.5 w-3.5 text-indigo-400" />
+                <span>Buyer KYC & Vault</span>
+              </button>
             </div>
 
             {/* Middle Scrollable Section */}
@@ -375,6 +389,11 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                     setSelectedVisitProjectId(projId);
                     setIsSiteVisitModalOpen(true);
                   }}
+                />
+              ) : activeTab === 'kyc' ? (
+                <BuyerKYCTab
+                  leadId={activeLead.id}
+                  leadName={activeLead.name}
                 />
               ) : (
                 <>

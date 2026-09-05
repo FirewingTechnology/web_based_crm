@@ -135,9 +135,44 @@ def run_auto_migrations(engine):
                     try:
                         conn.execute(text(f"ALTER TABLE notifications ADD COLUMN {col_name} {col_type};"))
                         conn.commit()
-                        logger.info(f"Successfully migrated 'notifications' table: added column '{col_name}'")
                     except Exception as e:
-                        logger.warning(f"Column migration '{col_name}' on 'notifications' skipped or error: {e}")
+                        logger.warning(f"Failed to add column '{col_name}' to 'notifications': {e}")
+        # 7. Buyer Documents & KYC Vault Table
+        if "buyer_documents" not in tables:
+            try:
+                conn.execute(text("""
+                    CREATE TABLE buyer_documents (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        organization_id INTEGER,
+                        lead_id INTEGER,
+                        booking_id INTEGER,
+                        uploaded_by_id INTEGER NOT NULL,
+                        document_type VARCHAR(50) DEFAULT 'OTHER' NOT NULL,
+                        title VARCHAR(200) NOT NULL,
+                        file_name VARCHAR(255) NOT NULL,
+                        file_url VARCHAR(500) NOT NULL,
+                        file_size_bytes INTEGER,
+                        mime_type VARCHAR(100) DEFAULT 'application/pdf' NOT NULL,
+                        document_number VARCHAR(100),
+                        verification_status VARCHAR(50) DEFAULT 'PENDING' NOT NULL,
+                        verified_by_id INTEGER,
+                        verified_at DATETIME,
+                        rejection_reason TEXT,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        is_deleted BOOLEAN DEFAULT 0 NOT NULL,
+                        FOREIGN KEY (organization_id) REFERENCES organizations(id),
+                        FOREIGN KEY (lead_id) REFERENCES leads(id),
+                        FOREIGN KEY (booking_id) REFERENCES bookings(id),
+                        FOREIGN KEY (uploaded_by_id) REFERENCES users(id),
+                        FOREIGN KEY (verified_by_id) REFERENCES users(id)
+                    );
+                """))
+                conn.commit()
+                logger.info("Successfully created 'buyer_documents' table for KYC management")
+            except Exception as e:
+                logger.warning(f"Failed to auto-create 'buyer_documents' table: {e}")
+
 
 
 
