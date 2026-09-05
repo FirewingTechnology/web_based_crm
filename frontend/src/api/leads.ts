@@ -62,4 +62,8 @@ export const leadsApi = {
     const res = await apiClient.get<import('../types/lead').LeadHealthDetail>(`/leads/${id}/health`);
     return res.data;
   },
+  getNextBestAction: async (id: number): Promise<import('../types/advisor').NextBestAction> => {
+    const res = await apiClient.get<import('../types/advisor').NextBestAction>(`/leads/${id}/next-action`);
+    return res.data;
+  },
 };

@@ -17,9 +17,11 @@ from app.schemas.lead import (
     LeadCreate, LeadUpdate, LeadResponse, LeadNoteCreate, LeadNoteResponse,
     LeadStatusHistoryResponse, LeadHealthSummaryResponse, LeadHealthDetailResponse
 )
+from app.schemas.advisor import NextBestActionResponse
 from app.services.lead_health_service import (
     calculate_lead_health, update_lead_health, bulk_recalculate_health, get_health_summary
 )
+from app.services.stage_advisor_service import get_next_best_action
 from app.middleware.auth_middleware import get_current_user
 from app.utils.csv_utils import generate_csv_response, parse_leads_csv
 
@@ -230,6 +232,21 @@ def get_lead_health_detail(
         days_in_stage=health["days_in_stage"],
         days_since_last_activity=health["days_since_last_activity"]
     )
+
+@router.get("/{lead_id}/next-action", response_model=NextBestActionResponse)
+def get_lead_next_action(
+    lead_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Lead).filter(Lead.id == lead_id, Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        query = query.filter(Lead.organization_id == current_user.organization_id)
+    lead = query.first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    return get_next_best_action(lead, db)
 
 @router.get("/{lead_id}", response_model=LeadResponse)
 def get_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Phone, Mail, MapPin, Tag, Calendar, Plus, MessageSquare, History, User,
-  ShieldAlert, Activity, AlertTriangle, Zap, CheckCircle2, Clock, Sparkles
+  ShieldAlert, Activity, AlertTriangle, Zap, CheckCircle2, Clock, Sparkles,
+  ArrowRight, Lightbulb, Compass, MessageCircle
 } from 'lucide-react';
 import { Lead } from '../../types/lead';
+import { NextBestAction } from '../../types/advisor';
 import { leadsApi } from '../../api/leads';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -28,12 +30,22 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   onUpdateStatus,
 }) => {
   const [activeLead, setActiveLead] = useState<Lead | null>(lead);
+  const [advisorData, setAdvisorData] = useState<NextBestAction | null>(null);
   const [newNote, setNewNote] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
+  const [isAdvancingStage, setIsAdvancingStage] = useState(false);
 
   useEffect(() => {
     setActiveLead(lead);
   }, [lead]);
+
+  // Fetch Next Best Action Advisor
+  useEffect(() => {
+    if (!isOpen || !activeLead?.id) return;
+    leadsApi.getNextBestAction(activeLead.id)
+      .then(setAdvisorData)
+      .catch(console.error);
+  }, [isOpen, activeLead?.id, activeLead?.status]);
 
   // Real-time polling to sync notes and status history while drawer is open
   useEffect(() => {
@@ -54,6 +66,22 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   }, [isOpen, lead?.id]);
 
   if (!activeLead) return null;
+
+  const handleAdvanceStage = async () => {
+    if (!advisorData?.suggested_next_status || !onUpdateStatus || !activeLead) return;
+    setIsAdvancingStage(true);
+    try {
+      await onUpdateStatus(activeLead.id, advisorData.suggested_next_status);
+      const updated = await leadsApi.getLead(activeLead.id);
+      setActiveLead(updated);
+      const updatedAdv = await leadsApi.getNextBestAction(activeLead.id);
+      setAdvisorData(updatedAdv);
+    } catch (err) {
+      console.error('Failed to advance stage:', err);
+    } finally {
+      setIsAdvancingStage(false);
+    }
+  };
 
   const handleNoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -281,6 +309,110 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
 
             {/* Middle Scrollable History & Notes */}
             <div className="flex-1 overflow-y-auto space-y-4 my-2 pr-1">
+              {/* Next Best Action & Stage Transition Advisor */}
+              {advisorData && (
+                <div className="p-4 rounded-xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-blue-950/30 border border-blue-500/30 shadow-lg space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Compass className="h-4 w-4 text-blue-400" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                        Next Best Action Advisor
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        advisorData.suggested_channel === 'WhatsApp'
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                          : advisorData.suggested_channel === 'Call'
+                          ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                          : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                      }`}>
+                        {advisorData.suggested_channel}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        advisorData.urgency === 'Urgent'
+                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                          : advisorData.urgency === 'High'
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                      }`}>
+                        {advisorData.urgency}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Primary Action */}
+                  <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 flex items-start gap-2.5">
+                    <Zap className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 block">Recommended Step</span>
+                      <p className="text-xs font-bold text-white mt-0.5">{advisorData.primary_action}</p>
+                    </div>
+                  </div>
+
+                  {/* Contextual Talking Points */}
+                  {advisorData.talking_points && advisorData.talking_points.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
+                        <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
+                        <span>Recommended Pitch & Talking Points:</span>
+                      </div>
+                      <div className="space-y-1 pl-1">
+                        {advisorData.talking_points.map((pt, idx) => (
+                          <div key={idx} className="flex items-start gap-1.5 text-xs text-slate-300">
+                            <span className="text-blue-400 font-bold shrink-0">•</span>
+                            <span className="text-[11px] leading-relaxed text-slate-300">{pt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Stage Transition Readiness Gate */}
+                  <div className="pt-2.5 border-t border-slate-800/80">
+                    {advisorData.stage_progression_readiness && advisorData.suggested_next_status ? (
+                      <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
+                              Milestone Criteria Met
+                            </span>
+                            <span className="text-xs text-slate-200">
+                              Ready to advance to: <strong className="text-white font-bold">{advisorData.suggested_next_status}</strong>
+                            </span>
+                          </div>
+                        </div>
+
+                        {onUpdateStatus && (
+                          <button
+                            onClick={handleAdvanceStage}
+                            disabled={isAdvancingStage}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 disabled:opacity-50 shrink-0"
+                          >
+                            <span>Advance Stage</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ) : advisorData.blockers && advisorData.blockers.length > 0 ? (
+                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
+                        <div className="flex items-center gap-1.5 text-amber-400 font-semibold mb-1">
+                          <AlertTriangle className="h-3.5 w-3.5" />
+                          <span>Stage Prerequisites Incomplete ({advisorData.current_status} → {advisorData.suggested_next_status || 'Next'}):</span>
+                        </div>
+                        <ul className="space-y-0.5 pl-5 list-disc text-[11px] text-slate-300">
+                          {advisorData.blockers.map((b, idx) => (
+                            <li key={idx}>{b}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+
               {/* Add Note Input */}
               <form onSubmit={handleNoteSubmit} className="space-y-2">
                 <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
