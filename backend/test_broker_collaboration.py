@@ -36,14 +36,15 @@ def test_cp_tiers_and_volume_kickers():
 def test_broker_sub_broker_hierarchy_and_tier_update():
     token = get_auth_token()
     headers = {"Authorization": f"Bearer {token}"}
-    db = SessionLocal()
+    import uuid
+    uid = uuid.uuid4().hex[:6]
 
     # 1. Create Parent Broker
     parent_resp = client.post("/api/v1/brokers", json={
-        "firm_name": "Apex Realty Partners",
+        "firm_name": f"Apex Realty Partners {uid}",
         "contact_person": "Sunil Mehta",
         "phone": "+919811122233",
-        "email": "sunil.apex@testcp.com",
+        "email": f"sunil.{uid}@testcp.com",
         "tier": "Gold",
         "commission_rate": 2.25
     }, headers=headers)
@@ -53,17 +54,17 @@ def test_broker_sub_broker_hierarchy_and_tier_update():
 
     # 2. Create Sub-Broker pointing to parent
     sub_resp = client.post("/api/v1/brokers", json={
-        "firm_name": "Apex Suburban Associates",
+        "firm_name": f"Apex Suburban Associates {uid}",
         "contact_person": "Kavita Rao",
         "phone": "+919811122244",
-        "email": "kavita.sub@testcp.com",
+        "email": f"kavita.{uid}@testcp.com",
         "parent_broker_id": parent_id,
         "tier": "Silver",
         "commission_rate": 1.5
     }, headers=headers)
     assert sub_resp.status_code == 201
     sub_data = sub_resp.json()
-    assert sub_data["parent_firm_name"] == "Apex Realty Partners"
+    assert f"Apex Realty Partners {uid}" in sub_data["parent_firm_name"]
 
     # Verify parent now has sub_broker_count >= 1
     fetch_parent = client.get(f"/api/v1/brokers/{parent_id}", headers=headers)

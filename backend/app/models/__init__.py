@@ -16,6 +16,7 @@ from app.models.saas import (
     EmailLog, OTP, RegistrationRequest, DemoAudit, WebsiteVisit
 )
 from app.models.whatsapp import WhatsAppMessage
+from app.models.site_visit import SiteVisit, SiteVisitStatus, BuyerInterestLevel
 
 __all__ = [
     "Base",
@@ -57,6 +58,9 @@ __all__ = [
     "RegistrationRequest",
     "DemoAudit",
     "WebsiteVisit",
-    "WhatsAppMessage"
+    "WhatsAppMessage",
+    "SiteVisit",
+    "SiteVisitStatus",
+    "BuyerInterestLevel"
 ]
 

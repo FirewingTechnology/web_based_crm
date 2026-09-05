@@ -19,6 +19,7 @@ import {
   LogOut,
   X,
   ShieldCheck,
+  Car,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -42,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
   const adminNavItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Lead Management', path: '/admin/leads', icon: Users },
+    { label: 'Site Visits', path: '/admin/site-visits', icon: Car },
     { label: 'Followups', path: '/admin/followups', icon: CalendarCheck },
     { label: 'Bookings', path: '/admin/bookings', icon: FileCheck2 },
     { label: 'Commission', path: '/admin/commissions', icon: Coins },
@@ -57,6 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
   const salesNavItems = [
     { label: 'Sales Dashboard', path: '/sales/dashboard', icon: LayoutDashboard },
     { label: 'My Leads', path: '/sales/leads', icon: Users },
+    { label: 'Site Visits', path: '/sales/site-visits', icon: Car },
     { label: 'My Followups', path: '/sales/followups', icon: CalendarCheck },
     { label: 'My Bookings', path: '/sales/bookings', icon: FileCheck2 },
     { label: 'Projects Catalog', path: '/sales/projects', icon: FolderKanban },

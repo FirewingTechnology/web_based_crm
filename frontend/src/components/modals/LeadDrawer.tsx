@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Phone, Mail, MapPin, Tag, Calendar, Plus, MessageSquare, History, User,
   ShieldAlert, Activity, AlertTriangle, Zap, CheckCircle2, Clock, Sparkles,
-  ArrowRight, Lightbulb, Compass, MessageCircle
+  ArrowRight, Lightbulb, Compass, MessageCircle, Car
 } from 'lucide-react';
 import { Lead } from '../../types/lead';
 import { NextBestAction } from '../../types/advisor';
@@ -11,6 +11,7 @@ import { leadsApi } from '../../api/leads';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { WhatsAppButton } from '../common/WhatsAppButton';
+import { SiteVisitScheduleModal } from './SiteVisitScheduleModal';
 
 interface LeadDrawerProps {
   lead: Lead | null;
@@ -34,6 +35,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   const [newNote, setNewNote] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isAdvancingStage, setIsAdvancingStage] = useState(false);
+  const [isSiteVisitModalOpen, setIsSiteVisitModalOpen] = useState(false);
 
   useEffect(() => {
     setActiveLead(lead);
@@ -205,11 +207,20 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                   <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="button" onMessageSent={onLeadUpdated} />
                   <Button
                     size="sm"
+                    variant="outline"
+                    className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+                    icon={<Car className="h-4 w-4 text-emerald-400" />}
+                    onClick={() => setIsSiteVisitModalOpen(true)}
+                  >
+                    Site Visit
+                  </Button>
+                  <Button
+                    size="sm"
                     variant="primary"
                     icon={<Calendar className="h-4 w-4" />}
                     onClick={() => onOpenFollowupModal(activeLead)}
                   >
-                    Schedule Followup
+                    Followup
                   </Button>
                 </div>
               </div>
@@ -487,6 +498,20 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Embedded VIP Site Visit Schedule Modal */}
+      {activeLead && isSiteVisitModalOpen && (
+        <SiteVisitScheduleModal
+          isOpen={isSiteVisitModalOpen}
+          onClose={() => setIsSiteVisitModalOpen(false)}
+          leadId={activeLead.id}
+          leadName={activeLead.name}
+          preferredProjectId={activeLead.preferred_project_id}
+          onVisitScheduled={() => {
+            fetchLeadData();
+          }}
+        />
       )}
     </AnimatePresence>
   );

@@ -21,6 +21,7 @@ import { ReportManagement } from '../pages/admin/ReportManagement';
 import { NotificationsPage } from '../pages/admin/NotificationsPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
 import { SuperAdminDashboard } from '../pages/admin/SuperAdminDashboard';
+import { SiteVisitManagement } from '../pages/admin/SiteVisitManagement';
 
 // Sales Portal Pages
 import { SalesDashboard } from '../pages/sales/SalesDashboard';
@@ -52,6 +53,7 @@ export const AppRouter: React.FC = () => {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/leads" element={<LeadManagement />} />
+            <Route path="/admin/site-visits" element={<SiteVisitManagement />} />
             <Route path="/admin/followups" element={<FollowupManagement />} />
             <Route path="/admin/bookings" element={<BookingManagement />} />
             <Route path="/admin/commissions" element={<CommissionManagement />} />
@@ -72,6 +74,7 @@ export const AppRouter: React.FC = () => {
           <Route element={<SalesLayout />}>
             <Route path="/sales/dashboard" element={<SalesDashboard />} />
             <Route path="/sales/leads" element={<MyLeads />} />
+            <Route path="/sales/site-visits" element={<SiteVisitManagement />} />
             <Route path="/sales/followups" element={<MyFollowups />} />
             <Route path="/sales/bookings" element={<MyBookings />} />
             <Route path="/sales/projects" element={<ProjectsCatalog />} />
