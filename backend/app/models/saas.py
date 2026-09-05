@@ -182,3 +182,19 @@ class DemoAudit(BaseModel):
     ip_address = Column(String(100), nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
+
+class WebsiteVisit(BaseModel):
+    __tablename__ = "website_visits"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    visitor_id = Column(String(100), index=True, nullable=False)
+    session_id = Column(String(100), index=True, nullable=True)
+    page_path = Column(String(255), index=True, nullable=False)
+    page_title = Column(String(255), nullable=True)
+    referrer = Column(String(500), nullable=True)
+    ip_address = Column(String(100), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+    device_type = Column(String(50), nullable=True)  # desktop, mobile, tablet
+    browser = Column(String(50), nullable=True)      # Chrome, Safari, Firefox, Edge, etc.
+    os = Column(String(50), nullable=True)           # Windows, macOS, iOS, Android, Linux, etc.
+

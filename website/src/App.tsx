@@ -5,6 +5,7 @@ import { WebsiteNavbar } from './components/WebsiteNavbar';
 import { WebsiteFooter } from './components/WebsiteFooter';
 import { DemoModal } from './components/DemoModal';
 import { ScrollToTop } from './components/ScrollToTop';
+import { WebsiteTracker } from './components/WebsiteTracker';
 
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -28,6 +29,7 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <WebsiteTracker />
       <div className="bg-[#050505] min-h-screen text-slate-100 flex flex-col justify-between selection:bg-[#C8A45D] selection:text-black">
         <WebsiteNavbar onOpenDemo={openDemo} />
         <main className="flex-1">

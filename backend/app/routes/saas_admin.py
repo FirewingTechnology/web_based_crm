@@ -1,10 +1,18 @@
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Organization, Workspace, Subscription, Payment, User, UserRole, Plan, Lead
-from app.schemas.saas import SaaSAnalyticsResponse, CreateOfflineTenantRequest, UpdateQuotaRequest, UpgradePlanRequest, ExtendSubscriptionRequest
+from app.models import (
+    Organization, Workspace, Subscription, Payment, User, UserRole, Plan, Lead,
+    WebsiteVisit, RegistrationRequest, DemoAudit
+)
+from app.schemas.saas import (
+    SaaSAnalyticsResponse, CreateOfflineTenantRequest, UpdateQuotaRequest, UpgradePlanRequest, ExtendSubscriptionRequest,
+    WebsiteAnalyticsResponse, WebsiteAnalyticsSummary, DailyTrendItem, TopPageItem, BreakdownItem, RecentVisitItem,
+    WebsiteRegisteredUserItem
+)
 from app.middleware.auth_middleware import get_current_user
 from app.utils.security import get_password_hash
 from app.services.email_service import send_welcome_credentials_email
@@ -57,6 +65,22 @@ def get_saas_analytics(
     else:
         growth_rate_pct = 0.0
 
+    # Website Traffic & Registration Metrics
+    website_total_visits = db.query(WebsiteVisit).count()
+    website_unique_visitors = db.query(func.count(func.distinct(WebsiteVisit.visitor_id))).scalar() or 0
+
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    website_today_visitors = db.query(func.count(func.distinct(WebsiteVisit.visitor_id))).filter(
+        WebsiteVisit.created_at >= today_start
+    ).scalar() or 0
+
+    # Distinct emails from DemoAudit and RegistrationRequest
+    demo_emails = [e[0].lower() for e in db.query(DemoAudit.email).distinct().all()]
+    reg_emails = [e[0].lower() for e in db.query(RegistrationRequest.email).distinct().all()]
+    website_registered_users = len(set(demo_emails + reg_emails))
+
+    conversion_rate = round((website_registered_users / max(website_unique_visitors, 1)) * 100, 1) if website_unique_visitors > 0 else 0.0
+
     return SaaSAnalyticsResponse(
         mrr=mrr,
         arr=arr,
@@ -64,7 +88,12 @@ def get_saas_analytics(
         active_subscriptions=active_subscriptions,
         demo_workspaces=demo_workspaces,
         total_revenue=total_revenue,
-        growth_rate_pct=growth_rate_pct
+        growth_rate_pct=growth_rate_pct,
+        website_total_visits=website_total_visits,
+        website_unique_visitors=website_unique_visitors,
+        website_today_visitors=website_today_visitors,
+        website_registered_users=website_registered_users,
+        website_conversion_rate=conversion_rate
     )
 
 @router.get("/organizations")
@@ -442,4 +471,254 @@ def get_recent_payments(
             "created_at": p.created_at.strftime("%Y-%m-%d %H:%M") if getattr(p, 'created_at', None) else "N/A"
         })
     return result
+
+
+# ─── Website Traffic Analytics & Registered Users Endpoints ───────────────────
+
+PAGE_TITLE_MAP = {
+    "/": "Homepage",
+    "/about": "About RealVion",
+    "/features": "Features & Voice Reminders",
+    "/pricing": "Plans & Pricing",
+    "/solutions": "Solutions & Workflows",
+    "/industries": "Industries",
+    "/blog": "Real Estate Insights Blog",
+    "/faq": "Frequently Asked Questions",
+    "/contact": "Contact & Support",
+    "/register": "Free Trial Registration",
+    "/privacy": "Privacy Policy",
+    "/privacy-policy": "Privacy Policy",
+    "/terms": "Terms of Service",
+    "/terms-of-service": "Terms of Service",
+    "/security": "Security Specifications",
+    "/security-specs": "Security Specifications",
+}
+
+@router.get("/website-analytics", response_model=WebsiteAnalyticsResponse)
+def get_website_analytics(
+    db: Session = Depends(get_db),
+    admin: User = Depends(check_superadmin_access)
+):
+    """Aggregates website traffic, unique visitors, conversion rate, top pages, and recent visits."""
+    now = datetime.utcnow()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = today_start - timedelta(days=7)
+
+    total_visits = db.query(WebsiteVisit).count()
+    unique_visitors = db.query(func.count(func.distinct(WebsiteVisit.visitor_id))).scalar() or 0
+    today_visitors = db.query(func.count(func.distinct(WebsiteVisit.visitor_id))).filter(WebsiteVisit.created_at >= today_start).scalar() or 0
+    this_week_visitors = db.query(func.count(func.distinct(WebsiteVisit.visitor_id))).filter(WebsiteVisit.created_at >= week_start).scalar() or 0
+
+    demo_emails = [e[0].lower() for e in db.query(DemoAudit.email).distinct().all()]
+    reg_emails = [e[0].lower() for e in db.query(RegistrationRequest.email).distinct().all()]
+    total_registered_users = len(set(demo_emails + reg_emails))
+
+    conversion_rate = round((total_registered_users / max(unique_visitors, 1)) * 100, 1) if unique_visitors > 0 else 0.0
+
+    summary = WebsiteAnalyticsSummary(
+        total_visits=total_visits,
+        unique_visitors=unique_visitors,
+        today_visitors=today_visitors,
+        this_week_visitors=this_week_visitors,
+        total_registered_users=total_registered_users,
+        conversion_rate_pct=conversion_rate
+    )
+
+    # 14-day trends
+    daily_trends = []
+    for i in range(13, -1, -1):
+        day_date = (now - timedelta(days=i)).date()
+        day_start = datetime.combine(day_date, datetime.min.time())
+        day_end = datetime.combine(day_date, datetime.max.time())
+        
+        day_visits = db.query(WebsiteVisit).filter(
+            WebsiteVisit.created_at >= day_start,
+            WebsiteVisit.created_at <= day_end
+        ).count()
+        
+        day_uniq = db.query(func.count(func.distinct(WebsiteVisit.visitor_id))).filter(
+            WebsiteVisit.created_at >= day_start,
+            WebsiteVisit.created_at <= day_end
+        ).scalar() or 0
+
+        day_regs = db.query(DemoAudit).filter(
+            DemoAudit.created_at >= day_start,
+            DemoAudit.created_at <= day_end
+        ).count()
+        day_reg_reqs = db.query(RegistrationRequest).filter(
+            RegistrationRequest.created_at >= day_start,
+            RegistrationRequest.created_at <= day_end
+        ).count()
+        day_regs_total = max(day_regs, day_reg_reqs)
+
+        daily_trends.append(DailyTrendItem(
+            date=day_date.strftime("%Y-%m-%d"),
+            visits=day_visits,
+            unique_visitors=day_uniq,
+            registrations=day_regs_total
+        ))
+
+    # Top visited pages
+    top_page_rows = db.query(
+        WebsiteVisit.page_path,
+        func.count(WebsiteVisit.id).label("views"),
+        func.count(func.distinct(WebsiteVisit.visitor_id)).label("unique_visitors")
+    ).group_by(WebsiteVisit.page_path).order_by(func.count(WebsiteVisit.id).desc()).limit(10).all()
+
+    top_pages = []
+    for row in top_page_rows:
+        pct = round((row.views / max(total_visits, 1)) * 100, 1)
+        clean_title = PAGE_TITLE_MAP.get(row.page_path, row.page_path.replace("-", " ").replace("/", " ").strip().title() or "Page")
+        top_pages.append(TopPageItem(
+            page_path=row.page_path,
+            page_title=clean_title,
+            views=row.views,
+            unique_visitors=row.unique_visitors,
+            pct=pct
+        ))
+
+    # Device breakdown
+    device_rows = db.query(
+        WebsiteVisit.device_type,
+        func.count(WebsiteVisit.id).label("count")
+    ).group_by(WebsiteVisit.device_type).order_by(func.count(WebsiteVisit.id).desc()).all()
+
+    device_breakdown = []
+    for d_type, count in device_rows:
+        label = (d_type or "Desktop").title()
+        pct = round((count / max(total_visits, 1)) * 100, 1)
+        device_breakdown.append(BreakdownItem(name=label, count=count, pct=pct))
+
+    if not device_breakdown and total_visits == 0:
+        device_breakdown = [
+            BreakdownItem(name="Desktop", count=0, pct=0.0),
+            BreakdownItem(name="Mobile", count=0, pct=0.0)
+        ]
+
+    # Browser breakdown
+    browser_rows = db.query(
+        WebsiteVisit.browser,
+        func.count(WebsiteVisit.id).label("count")
+    ).group_by(WebsiteVisit.browser).order_by(func.count(WebsiteVisit.id).desc()).limit(6).all()
+
+    browser_breakdown = []
+    for b_name, count in browser_rows:
+        label = b_name or "Chrome"
+        pct = round((count / max(total_visits, 1)) * 100, 1)
+        browser_breakdown.append(BreakdownItem(name=label, count=count, pct=pct))
+
+    # Recent visits (last 50)
+    recent_rows = db.query(WebsiteVisit).order_by(WebsiteVisit.id.desc()).limit(50).all()
+    recent_visits = [
+        RecentVisitItem(
+            id=v.id,
+            visitor_id=v.visitor_id,
+            page_path=v.page_path,
+            page_title=v.page_title or PAGE_TITLE_MAP.get(v.page_path, v.page_path),
+            referrer=v.referrer,
+            ip_address=v.ip_address or "N/A",
+            device_type=v.device_type or "Desktop",
+            browser=v.browser or "Chrome",
+            os=v.os or "Windows",
+            created_at=v.created_at.strftime("%Y-%m-%d %H:%M:%S") if getattr(v, 'created_at', None) else ""
+        )
+        for v in recent_rows
+    ]
+
+    return WebsiteAnalyticsResponse(
+        summary=summary,
+        daily_trends=daily_trends,
+        top_pages=top_pages,
+        device_breakdown=device_breakdown,
+        browser_breakdown=browser_breakdown,
+        recent_visits=recent_visits
+    )
+
+
+@router.get("/website-registered-users", response_model=List[WebsiteRegisteredUserItem])
+def get_website_registered_users(
+    db: Session = Depends(get_db),
+    admin: User = Depends(check_superadmin_access)
+):
+    """Returns complete list of users who registered via website with company, plan, and contact info."""
+    demo_audits = db.query(DemoAudit).order_by(DemoAudit.id.desc()).all()
+    reg_requests = db.query(RegistrationRequest).order_by(RegistrationRequest.id.desc()).all()
+
+    users = db.query(User).all()
+    user_map = {u.email.lower(): u for u in users}
+
+    orgs = db.query(Organization).all()
+    org_map = {o.id: o for o in orgs}
+
+    subs = db.query(Subscription).all()
+    sub_map = {s.organization_id: s for s in subs}
+
+    reg_req_map = {r.email.lower(): r for r in reg_requests}
+
+    seen_emails = set()
+    items: List[WebsiteRegisteredUserItem] = []
+
+    for demo in demo_audits:
+        em = demo.email.lower()
+        if em in seen_emails:
+            continue
+        seen_emails.add(em)
+
+        u = user_map.get(em)
+        reg = reg_req_map.get(em)
+        org = org_map.get(u.organization_id) if u and u.organization_id else None
+        if not org and u and u.firm_name:
+            org = next((o for o in orgs if o.name.lower() == u.firm_name.lower()), None)
+        sub = sub_map.get(org.id) if org else None
+
+        reg_at = demo.created_at.strftime("%Y-%m-%d %H:%M") if getattr(demo, 'created_at', None) else "2026-01-01"
+        plan = (sub.plan_code if sub and sub.plan_code else (reg.selected_plan_code if reg else "professional")).lower()
+        status_val = sub.status if sub else ("Active" if u else "Trial")
+
+        items.append(WebsiteRegisteredUserItem(
+            id=demo.id,
+            user_id=u.id if u else None,
+            name=u.name if u else (reg.full_name if reg else "Trial User"),
+            email=demo.email,
+            phone=u.phone if u and u.phone else (demo.phone_clean or (reg.phone if reg else "N/A")),
+            company_name=org.name if org else (demo.company_name or (reg.company_name if reg else "Agency Corp")),
+            company_type=org.company_type if org else (reg.company_type if reg else "Agency"),
+            city=org.city if org else (reg.city if reg else "Mumbai"),
+            state=org.state if org else (reg.state if reg else "Maharashtra"),
+            plan_code=plan,
+            status=status_val,
+            registered_at=reg_at,
+            ip_address=demo.ip_address or "N/A",
+            is_active=u.is_active if u else True
+        ))
+
+    for reg in reg_requests:
+        em = reg.email.lower()
+        if em in seen_emails:
+            continue
+        seen_emails.add(em)
+
+        u = user_map.get(em)
+        org = org_map.get(u.organization_id) if u and u.organization_id else None
+        sub = sub_map.get(org.id) if org else None
+
+        reg_at = reg.created_at.strftime("%Y-%m-%d %H:%M") if getattr(reg, 'created_at', None) else "2026-01-01"
+        items.append(WebsiteRegisteredUserItem(
+            id=1000 + reg.id,
+            user_id=u.id if u else None,
+            name=reg.full_name,
+            email=reg.email,
+            phone=reg.phone,
+            company_name=reg.company_name or "Agency Corp",
+            company_type=reg.company_type or "Agency",
+            city=reg.city or "Mumbai",
+            state=reg.state or "Maharashtra",
+            plan_code=reg.selected_plan_code or "professional",
+            status=sub.status if sub else ("Converted" if reg.is_converted else "Pending"),
+            registered_at=reg_at,
+            ip_address="N/A",
+            is_active=u.is_active if u else True
+        ))
+
+    return items
 

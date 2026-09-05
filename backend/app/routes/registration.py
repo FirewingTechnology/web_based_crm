@@ -7,12 +7,13 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import (
-    User, UserRole, Organization, Workspace, Plan, Subscription, OTP, RegistrationRequest, DemoAudit,
+    User, UserRole, Organization, Workspace, Plan, Subscription, OTP, RegistrationRequest, DemoAudit, WebsiteVisit,
     Lead, LeadStatus, LeadPriority, Builder, Project, ProjectStatus, Followup, FollowupType, FollowupStatus
 )
 from app.schemas.saas import (
     SendOTPRequest, SendOTPResponse, VerifyOTPRequest, VerifyOTPResponse,
-    RegisterDemoRequest, RegisterDemoResponse, ValidateRegistrationRequest, ValidateRegistrationResponse, PlanSchema
+    RegisterDemoRequest, RegisterDemoResponse, ValidateRegistrationRequest, ValidateRegistrationResponse, PlanSchema,
+    TrackVisitRequest
 )
 from app.utils.security import get_password_hash, create_access_token, create_refresh_token
 from app.services.email_service import send_otp_email
@@ -447,6 +448,27 @@ def register_demo(req: RegisterDemoRequest, request: Request, db: Session = Depe
     )
     db.add(audit_entry)
 
+    # Record or update RegistrationRequest entry for website registration tracking
+    existing_reg = db.query(RegistrationRequest).filter(func.lower(RegistrationRequest.email) == email).first()
+    if not existing_reg:
+        reg_req = RegistrationRequest(
+            email=email,
+            full_name=req.full_name,
+            phone=req.phone,
+            password_hash=hashed_pwd,
+            company_name=company_name_clean,
+            company_type=req.company_type,
+            city=req.city,
+            state=req.state,
+            selected_plan_code=getattr(req, 'selected_plan_code', 'professional') or 'professional',
+            step_completed=2,
+            is_converted=True
+        )
+        db.add(reg_req)
+    else:
+        existing_reg.is_converted = True
+        existing_reg.step_completed = 2
+
     db.commit()
     db.refresh(admin_user)
 
@@ -509,3 +531,35 @@ def get_plans(db: Session = Depends(get_db)):
         }
     ]
     return plans
+
+
+@router.post("/track-visit")
+def track_website_visit(req: TrackVisitRequest, request: Request, db: Session = Depends(get_db)):
+    """Logs an anonymous website pageview/visit for SuperAdmin traffic analytics."""
+    try:
+        client_ip = request.headers.get("x-forwarded-for")
+        if client_ip:
+            client_ip = client_ip.split(",")[0].strip()
+        else:
+            client_ip = request.client.host if request.client else "unknown"
+
+        user_agent = request.headers.get("user-agent", "")
+
+        visit = WebsiteVisit(
+            visitor_id=req.visitor_id.strip()[:100],
+            session_id=req.session_id.strip()[:100] if req.session_id else None,
+            page_path=req.page_path.strip()[:255] or "/",
+            page_title=req.page_title.strip()[:255] if req.page_title else None,
+            referrer=req.referrer.strip()[:500] if req.referrer else None,
+            ip_address=client_ip[:100],
+            user_agent=user_agent[:500] if user_agent else None,
+            device_type=req.device_type[:50] if req.device_type else None,
+            browser=req.browser[:50] if req.browser else None,
+            os=req.os[:50] if req.os else None
+        )
+        db.add(visit)
+        db.commit()
+        return {"status": "ok"}
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": str(e)}

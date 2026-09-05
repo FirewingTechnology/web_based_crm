@@ -66,6 +66,11 @@ def startup_db_seed():
         else:
             print("[RENDER STARTUP] Database active. Ensuring superadmin@realvion.com exists...")
             ensure_seed_users(db)
+
+        # Baseline check for website visits & registration sync
+        from app.utils.seed_website_visits import seed_baseline_website_visits
+        seed_baseline_website_visits(db)
+
         db.close()
     except Exception as e:
         print(f"[RENDER STARTUP] Seeding check: {e}")

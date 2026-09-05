@@ -103,6 +103,83 @@ class SaaSAnalyticsResponse(BaseModel):
     demo_workspaces: int
     total_revenue: float
     growth_rate_pct: float
+    website_total_visits: Optional[int] = 0
+    website_unique_visitors: Optional[int] = 0
+    website_today_visitors: Optional[int] = 0
+    website_registered_users: Optional[int] = 0
+    website_conversion_rate: Optional[float] = 0.0
+
+class TrackVisitRequest(BaseModel):
+    visitor_id: str
+    session_id: Optional[str] = None
+    page_path: str
+    page_title: Optional[str] = None
+    referrer: Optional[str] = None
+    device_type: Optional[str] = None
+    browser: Optional[str] = None
+    os: Optional[str] = None
+
+class WebsiteAnalyticsSummary(BaseModel):
+    total_visits: int
+    unique_visitors: int
+    today_visitors: int
+    this_week_visitors: int
+    total_registered_users: int
+    conversion_rate_pct: float
+
+class DailyTrendItem(BaseModel):
+    date: str
+    visits: int
+    unique_visitors: int
+    registrations: int
+
+class TopPageItem(BaseModel):
+    page_path: str
+    page_title: Optional[str] = None
+    views: int
+    unique_visitors: int
+    pct: float
+
+class BreakdownItem(BaseModel):
+    name: str
+    count: int
+    pct: float
+
+class RecentVisitItem(BaseModel):
+    id: int
+    visitor_id: str
+    page_path: str
+    page_title: Optional[str] = None
+    referrer: Optional[str] = None
+    ip_address: Optional[str] = None
+    device_type: Optional[str] = None
+    browser: Optional[str] = None
+    os: Optional[str] = None
+    created_at: str
+
+class WebsiteAnalyticsResponse(BaseModel):
+    summary: WebsiteAnalyticsSummary
+    daily_trends: List[DailyTrendItem]
+    top_pages: List[TopPageItem]
+    device_breakdown: List[BreakdownItem]
+    browser_breakdown: List[BreakdownItem]
+    recent_visits: List[RecentVisitItem]
+
+class WebsiteRegisteredUserItem(BaseModel):
+    id: int
+    user_id: Optional[int] = None
+    name: str
+    email: str
+    phone: str
+    company_name: Optional[str] = None
+    company_type: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    plan_code: str
+    status: str
+    registered_at: str
+    ip_address: Optional[str] = None
+    is_active: bool
 
 class CreateOfflineTenantRequest(BaseModel):
     admin_name: str

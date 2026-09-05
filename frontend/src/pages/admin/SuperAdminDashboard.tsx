@@ -24,6 +24,17 @@ import {
   Clock,
   BadgeCheck,
   Zap,
+  Globe,
+  Eye,
+  UserPlus,
+  ExternalLink,
+  Download,
+  Laptop,
+  Smartphone,
+  Tablet,
+  Activity,
+  MousePointerClick,
+  Share2,
 } from 'lucide-react';
 
 interface SaaSAnalytics {
@@ -34,6 +45,80 @@ interface SaaSAnalytics {
   demo_workspaces: number;
   total_revenue: number;
   growth_rate_pct: number;
+  website_total_visits?: number;
+  website_unique_visitors?: number;
+  website_today_visitors?: number;
+  website_registered_users?: number;
+  website_conversion_rate?: number;
+}
+
+interface WebsiteAnalyticsSummary {
+  total_visits: number;
+  unique_visitors: number;
+  today_visitors: number;
+  this_week_visitors: number;
+  total_registered_users: number;
+  conversion_rate_pct: number;
+}
+
+interface DailyTrendItem {
+  date: string;
+  visits: number;
+  unique_visitors: number;
+  registrations: number;
+}
+
+interface TopPageItem {
+  page_path: string;
+  page_title?: string;
+  views: number;
+  unique_visitors: number;
+  pct: number;
+}
+
+interface BreakdownItem {
+  name: string;
+  count: number;
+  pct: number;
+}
+
+interface RecentVisitItem {
+  id: number;
+  visitor_id: string;
+  page_path: string;
+  page_title?: string;
+  referrer?: string;
+  ip_address?: string;
+  device_type?: string;
+  browser?: string;
+  os?: string;
+  created_at: string;
+}
+
+interface WebsiteAnalyticsData {
+  summary: WebsiteAnalyticsSummary;
+  daily_trends: DailyTrendItem[];
+  top_pages: TopPageItem[];
+  device_breakdown: BreakdownItem[];
+  browser_breakdown: BreakdownItem[];
+  recent_visits: RecentVisitItem[];
+}
+
+interface WebsiteRegisteredUser {
+  id: number;
+  user_id?: number;
+  name: string;
+  email: string;
+  phone: string;
+  company_name?: string;
+  company_type?: string;
+  city?: string;
+  state?: string;
+  plan_code: string;
+  status: string;
+  registered_at: string;
+  ip_address?: string;
+  is_active: boolean;
 }
 
 interface TenantOrg {
@@ -89,11 +174,16 @@ const PLAN_CONFIG: Record<string, { label: string; seats: number; leads: number;
 };
 
 export const SuperAdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'admins' | 'organizations' | 'payments'>('admins');
+  const [activeTab, setActiveTab] = useState<'admins' | 'organizations' | 'payments' | 'website'>('admins');
   const [analytics, setAnalytics] = useState<SaaSAnalytics | null>(null);
   const [organizations, setOrganizations] = useState<TenantOrg[]>([]);
   const [adminsList, setAdminsList] = useState<TenantAdmin[]>([]);
   const [payments, setPayments] = useState<RecentPayment[]>([]);
+  const [websiteAnalytics, setWebsiteAnalytics] = useState<WebsiteAnalyticsData | null>(null);
+  const [websiteRegisteredUsers, setWebsiteRegisteredUsers] = useState<WebsiteRegisteredUser[]>([]);
+  const [websiteSubTab, setWebsiteSubTab] = useState<'registered_users' | 'traffic_analytics' | 'recent_visits'>('registered_users');
+  const [websitePlanFilter, setWebsitePlanFilter] = useState<string>('all');
+  const [websiteStatusFilter, setWebsiteStatusFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,20 +226,50 @@ export const SuperAdminDashboard: React.FC = () => {
     state: 'Maharashtra',
   });
 
+  const exportRegisteredUsersCSV = () => {
+    if (!websiteRegisteredUsers.length) return;
+    const headers = ['ID', 'Name', 'Email', 'Phone', 'Company', 'Company Type', 'City', 'Plan', 'Status', 'Registered At', 'IP Address'];
+    const rows = websiteRegisteredUsers.map(u => [
+      u.id,
+      `"${u.name.replace(/"/g, '""')}"`,
+      `"${u.email}"`,
+      `"${u.phone}"`,
+      `"${(u.company_name || '').replace(/"/g, '""')}"`,
+      `"${u.company_type || ''}"`,
+      `"${u.city || ''}"`,
+      `"${u.plan_code.toUpperCase()}"`,
+      `"${u.status}"`,
+      `"${u.registered_at}"`,
+      `"${u.ip_address || ''}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `realvion_website_registered_users_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [analyticsRes, orgsRes, adminsRes, paymentsRes] = await Promise.all([
+      const [analyticsRes, orgsRes, adminsRes, paymentsRes, webAnalyticsRes, webUsersRes] = await Promise.all([
         apiClient.get('/superadmin/analytics'),
         apiClient.get('/superadmin/organizations'),
         apiClient.get('/superadmin/admins'),
         apiClient.get('/superadmin/recent-payments'),
+        apiClient.get('/superadmin/website-analytics').catch(() => ({ data: null })),
+        apiClient.get('/superadmin/website-registered-users').catch(() => ({ data: [] })),
       ]);
       setAnalytics(analyticsRes.data);
       setOrganizations(orgsRes.data);
       setAdminsList(adminsRes.data);
       setPayments(paymentsRes.data);
+      if (webAnalyticsRes?.data) setWebsiteAnalytics(webAnalyticsRes.data);
+      if (webUsersRes?.data) setWebsiteRegisteredUsers(webUsersRes.data);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.message || 'Failed to fetch SaaS analytics');
     } finally {
@@ -298,56 +418,96 @@ export const SuperAdminDashboard: React.FC = () => {
       )}
 
       {/* ── Analytics Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 uppercase font-semibold">Monthly Recurring Revenue</span>
-            <TrendingUp className="h-5 w-5 text-emerald-400" />
+            <span className="text-[11px] text-slate-400 uppercase font-semibold">Monthly Rec. Rev</span>
+            <TrendingUp className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-white">
+          <div className="text-2xl font-black text-white">
             ₹{analytics?.mrr != null ? analytics.mrr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </div>
-          <p className="text-[11px] text-emerald-400 font-medium">
+          <p className="text-[10px] text-emerald-400 font-medium">
             {analytics?.growth_rate_pct != null
               ? `${analytics.growth_rate_pct >= 0 ? '+' : ''}${analytics.growth_rate_pct}% MoM`
               : '0.0% MoM'}
           </p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
+        <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 uppercase font-semibold">Annual Run Rate (ARR)</span>
-            <IndianRupee className="h-5 w-5 text-[#C8A45D]" />
+            <span className="text-[11px] text-slate-400 uppercase font-semibold">Annual Run Rate</span>
+            <IndianRupee className="h-4 w-4 text-[#C8A45D]" />
           </div>
-          <div className="text-3xl font-black text-[#C8A45D]">
+          <div className="text-2xl font-black text-[#C8A45D]">
             ₹{analytics?.arr != null ? analytics.arr.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </div>
-          <p className="text-[11px] text-slate-500 font-light">12-Month Projected</p>
+          <p className="text-[10px] text-slate-500 font-light">12-Month Projected</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
+        <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 uppercase font-semibold">Total Tenants</span>
-            <Building2 className="h-5 w-5 text-blue-400" />
+            <span className="text-[11px] text-slate-400 uppercase font-semibold">Total Tenants</span>
+            <Building2 className="h-4 w-4 text-blue-400" />
           </div>
-          <div className="text-3xl font-black text-white">
+          <div className="text-2xl font-black text-white">
             {analytics?.total_customers ?? organizations.length}
           </div>
-          <p className="text-[11px] text-blue-400 font-medium">
+          <p className="text-[10px] text-blue-400 font-medium">
             {analytics?.active_subscriptions ?? 0} Active Subscriptions
           </p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
+        <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 uppercase font-semibold">Total Revenue Collected</span>
-            <BadgeCheck className="h-5 w-5 text-emerald-400" />
+            <span className="text-[11px] text-slate-400 uppercase font-semibold">Total Revenue</span>
+            <BadgeCheck className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-emerald-400">
+          <div className="text-2xl font-black text-emerald-400">
             ₹{analytics?.total_revenue != null ? analytics.total_revenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </div>
-          <p className="text-[11px] text-slate-500">
-            {payments.filter(p => p.status === 'Captured').length} captured payments
+          <p className="text-[10px] text-slate-500">
+            {payments.filter(p => p.status === 'Captured').length} payments
+          </p>
+        </div>
+
+        {/* 🌐 Website Traffic Card */}
+        <div 
+          onClick={() => { setActiveTab('website'); setWebsiteSubTab('traffic_analytics'); }}
+          className="p-5 rounded-3xl bg-[#0e0e0e] border border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500/[0.02] cursor-pointer transition space-y-2 shadow-lg shadow-cyan-500/5"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-cyan-400 uppercase font-semibold flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5" /> Website Traffic
+            </span>
+            <Eye className="h-4 w-4 text-cyan-400" />
+          </div>
+          <div className="text-2xl font-black text-white flex items-baseline gap-2">
+            {(analytics?.website_total_visits ?? 0).toLocaleString()}
+            <span className="text-xs text-slate-400 font-normal">views</span>
+          </div>
+          <p className="text-[10px] text-cyan-300/80 font-medium">
+            👤 {analytics?.website_unique_visitors ?? 0} Unique · 📅 {analytics?.website_today_visitors ?? 0} Today
+          </p>
+        </div>
+
+        {/* 👥 Website Registered Users Card */}
+        <div 
+          onClick={() => { setActiveTab('website'); setWebsiteSubTab('registered_users'); }}
+          className="p-5 rounded-3xl bg-[#0e0e0e] border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/[0.02] cursor-pointer transition space-y-2 shadow-lg shadow-amber-500/5"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-amber-400 uppercase font-semibold flex items-center gap-1.5">
+              <UserPlus className="h-3.5 w-3.5" /> Website Signups
+            </span>
+            <Sparkles className="h-4 w-4 text-amber-400" />
+          </div>
+          <div className="text-2xl font-black text-white flex items-baseline gap-2">
+            {analytics?.website_registered_users ?? websiteRegisteredUsers.length}
+            <span className="text-xs text-slate-400 font-normal">registered</span>
+          </div>
+          <p className="text-[10px] text-amber-300/80 font-medium">
+            🎯 {analytics?.website_conversion_rate ?? 0}% Conversion Rate
           </p>
         </div>
       </div>
@@ -356,7 +516,7 @@ export const SuperAdminDashboard: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex gap-2 flex-wrap">
-            {(['admins', 'organizations', 'payments'] as const).map(tab => (
+            {(['admins', 'organizations', 'payments', 'website'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -369,10 +529,15 @@ export const SuperAdminDashboard: React.FC = () => {
                 {tab === 'admins' && <><UserCheck className="h-4 w-4" /> Tenant Admins ({adminsList.length})</>}
                 {tab === 'organizations' && <><Building2 className="h-4 w-4" /> Organizations ({organizations.length})</>}
                 {tab === 'payments' && <><CreditCard className="h-4 w-4" /> Recent Payments ({payments.length})</>}
+                {tab === 'website' && (
+                  <>
+                    <Globe className="h-4 w-4" /> Website Traffic &amp; Signups ({websiteRegisteredUsers.length} Users · {(analytics?.website_total_visits ?? 0).toLocaleString()} Visits)
+                  </>
+                )}
               </button>
             ))}
           </div>
-          {activeTab !== 'payments' && (
+          {activeTab !== 'payments' && activeTab !== 'website' && (
             <div className="relative w-full sm:w-72">
               <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -596,6 +761,430 @@ export const SuperAdminDashboard: React.FC = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* ── Tab: Website Traffic & Registered Users ── */}
+        {activeTab === 'website' && (
+          <div className="space-y-6">
+            {/* Sub-navigation & Header Controls */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-3xl bg-[#0e0e0e] border border-white/10">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setWebsiteSubTab('registered_users')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    websiteSubTab === 'registered_users'
+                      ? 'bg-[#C8A45D] text-black shadow-lg shadow-[#C8A45D]/20'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <UserPlus className="h-4 w-4" /> Registered Users ({websiteRegisteredUsers.length})
+                </button>
+                <button
+                  onClick={() => setWebsiteSubTab('traffic_analytics')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    websiteSubTab === 'traffic_analytics'
+                      ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Activity className="h-4 w-4" /> Traffic &amp; Trends ({(analytics?.website_total_visits ?? websiteAnalytics?.summary.total_visits ?? 0).toLocaleString()} Views)
+                </button>
+                <button
+                  onClick={() => setWebsiteSubTab('recent_visits')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                    websiteSubTab === 'recent_visits'
+                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/20'
+                      : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Eye className="h-4 w-4" /> Live Visitor Stream ({websiteAnalytics?.recent_visits?.length ?? 0})
+                </button>
+              </div>
+
+              {websiteSubTab === 'registered_users' && (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="relative w-full sm:w-64">
+                    <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      placeholder="Search name, email, firm..."
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C8A45D]"
+                    />
+                  </div>
+                  <select
+                    value={websitePlanFilter}
+                    onChange={e => setWebsitePlanFilter(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-[#C8A45D]"
+                  >
+                    <option value="all">All Plans</option>
+                    <option value="starter">Starter</option>
+                    <option value="professional">Professional</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                  <button
+                    onClick={exportRegisteredUsersCSV}
+                    className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 text-xs transition flex items-center gap-1.5"
+                    title="Export Registered Users to CSV"
+                  >
+                    <Download className="h-3.5 w-3.5" /> CSV
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* ── Sub-tab 1: Registered Users Table ── */}
+            {websiteSubTab === 'registered_users' && (
+              <div className="rounded-3xl bg-[#0e0e0e] border border-white/10 overflow-hidden shadow-2xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-900/80 border-b border-white/10 uppercase text-[10px] text-slate-400 tracking-wider">
+                      <tr>
+                        <th className="py-4 px-5">Registrant Contact</th>
+                        <th className="py-4 px-5">Agency / Company</th>
+                        <th className="py-4 px-5">City &amp; State</th>
+                        <th className="py-4 px-5">Selected Plan</th>
+                        <th className="py-4 px-5">Account Status</th>
+                        <th className="py-4 px-5">Registration Date</th>
+                        <th className="py-4 px-5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {websiteRegisteredUsers
+                        .filter(u => {
+                          const matchesQuery = 
+                            u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (u.company_name && u.company_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                            (u.phone && u.phone.includes(searchQuery)) ||
+                            (u.city && u.city.toLowerCase().includes(searchQuery.toLowerCase()));
+                          const matchesPlan = websitePlanFilter === 'all' || u.plan_code.toLowerCase() === websitePlanFilter.toLowerCase();
+                          return matchesQuery && matchesPlan;
+                        })
+                        .map(u => (
+                          <tr key={u.id} className="hover:bg-white/[0.02] transition">
+                            <td className="py-4 px-5">
+                              <p className="font-bold text-white flex items-center gap-2">
+                                {u.name}
+                                {u.user_id && (
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-normal">
+                                    Active User #{u.user_id}
+                                  </span>
+                                )}
+                              </p>
+                              <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-0.5">
+                                <a href={`mailto:${u.email}`} className="hover:text-[#C8A45D] flex items-center gap-1">
+                                  <Mail className="h-3 w-3" /> {u.email}
+                                </a>
+                                {u.phone && u.phone !== 'N/A' && (
+                                  <a href={`tel:${u.phone}`} className="hover:text-[#C8A45D] flex items-center gap-1">
+                                    <Phone className="h-3 w-3" /> {u.phone}
+                                  </a>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-4 px-5">
+                              <p className="font-semibold text-slate-200">{u.company_name || 'Independent Agency'}</p>
+                              <p className="text-[10px] text-slate-500">{u.company_type || 'Channel Partner'}</p>
+                            </td>
+                            <td className="py-4 px-5">
+                              <p className="text-slate-300">{u.city || 'Mumbai'}</p>
+                              <p className="text-[10px] text-slate-500">{u.state || 'Maharashtra'}</p>
+                            </td>
+                            <td className="py-4 px-5">
+                              <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${planBadge(u.plan_code)}`}>
+                                {u.plan_code.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="py-4 px-5">
+                              <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${
+                                u.status === 'Active'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                  : u.status === 'Trial'
+                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                  : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                              }`}>
+                                {u.status}
+                              </span>
+                            </td>
+                            <td className="py-4 px-5">
+                              <p className="text-slate-300">{u.registered_at}</p>
+                              <p className="text-[10px] text-slate-500 font-mono">IP: {u.ip_address || 'N/A'}</p>
+                            </td>
+                            <td className="py-4 px-5 text-right space-x-2">
+                              {u.user_id ? (
+                                <button
+                                  onClick={() => handleResetPassword(u.user_id!, u.name)}
+                                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 text-xs transition inline-flex items-center gap-1"
+                                >
+                                  <KeyRound className="h-3.5 w-3.5 text-[#C8A45D]" /> Reset Pass
+                                </button>
+                              ) : (
+                                <a
+                                  href={`mailto:${u.email}?subject=Welcome%20to%20RealVion%20CRM`}
+                                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 text-xs transition inline-flex items-center gap-1"
+                                >
+                                  <Mail className="h-3.5 w-3.5 text-[#C8A45D]" /> Email
+                                </a>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      {websiteRegisteredUsers.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="py-12 text-center text-slate-500 text-xs">
+                            No users have registered on the website yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* ── Sub-tab 2: Traffic & Trends Analytics ── */}
+            {websiteSubTab === 'traffic_analytics' && (
+              <div className="space-y-6">
+                {/* Mini Stat Summary */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-1">
+                    <span className="text-[11px] text-slate-400 uppercase font-semibold">Total Page Views</span>
+                    <div className="text-2xl font-black text-white">
+                      {(websiteAnalytics?.summary.total_visits ?? 0).toLocaleString()}
+                    </div>
+                    <p className="text-[10px] text-slate-500">Across all marketing pages</p>
+                  </div>
+                  <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-1">
+                    <span className="text-[11px] text-cyan-400 uppercase font-semibold">Unique Visitors</span>
+                    <div className="text-2xl font-black text-cyan-400">
+                      {(websiteAnalytics?.summary.unique_visitors ?? 0).toLocaleString()}
+                    </div>
+                    <p className="text-[10px] text-slate-500">Distinct browser sessions</p>
+                  </div>
+                  <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-1">
+                    <span className="text-[11px] text-amber-400 uppercase font-semibold">Today &amp; This Week</span>
+                    <div className="text-2xl font-black text-amber-400">
+                      {websiteAnalytics?.summary.today_visitors ?? 0} Today
+                    </div>
+                    <p className="text-[10px] text-slate-500">{websiteAnalytics?.summary.this_week_visitors ?? 0} active in last 7 days</p>
+                  </div>
+                  <div className="p-5 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-1">
+                    <span className="text-[11px] text-emerald-400 uppercase font-semibold">Visitor to Signup Rate</span>
+                    <div className="text-2xl font-black text-emerald-400">
+                      {websiteAnalytics?.summary.conversion_rate_pct ?? 0}%
+                    </div>
+                    <p className="text-[10px] text-slate-500">
+                      {websiteAnalytics?.summary.total_registered_users ?? 0} registered out of {websiteAnalytics?.summary.unique_visitors ?? 0} visitors
+                    </p>
+                  </div>
+                </div>
+
+                {/* 14-Day Traffic Trend Visual Bars */}
+                <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-cyan-400" /> 14-Day Website Traffic &amp; Signup Trends
+                      </h3>
+                      <p className="text-[11px] text-slate-400 font-light">Daily page views, unique visitors, and user registrations</p>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <span className="h-2.5 w-2.5 rounded-full bg-cyan-400"></span> Views
+                      </div>
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span> Visitors
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 items-end h-44 pt-6 pb-2">
+                    {websiteAnalytics?.daily_trends.map(day => {
+                      const maxVisits = Math.max(...(websiteAnalytics?.daily_trends.map(d => d.visits) || [25]), 25);
+                      const heightPct = Math.max(Math.round((day.visits / maxVisits) * 100), 8);
+                      const isToday = day.date === new Date().toISOString().split('T')[0];
+
+                      return (
+                        <div key={day.date} className="flex flex-col items-center gap-2 group h-full justify-end">
+                          <div className="text-[10px] text-slate-400 font-mono opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                            {day.visits}v / {day.unique_visitors}u
+                          </div>
+                          <div className="w-full max-w-[28px] flex flex-col justify-end items-center h-28 bg-white/5 rounded-t-lg overflow-hidden relative">
+                            <div
+                              style={{ height: `${heightPct}%` }}
+                              className={`w-full rounded-t-lg transition-all duration-500 ${
+                                isToday
+                                  ? 'bg-gradient-to-t from-cyan-600 to-cyan-400 shadow-md shadow-cyan-500/50'
+                                  : 'bg-gradient-to-t from-slate-700 to-cyan-500/80 group-hover:to-cyan-400'
+                              }`}
+                            />
+                            {day.registrations > 0 && (
+                              <div className="absolute top-1 h-2 w-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400/80" title={`${day.registrations} signups`} />
+                            )}
+                          </div>
+                          <span className={`text-[10px] font-mono ${isToday ? 'text-cyan-400 font-bold' : 'text-slate-500'}`}>
+                            {day.date.slice(5)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Grid: Top Visited Pages & Device/Browser Breakdown */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Top Pages Table */}
+                  <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-4 shadow-xl">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-[#C8A45D]" /> Most Visited Website Pages
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs text-slate-300">
+                        <thead className="text-[10px] text-slate-500 uppercase border-b border-white/5">
+                          <tr>
+                            <th className="pb-2">Page Title &amp; Path</th>
+                            <th className="pb-2 text-right">Views</th>
+                            <th className="pb-2 text-right">Visitors</th>
+                            <th className="pb-2 text-right">Traffic Share</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {websiteAnalytics?.top_pages.map(page => (
+                            <tr key={page.page_path} className="hover:bg-white/[0.02]">
+                              <td className="py-2.5">
+                                <p className="font-semibold text-white">{page.page_title || page.page_path}</p>
+                                <p className="text-[10px] text-slate-500 font-mono">{page.page_path}</p>
+                              </td>
+                              <td className="py-2.5 text-right font-bold text-white">{page.views}</td>
+                              <td className="py-2.5 text-right text-slate-400">{page.unique_visitors}</td>
+                              <td className="py-2.5 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                    <div style={{ width: `${page.pct}%` }} className="h-full bg-[#C8A45D] rounded-full" />
+                                  </div>
+                                  <span className="text-[10px] font-mono text-slate-400 w-8">{page.pct}%</span>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Device & Browser Breakdowns */}
+                  <div className="space-y-6">
+                    {/* Devices */}
+                    <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-4 shadow-xl">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Laptop className="h-4 w-4 text-cyan-400" /> Device Distribution
+                      </h3>
+                      <div className="space-y-3">
+                        {websiteAnalytics?.device_breakdown.map(dev => (
+                          <div key={dev.name} className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-300 flex items-center gap-2">
+                                {dev.name.toLowerCase() === 'desktop' && <Laptop className="h-3.5 w-3.5 text-slate-400" />}
+                                {dev.name.toLowerCase() === 'mobile' && <Smartphone className="h-3.5 w-3.5 text-slate-400" />}
+                                {dev.name.toLowerCase() === 'tablet' && <Tablet className="h-3.5 w-3.5 text-slate-400" />}
+                                {dev.name}
+                              </span>
+                              <span className="text-slate-400 font-mono">{dev.count} ({dev.pct}%)</span>
+                            </div>
+                            <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
+                              <div style={{ width: `${dev.pct}%` }} className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Browsers */}
+                    <div className="p-6 rounded-3xl bg-[#0e0e0e] border border-white/10 space-y-4 shadow-xl">
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-purple-400" /> Top Browsers
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {websiteAnalytics?.browser_breakdown.map(b => (
+                          <div key={b.name} className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <p className="text-[11px] text-slate-400 uppercase font-semibold">{b.name}</p>
+                            <p className="text-base font-bold text-white">{b.count}</p>
+                            <p className="text-[10px] text-purple-300 font-mono">{b.pct}% share</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Sub-tab 3: Live Visitor Stream ── */}
+            {websiteSubTab === 'recent_visits' && (
+              <div className="rounded-3xl bg-[#0e0e0e] border border-white/10 overflow-hidden shadow-2xl">
+                <div className="p-4 bg-slate-900/60 border-b border-white/10 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Eye className="h-4 w-4 text-purple-400" /> Real-Time Website Visitor Logs
+                    </h3>
+                    <p className="text-[11px] text-slate-400 font-light">Latest 50 recorded page views with device and referrer metadata</p>
+                  </div>
+                  <button
+                    onClick={fetchData}
+                    className="px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-slate-300 transition flex items-center gap-1.5"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh Feed
+                  </button>
+                </div>
+                <div className="overflow-x-auto max-h-[550px]">
+                  <table className="w-full text-left text-xs text-slate-300">
+                    <thead className="bg-slate-900/80 sticky top-0 uppercase text-[10px] text-slate-400 tracking-wider z-10 border-b border-white/10">
+                      <tr>
+                        <th className="py-3.5 px-5">Time</th>
+                        <th className="py-3.5 px-5">Page Visited</th>
+                        <th className="py-3.5 px-5">Device &amp; Browser</th>
+                        <th className="py-3.5 px-5">IP Address</th>
+                        <th className="py-3.5 px-5">Referrer</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 font-mono text-[11px]">
+                      {websiteAnalytics?.recent_visits?.map(visit => (
+                        <tr key={visit.id} className="hover:bg-white/[0.02] transition">
+                          <td className="py-3 px-5 text-slate-400 whitespace-nowrap">
+                            {visit.created_at}
+                          </td>
+                          <td className="py-3 px-5 font-sans">
+                            <span className="font-semibold text-white">{visit.page_title || visit.page_path}</span>
+                            <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-white/5 text-cyan-300 font-mono">
+                              {visit.page_path}
+                            </span>
+                          </td>
+                          <td className="py-3 px-5 font-sans text-slate-300">
+                            {visit.device_type} · {visit.browser} on {visit.os}
+                          </td>
+                          <td className="py-3 px-5 text-slate-400">
+                            {visit.ip_address || 'N/A'}
+                          </td>
+                          <td className="py-3 px-5 text-slate-500 truncate max-w-[200px]" title={visit.referrer || 'Direct'}>
+                            {visit.referrer ? visit.referrer.replace('https://', '') : 'Direct'}
+                          </td>
+                        </tr>
+                      ))}
+                      {(!websiteAnalytics?.recent_visits || websiteAnalytics.recent_visits.length === 0) && (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center text-slate-500 text-xs font-sans">
+                            No visitor logs recorded yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -40,3 +40,6 @@ Thumbs.db
 # Raw Screen Recordings & Video Files
 *.mp4
 website/public/*.mp4
+
+# Archives
+*.zip
