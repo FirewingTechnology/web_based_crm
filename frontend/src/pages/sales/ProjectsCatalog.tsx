@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FolderKanban, MapPin, Download, ShieldCheck, Building2 } from 'lucide-react';
+import { FolderKanban, MapPin, Download, ShieldCheck, Building2, Users, Sparkles } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 import { projectsApi } from '../../api/projects';
 import { Project } from '../../types/project';
+import { ProjectMatchingBuyersModal } from '../../components/modals/ProjectMatchingBuyersModal';
 
 export const ProjectsCatalog: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [matchingProject, setMatchingProject] = useState<Project | null>(null);
 
   useEffect(() => {
     projectsApi.getProjects().then(setProjects).catch(console.error);
@@ -59,8 +62,17 @@ export const ProjectsCatalog: React.FC = () => {
               </div>
             </div>
 
-            {project.brochure_url && (
-              <div className="pt-3 border-t border-slate-800">
+            <div className="pt-3 border-t border-slate-800 space-y-2">
+              <button
+                type="button"
+                onClick={() => setMatchingProject(project)}
+                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 border border-purple-500/30 text-purple-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                <span>Find Matching Buyers in CRM</span>
+              </button>
+
+              {project.brochure_url && (
                 <a
                   href={project.brochure_url}
                   target="_blank"
@@ -69,11 +81,21 @@ export const ProjectsCatalog: React.FC = () => {
                 >
                   <Download className="h-4 w-4" /> Download PDF Brochure
                 </a>
-              </div>
-            )}
+              )}
+            </div>
           </Card>
         ))}
       </div>
+
+      {matchingProject && (
+        <ProjectMatchingBuyersModal
+          isOpen={!!matchingProject}
+          onClose={() => setMatchingProject(null)}
+          projectId={matchingProject.id}
+          projectName={matchingProject.name}
+        />
+      )}
     </div>
   );
 };
+

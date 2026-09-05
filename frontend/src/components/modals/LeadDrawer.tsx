@@ -12,6 +12,7 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { WhatsAppButton } from '../common/WhatsAppButton';
 import { SiteVisitScheduleModal } from './SiteVisitScheduleModal';
+import { MatchedInventoryTab } from './MatchedInventoryTab';
 
 interface LeadDrawerProps {
   lead: Lead | null;
@@ -36,9 +37,22 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isAdvancingStage, setIsAdvancingStage] = useState(false);
   const [isSiteVisitModalOpen, setIsSiteVisitModalOpen] = useState(false);
+  const [selectedVisitProjectId, setSelectedVisitProjectId] = useState<number | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<'advisor' | 'inventory'>('advisor');
+
+  const fetchLeadData = async () => {
+    if (!lead?.id) return;
+    try {
+      const updated = await leadsApi.getLead(lead.id);
+      setActiveLead(updated);
+    } catch (err) {
+      console.error('Error auto-syncing lead drawer:', err);
+    }
+  };
 
   useEffect(() => {
     setActiveLead(lead);
+    setSelectedVisitProjectId(lead?.preferred_project_id || undefined);
   }, [lead]);
 
   // Fetch Next Best Action Advisor
@@ -53,19 +67,11 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   useEffect(() => {
     if (!isOpen || !lead?.id) return;
 
-    const fetchLatestLead = async () => {
-      try {
-        const updated = await leadsApi.getLead(lead.id);
-        setActiveLead(updated);
-      } catch (err) {
-        console.error('Error auto-syncing lead drawer:', err);
-      }
-    };
-
-    fetchLatestLead();
-    const interval = setInterval(fetchLatestLead, 4000);
+    fetchLeadData();
+    const interval = setInterval(fetchLeadData, 4000);
     return () => clearInterval(interval);
   }, [isOpen, lead?.id]);
+
 
   if (!activeLead) return null;
 
@@ -318,183 +324,226 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
               </div>
             </div>
 
-            {/* Middle Scrollable History & Notes */}
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-2 border-b border-slate-800 pb-2 mb-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveTab('advisor')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  activeTab === 'advisor'
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                <Compass className="h-3.5 w-3.5" />
+                <span>Advisor & Activity</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('inventory')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  activeTab === 'inventory'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                <span>AI Matched Inventory</span>
+              </button>
+            </div>
+
+            {/* Middle Scrollable Section */}
             <div className="flex-1 overflow-y-auto space-y-4 my-2 pr-1">
-              {/* Next Best Action & Stage Transition Advisor */}
-              {advisorData && (
-                <div className="p-4 rounded-xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-blue-950/30 border border-blue-500/30 shadow-lg space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <Compass className="h-4 w-4 text-blue-400" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                        Next Best Action Advisor
-                      </span>
-                    </div>
+              {activeTab === 'inventory' ? (
+                <MatchedInventoryTab
+                  leadId={activeLead.id}
+                  leadPhone={activeLead.phone}
+                  leadName={activeLead.name}
+                  onScheduleVisit={(projId) => {
+                    setSelectedVisitProjectId(projId);
+                    setIsSiteVisitModalOpen(true);
+                  }}
+                />
+              ) : (
+                <>
+                  {/* Next Best Action & Stage Transition Advisor */}
+                  {advisorData && (
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-blue-950/30 border border-blue-500/30 shadow-lg space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <Compass className="h-4 w-4 text-blue-400" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                            Next Best Action Advisor
+                          </span>
+                        </div>
 
-                    <div className="flex items-center gap-1.5">
-                      {advisorData.suggested_channel === 'WhatsApp' ? (
-                        <WhatsAppButton
-                          leadId={activeLead.id}
-                          phone={activeLead.phone}
-                          leadName={activeLead.name}
-                          variant="compact"
-                          onMessageSent={onLeadUpdated}
-                        />
-                      ) : (
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                          advisorData.suggested_channel === 'Call'
-                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                            : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
-                        }`}>
-                          {advisorData.suggested_channel}
-                        </span>
-                      )}
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        advisorData.urgency === 'Urgent'
-                          ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
-                          : advisorData.urgency === 'High'
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
-                      }`}>
-                        {advisorData.urgency}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Primary Action */}
-                  <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 flex items-start gap-2.5">
-                    <Zap className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 block">Recommended Step</span>
-                      <p className="text-xs font-bold text-white mt-0.5">{advisorData.primary_action}</p>
-                    </div>
-                  </div>
-
-                  {/* Contextual Talking Points */}
-                  {advisorData.talking_points && advisorData.talking_points.length > 0 && (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
-                        <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
-                        <span>Recommended Pitch & Talking Points:</span>
+                        <div className="flex items-center gap-1.5">
+                          {advisorData.suggested_channel === 'WhatsApp' ? (
+                            <WhatsAppButton
+                              leadId={activeLead.id}
+                              phone={activeLead.phone}
+                              leadName={activeLead.name}
+                              variant="compact"
+                              onMessageSent={onLeadUpdated}
+                            />
+                          ) : (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              advisorData.suggested_channel === 'Call'
+                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                                : 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                            }`}>
+                              {advisorData.suggested_channel}
+                            </span>
+                          )}
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            advisorData.urgency === 'Urgent'
+                              ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                              : advisorData.urgency === 'High'
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                              : 'bg-slate-800 text-slate-400 border-slate-700'
+                          }`}>
+                            {advisorData.urgency}
+                          </span>
+                        </div>
                       </div>
-                      <div className="space-y-1 pl-1">
-                        {advisorData.talking_points.map((pt, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 text-xs text-slate-300">
-                            <span className="text-blue-400 font-bold shrink-0">•</span>
-                            <span className="text-[11px] leading-relaxed text-slate-300">{pt}</span>
+
+                      {/* Primary Action */}
+                      <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 flex items-start gap-2.5">
+                        <Zap className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 block">Recommended Step</span>
+                          <p className="text-xs font-bold text-white mt-0.5">{advisorData.primary_action}</p>
+                        </div>
+                      </div>
+
+                      {/* Contextual Talking Points */}
+                      {advisorData.talking_points && advisorData.talking_points.length > 0 && (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-1.5 text-slate-400 text-xs font-semibold">
+                            <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
+                            <span>Recommended Pitch & Talking Points:</span>
                           </div>
-                        ))}
+                          <div className="space-y-1 pl-1">
+                            {advisorData.talking_points.map((pt, idx) => (
+                              <div key={idx} className="flex items-start gap-1.5 text-xs text-slate-300">
+                                <span className="text-blue-400 font-bold shrink-0">•</span>
+                                <span className="text-[11px] leading-relaxed text-slate-300">{pt}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Stage Transition Readiness Gate */}
+                      <div className="pt-2.5 border-t border-slate-800/80">
+                        {advisorData.stage_progression_readiness && advisorData.suggested_next_status ? (
+                          <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
+                                  Milestone Criteria Met
+                                </span>
+                                <span className="text-xs text-slate-200">
+                                  Ready to advance to: <strong className="text-white font-bold">{advisorData.suggested_next_status}</strong>
+                                </span>
+                              </div>
+                            </div>
+
+                            {onUpdateStatus && (
+                              <button
+                                onClick={handleAdvanceStage}
+                                disabled={isAdvancingStage}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 disabled:opacity-50 shrink-0"
+                              >
+                                <span>Advance Stage</span>
+                                <ArrowRight className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ) : advisorData.blockers && advisorData.blockers.length > 0 ? (
+                          <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
+                            <div className="flex items-center gap-1.5 text-amber-400 font-semibold mb-1">
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                              <span>Stage Prerequisites Incomplete ({advisorData.current_status} → {advisorData.suggested_next_status || 'Next'}):</span>
+                            </div>
+                            <ul className="space-y-0.5 pl-5 list-disc text-[11px] text-slate-300">
+                              {advisorData.blockers.map((b, idx) => (
+                                <li key={idx}>{b}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   )}
 
-                  {/* Stage Transition Readiness Gate */}
-                  <div className="pt-2.5 border-t border-slate-800/80">
-                    {advisorData.stage_progression_readiness && advisorData.suggested_next_status ? (
-                      <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                          <div>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
-                              Milestone Criteria Met
-                            </span>
-                            <span className="text-xs text-slate-200">
-                              Ready to advance to: <strong className="text-white font-bold">{advisorData.suggested_next_status}</strong>
-                            </span>
-                          </div>
-                        </div>
-
-                        {onUpdateStatus && (
-                          <button
-                            onClick={handleAdvanceStage}
-                            disabled={isAdvancingStage}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 disabled:opacity-50 shrink-0"
-                          >
-                            <span>Advance Stage</span>
-                            <ArrowRight className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    ) : advisorData.blockers && advisorData.blockers.length > 0 ? (
-                      <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
-                        <div className="flex items-center gap-1.5 text-amber-400 font-semibold mb-1">
-                          <AlertTriangle className="h-3.5 w-3.5" />
-                          <span>Stage Prerequisites Incomplete ({advisorData.current_status} → {advisorData.suggested_next_status || 'Next'}):</span>
-                        </div>
-                        <ul className="space-y-0.5 pl-5 list-disc text-[11px] text-slate-300">
-                          {advisorData.blockers.map((b, idx) => (
-                            <li key={idx}>{b}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              )}
-
-              {/* Add Note Input */}
-              <form onSubmit={handleNoteSubmit} className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                  <MessageSquare className="h-3.5 w-3.5 text-blue-400" /> Log Note / Interaction
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
-                    placeholder="Type client remarks or discussion summary..."
-                    className="glass-input flex-1 text-xs rounded-lg px-3 py-2"
-                  />
-                  <Button size="sm" type="submit" isLoading={isAddingNote} icon={<Plus className="h-3.5 w-3.5" />}>
-                    Add Note
-                  </Button>
-                </div>
-              </form>
-
-              {/* Notes List */}
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <MessageSquare className="h-3.5 w-3.5" /> Activity Notes ({activeLead.notes_list?.length || 0})
-                </h4>
-                {activeLead.notes_list && activeLead.notes_list.length > 0 ? (
-                  activeLead.notes_list.map((note) => (
-                    <div key={note.id} className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/60 text-xs">
-                      <div className="flex items-center justify-between text-slate-400 text-[11px] mb-1">
-                        <span className="font-semibold text-blue-400 flex items-center gap-1">
-                          <User className="h-3 w-3" /> {note.author_name}
-                        </span>
-                        <span>{new Date(note.created_at).toLocaleString()}</span>
-                      </div>
-                      <p className="text-slate-200">{note.note_text}</p>
+                  {/* Add Note Input */}
+                  <form onSubmit={handleNoteSubmit} className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                      <MessageSquare className="h-3.5 w-3.5 text-blue-400" /> Log Note / Interaction
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                        placeholder="Type client remarks or discussion summary..."
+                        className="glass-input flex-1 text-xs rounded-lg px-3 py-2"
+                      />
+                      <Button size="sm" type="submit" isLoading={isAddingNote} icon={<Plus className="h-3.5 w-3.5" />}>
+                        Add Note
+                      </Button>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-slate-500 italic">No notes logged yet.</p>
-                )}
-              </div>
+                  </form>
 
-              {/* Timeline Status History */}
-              <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <History className="h-3.5 w-3.5" /> Status History Timeline
-                </h4>
-                {activeLead.history_list && activeLead.history_list.length > 0 ? (
-                  <div className="space-y-3 pl-3 border-l-2 border-slate-800">
-                    {activeLead.history_list.map((h) => (
-                      <div key={h.id} className="relative text-xs">
-                        <div className="absolute -left-[17px] top-0.5 h-2.5 w-2.5 rounded-full bg-blue-500 border-2 border-slate-900" />
-                        <p className="font-semibold text-slate-200">
-                          Changed to <span className="text-blue-400">{h.new_status}</span> by {h.changed_by_name}
-                        </p>
-                        {h.remarks && <p className="text-slate-400 text-[11px] mt-0.5">{h.remarks}</p>}
-                        <p className="text-[10px] text-slate-500 mt-0.5">{new Date(h.created_at).toLocaleString()}</p>
-                      </div>
-                    ))}
+                  {/* Notes List */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquare className="h-3.5 w-3.5" /> Activity Notes ({activeLead.notes_list?.length || 0})
+                    </h4>
+                    {activeLead.notes_list && activeLead.notes_list.length > 0 ? (
+                      activeLead.notes_list.map((note) => (
+                        <div key={note.id} className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/60 text-xs">
+                          <div className="flex items-center justify-between text-slate-400 text-[11px] mb-1">
+                            <span className="font-semibold text-blue-400 flex items-center gap-1">
+                              <User className="h-3 w-3" /> {note.author_name}
+                            </span>
+                            <span>{new Date(note.created_at).toLocaleString()}</span>
+                          </div>
+                          <p className="text-slate-200">{note.note_text}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-500 italic">No notes logged yet.</p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-xs text-slate-500 italic">No status transitions recorded.</p>
-                )}
-              </div>
+
+                  {/* Timeline Status History */}
+                  <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <History className="h-3.5 w-3.5" /> Status History Timeline
+                    </h4>
+                    {activeLead.history_list && activeLead.history_list.length > 0 ? (
+                      <div className="space-y-3 pl-3 border-l-2 border-slate-800">
+                        {activeLead.history_list.map((h) => (
+                          <div key={h.id} className="relative text-xs">
+                            <div className="absolute -left-[17px] top-0.5 h-2.5 w-2.5 rounded-full bg-blue-500 border-2 border-slate-900" />
+                            <p className="font-semibold text-slate-200">
+                              Changed to <span className="text-blue-400">{h.new_status}</span> by {h.changed_by_name}
+                            </p>
+                            {h.remarks && <p className="text-slate-400 text-[11px] mt-0.5">{h.remarks}</p>}
+                            <p className="text-[10px] text-slate-500 mt-0.5">{new Date(h.created_at).toLocaleString()}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 italic">No status transitions recorded.</p>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         </div>
@@ -507,7 +556,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
           onClose={() => setIsSiteVisitModalOpen(false)}
           leadId={activeLead.id}
           leadName={activeLead.name}
-          preferredProjectId={activeLead.preferred_project_id}
+          preferredProjectId={selectedVisitProjectId || activeLead.preferred_project_id}
           onVisitScheduled={() => {
             fetchLeadData();
           }}
@@ -516,3 +565,4 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
     </AnimatePresence>
   );
 };
+

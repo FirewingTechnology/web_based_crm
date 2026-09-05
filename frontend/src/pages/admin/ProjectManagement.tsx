@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, FolderKanban, MapPin, ShieldCheck, Download, Edit, Trash2, Building2, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Plus, FolderKanban, MapPin, ShieldCheck, Download, Edit, Trash2, Building2, CheckCircle2, AlertCircle, X, Sparkles } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Card } from '../../components/ui/Card';
 import { DataTable } from '../../components/ui/DataTable';
 import { ProjectModal } from '../../components/modals/ProjectModal';
+import { ProjectMatchingBuyersModal } from '../../components/modals/ProjectMatchingBuyersModal';
 import { projectsApi } from '../../api/projects';
 import { buildersApi } from '../../api/builders';
 import { Project, ProjectCreateInput } from '../../types/project';
@@ -16,7 +17,9 @@ export const ProjectManagement: React.FC = () => {
   const [builders, setBuilders] = useState<Builder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [matchingProject, setMatchingProject] = useState<Project | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -139,6 +142,13 @@ export const ProjectManagement: React.FC = () => {
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setMatchingProject(row.original)}
+            title="Find Matching Buyers in CRM"
+            className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 transition"
+          >
+            <Sparkles className="h-4 w-4" />
+          </button>
           <button
             onClick={() => {
               setEditingProject(row.original);
@@ -264,6 +274,16 @@ export const ProjectManagement: React.FC = () => {
         initialProject={editingProject}
         builders={builders}
       />
+
+      {matchingProject && (
+        <ProjectMatchingBuyersModal
+          isOpen={!!matchingProject}
+          onClose={() => setMatchingProject(null)}
+          projectId={matchingProject.id}
+          projectName={matchingProject.name}
+        />
+      )}
     </div>
   );
 };
+

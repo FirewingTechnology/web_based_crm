@@ -18,10 +18,12 @@ from app.schemas.lead import (
     LeadStatusHistoryResponse, LeadHealthSummaryResponse, LeadHealthDetailResponse
 )
 from app.schemas.advisor import NextBestActionResponse
+from app.schemas.inventory_matching import LeadInventoryMatchResponse
 from app.services.lead_health_service import (
     calculate_lead_health, update_lead_health, bulk_recalculate_health, get_health_summary
 )
 from app.services.stage_advisor_service import get_next_best_action
+from app.services.inventory_matching_service import InventoryMatchingService
 from app.middleware.auth_middleware import get_current_user
 from app.utils.csv_utils import generate_csv_response, parse_leads_csv
 
@@ -247,6 +249,18 @@ def get_lead_next_action(
         raise HTTPException(status_code=404, detail="Lead not found")
     
     return get_next_best_action(lead, db)
+
+@router.get("/{lead_id}/inventory-matches", response_model=LeadInventoryMatchResponse)
+def get_lead_inventory_matches(
+    lead_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return InventoryMatchingService.match_inventory_for_lead(lead_id, db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.get("/{lead_id}", response_model=LeadResponse)
 def get_lead(lead_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

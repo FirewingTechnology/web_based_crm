@@ -5,9 +5,34 @@ from app.models.project import Project, ProjectStatus
 from app.models.builder import Builder
 from app.models.user import User, UserRole
 from app.schemas.project import ProjectCreate, ProjectUpdate, ProjectResponse
+from app.schemas.inventory_matching import LeadInventoryMatchResponse, ProjectMatchingLeadsResponse
+from app.services.inventory_matching_service import InventoryMatchingService
 from app.middleware.auth_middleware import get_current_user, RequireRole
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
+
+@router.get("/match-lead/{lead_id}", response_model=LeadInventoryMatchResponse)
+def get_inventory_matches_for_lead(
+    lead_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return InventoryMatchingService.match_inventory_for_lead(lead_id, db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@router.get("/{project_id}/matching-leads", response_model=ProjectMatchingLeadsResponse)
+def get_matching_leads_for_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return InventoryMatchingService.match_leads_for_project(project_id, db, current_user)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.get("", response_model=list[ProjectResponse])
 def get_projects(
