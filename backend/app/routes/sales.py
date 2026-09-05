@@ -8,6 +8,8 @@ from app.schemas.sales_target import SalesTargetCreate, SalesTargetUpdate, Sales
 from app.schemas.priority import TodayPrioritiesResponse
 from app.services.priority_engine import get_today_priorities
 from app.middleware.auth_middleware import get_current_user, RequireRole
+from app.schemas.performance import LeaderboardSummary, ExecutiveScorecard
+from app.services.performance_service import PerformanceService
 
 router = APIRouter(prefix="/sales", tags=["Sales Management"])
 
@@ -20,6 +22,34 @@ def get_user_today_priorities(
     Returns prioritized operational actions for the authenticated user/organization today.
     """
     return get_today_priorities(current_user, db)
+
+@router.get("/leaderboard", response_model=LeaderboardSummary)
+def get_sales_leaderboard(
+    month_year: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns real-time sales gamification leaderboard, podium standings, and run-rate projections.
+    """
+    return PerformanceService.get_leaderboard(db, current_user, month_year=month_year)
+
+@router.get("/scorecard/{user_id}", response_model=ExecutiveScorecard)
+def get_executive_scorecard(
+    user_id: int,
+    month_year: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns individual sales scorecard and badges for an executive.
+    """
+    summary = PerformanceService.get_leaderboard(db, current_user, month_year=month_year)
+    for sc in summary.rankings:
+        if sc.user_id == user_id:
+            return sc
+    raise HTTPException(status_code=404, detail="Executive scorecard not found for this period")
+
 
 from app.models.booking import Booking, BookingStatus
 
