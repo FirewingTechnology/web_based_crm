@@ -115,7 +115,8 @@ def run_auto_migrations(engine):
 
             # Normalize any existing rows in commissions table
             try:
-                conn.execute(text("UPDATE commissions SET stage = UPPER(stage) WHERE stage IS NOT NULL;"))
+                if conn.dialect.name == "sqlite":
+                    conn.execute(text("UPDATE commissions SET stage = UPPER(stage) WHERE stage IS NOT NULL;"))
                 conn.execute(text("UPDATE commissions SET stage = 'EXPECTED' WHERE stage IS NULL;"))
                 conn.commit()
             except Exception as e:
@@ -137,12 +138,15 @@ def run_auto_migrations(engine):
                         conn.commit()
                     except Exception as e:
                         logger.warning(f"Failed to add column '{col_name}' to 'notifications': {e}")
-        # 7. Buyer Documents & KYC Vault Table
+
+        # 7. Buyer Documents & KYC Vault Table (for SQLite fallback if create_all wasn't run)
         if "buyer_documents" not in tables:
             try:
-                conn.execute(text("""
+                pk_syntax = "INTEGER PRIMARY KEY AUTOINCREMENT" if conn.dialect.name == "sqlite" else "SERIAL PRIMARY KEY"
+                dt_syntax = "DATETIME" if conn.dialect.name == "sqlite" else "TIMESTAMP"
+                conn.execute(text(f"""
                     CREATE TABLE buyer_documents (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        id {pk_syntax},
                         organization_id INTEGER,
                         lead_id INTEGER,
                         booking_id INTEGER,
@@ -156,11 +160,11 @@ def run_auto_migrations(engine):
                         document_number VARCHAR(100),
                         verification_status VARCHAR(50) DEFAULT 'PENDING' NOT NULL,
                         verified_by_id INTEGER,
-                        verified_at DATETIME,
+                        verified_at {dt_syntax},
                         rejection_reason TEXT,
-                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        is_deleted BOOLEAN DEFAULT 0 NOT NULL,
+                        created_at {dt_syntax} DEFAULT CURRENT_TIMESTAMP,
+                        updated_at {dt_syntax} DEFAULT CURRENT_TIMESTAMP,
+                        is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
                         FOREIGN KEY (organization_id) REFERENCES organizations(id),
                         FOREIGN KEY (lead_id) REFERENCES leads(id),
                         FOREIGN KEY (booking_id) REFERENCES bookings(id),

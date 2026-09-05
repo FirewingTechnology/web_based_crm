@@ -493,8 +493,42 @@ def ensure_seed_users(db):
             superadmin.is_active = True
             superadmin.is_deleted = False
 
+        # 2. Admin User
+        admin = db.query(User).filter(func.lower(User.email) == "admin@brokeros.com").first()
+        if not admin:
+            # Check or create default organization
+            org = db.query(Organization).first()
+            if not org:
+                org = Organization(
+                    name="REALVION Corporate HQ",
+                    slug="realvion-corporate-hq",
+                    company_type="Real Estate Advisory",
+                    is_active=True
+                )
+                db.add(org)
+                db.commit()
+                db.refresh(org)
+
+            admin = User(
+                organization_id=org.id,
+                name="Aman Sharma",
+                email="admin@brokeros.com",
+                hashed_password=get_password_hash("Admin@123"),
+                role=UserRole.ADMIN,
+                phone="+91 98100 11223",
+                firm_name="BrokerOS Corporate HQ",
+                is_active=True,
+                is_deleted=False
+            )
+            db.add(admin)
+        else:
+            admin.hashed_password = get_password_hash("Admin@123")
+            admin.role = UserRole.ADMIN
+            admin.is_active = True
+            admin.is_deleted = False
+
         db.commit()
-        print("[SEED CHECK] Ensured superadmin@realvion.com exists and credentials are active.")
+        print("[SEED CHECK] Ensured superadmin@realvion.com and admin@brokeros.com exist and credentials are active.")
     except Exception as e:
         db.rollback()
         print(f"[SEED CHECK ERROR] {e}")
