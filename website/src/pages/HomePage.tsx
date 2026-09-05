@@ -60,38 +60,40 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
   ];
 
   const timelineSteps = [
-    { title: "Step 1: One-Click Registration", desc: "Select your plan, verify your work email with OTP, and register your brokerage entity." },
-    { title: "Step 2: Instant Demo Workspace", desc: "Your workspace is immediately provisioned with 50 pre-seeded leads, builders, and analytics." },
-    { title: "Step 3: Automated Follow-Up Alarms", desc: "Synthesizes dual-harmonic audio chimes and voice alerts so no client call is ever lost." },
-    { title: "Step 4: Commission & Revenue Auto-Calculation", desc: "Track channel partner commission payouts, executive targets, and booking ledgers live." }
+    { title: "Step 1: Lead Qualification & Health Audit", desc: "Algorithmic health scoring evaluates buyer inquiries for response speed and flags pipeline revenue leakage." },
+    { title: "Step 2: VIP Site Visit & Cab Dispatch", desc: "Coordinate site visits with cab/driver assignment, OTP check-in, and instant post-visit feedback." },
+    { title: "Step 3: Inventory Match & RERA Cost Sheet", desc: "Intelligently match buyer budgets to live inventory and calculate all-inclusive Indian pricing in 1 click." },
+    { title: "Step 4: Commission Aging & Revenue Realization", desc: "Track broker commission receivables with 18% GST, 5% TDS (194H), and aging overdue buckets." }
   ];
 
   const comparisonFeatures = [
-    { name: "Real Estate CP Specific Workflows", realvion: true, legacy: false },
-    { name: "Dual-Harmonic Audio & Speech Alarms", realvion: true, legacy: false },
-    { name: "Inline Builder & Developer Creation", realvion: true, legacy: false },
-    { name: "Automated Self-Onboarding & Instant Demo", realvion: true, legacy: false },
-    { name: "Native Lakhs/Crores Revenue Calculators", realvion: true, legacy: false },
-    { name: "Multi-Tier Role Scoping (Exec vs Admin)", realvion: true, legacy: true },
-    { name: "Zero Cloud Bloat (Sub-second load times)", realvion: true, legacy: false },
+    { name: "Real Estate Revenue Operating System (Full Lifecycle)", realvion: true, legacy: false },
+    { name: "Lead Health & Revenue Leakage Detection (0-100 Score)", realvion: true, legacy: false },
+    { name: "VIP Site Visit Operating System & OTP Verification", realvion: true, legacy: false },
+    { name: "Intelligent Inventory Matchmaking (BHK/Budget/Location)", realvion: true, legacy: false },
+    { name: "Indian Real Estate Cost Sheet & Milestone Calculations", realvion: true, legacy: false },
+    { name: "Commission Command Center (18% GST, 5% TDS, Aging)", realvion: true, legacy: false },
+    { name: "Sales Gamification & Live Team Leaderboard", realvion: true, legacy: false },
+    { name: "Buyer KYC Vault (PAN/Aadhaar/RERA Agreement)", realvion: true, legacy: false },
+    { name: "Voice & Audio Follow-Up Alarm Engine", realvion: true, legacy: false },
   ];
 
   const faqs = [
     {
       q: "Why is REALVION different from Salesforce, Zoho, or LeadSquared?",
-      a: "General CRMs are built for generic software companies. REALVION is tailored exclusively for Real Estate Channel Partners in India—with built-in Lakhs/Crores revenue logic, RERA registration numbers, site visit scheduling, and audio voice alarms for follow-ups."
+      a: "Generic CRMs simply store contact details. REALVION is a complete Revenue Operating System purpose-built for Indian Real Estate Channel Partners and Developers—uniting lead health scoring, VIP site visits, unit inventory matching, Indian RERA cost sheets, and commission aging ledgers."
     },
     {
-      q: "How does the Voice Follow-Up Alarm work?",
-      a: "When a lead follow-up deadline is reached, REALVION uses HTML5 Web Audio synthesis and Text-to-Speech to read out the client's name and project aloud to your sales executive so no high-value buyer is forgotten."
+      q: "How does the Lead Health & Revenue Leakage Engine work?",
+      a: "REALVION analyzes follow-up timeliness, postponement frequency, and buyer engagement to calculate a dynamic 0-100 score. It automatically alerts managers when high-value deals are at risk of dropping off."
+    },
+    {
+      q: "How does the Indian Cost Sheet and Commission Ledger handle taxes?",
+      a: "REALVION natively factors in base rate, floor rise, PLC, car parking, 5% GST, stamp duty, and registration charges for buyer bookings, plus statutory 18% GST and 5% TDS (Section 194H) on broker commissions."
     },
     {
       q: "How does the demo access work?",
       a: "The complete platform demo video and interactive sandbox are available to all registered users. Simply register your agency free of charge to immediately unlock the full walkthrough recording and hands-on test workspace."
-    },
-    {
-      q: "Can I manage my builders and project inventory in REALVION?",
-      a: "Yes! REALVION allows you to catalog builders (Godrej, DLF, Lodha, Prestige, etc.) and create projects on-the-fly directly inside lead drawers."
     }
   ];
 
@@ -105,18 +107,18 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
           <div className="lg:col-span-7 space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C8A45D]/30 bg-[#C8A45D]/10 text-[#C8A45D] text-xs font-semibold tracking-wide">
-              <Sparkles className="h-3.5 w-3.5 animate-pulse" /> The Official Real Estate Operating System
+              <Sparkles className="h-3.5 w-3.5 animate-pulse" /> Real Estate Revenue Operating System
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1]">
               You don't need another CRM. <br />
               <span className="bg-gradient-to-r from-white via-slate-200 to-[#C8A45D] bg-clip-text text-transparent">
-                You need complete control over your sales.
+                You need a complete Revenue Operating System.
               </span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-400 leading-relaxed max-w-2xl font-light">
-              REALVION is the official Real Estate Sales Operating System built specifically for Real Estate Channel Partners, Brokerage Firms, and Agency Leaders to organize buyer leads, voice follow-ups, developers, and project inventory.
+              REALVION is the official Real Estate Revenue Operating System engineered for Channel Partner firms, Brokerages, Sales Teams, and Builders. Connect every step: <span className="text-white font-medium">Lead → Site Visit → Cost Sheet → Booking → Commission → Revenue</span>.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
