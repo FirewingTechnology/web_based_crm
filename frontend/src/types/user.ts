@@ -15,6 +15,9 @@ export interface User {
   trial_expires_at?: string;
   is_trial_expired?: boolean;
   trial_seconds_remaining?: number;
+  is_trial?: boolean;
+  subscription_status?: string;
+  plan_code?: string;
 }
 
 

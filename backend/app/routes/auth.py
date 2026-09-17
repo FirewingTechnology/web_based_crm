@@ -89,12 +89,18 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
         resp_data = UserResponse.from_orm(current_user).dict()
         resp_data["trial_expires_at"] = None
         resp_data["is_trial_expired"] = False
-        resp_data["trial_seconds_remaining"] = 864000
+        resp_data["trial_seconds_remaining"] = 0
+        resp_data["is_trial"] = False
+        resp_data["subscription_status"] = "Active"
+        resp_data["plan_code"] = "enterprise"
         return resp_data
 
     trial_expires_at = None
     is_trial_expired = False
     trial_seconds_remaining = 0
+    is_trial = True
+    subscription_status = "Trial"
+    plan_code = "starter"
 
     # Query Organization strictly bound to this user
     org = None
@@ -117,10 +123,18 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
         ).order_by(Subscription.id.desc()).first()
 
         if sub:
+            plan_code = sub.plan_code or "professional"
+            subscription_status = sub.status
             if sub.status == "Active":
+                is_trial = False
                 is_trial_expired = False
-                trial_seconds_remaining = 864000
+                trial_seconds_remaining = 0
+                end_dt = sub.end_date
+                if end_dt and getattr(end_dt, "tzinfo", None) is not None:
+                    end_dt = end_dt.replace(tzinfo=None)
+                trial_expires_at = end_dt
             else:
+                is_trial = True
                 end_dt = sub.end_date
                 if end_dt and getattr(end_dt, "tzinfo", None) is not None:
                     end_dt = end_dt.replace(tzinfo=None)
@@ -167,6 +181,9 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
     resp_data["trial_expires_at"] = trial_expires_at
     resp_data["is_trial_expired"] = is_trial_expired
     resp_data["trial_seconds_remaining"] = trial_seconds_remaining
+    resp_data["is_trial"] = is_trial
+    resp_data["subscription_status"] = subscription_status
+    resp_data["plan_code"] = plan_code
     return resp_data
 
 from pydantic import BaseModel

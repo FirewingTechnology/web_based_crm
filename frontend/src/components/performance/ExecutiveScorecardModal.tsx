@@ -187,7 +187,7 @@ export const ExecutiveScorecardModal: React.FC<ExecutiveScorecardModalProps> = (
         )}
 
         <div className="flex justify-end pt-5 border-t border-slate-800 mt-5">
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="outline" size="sm" onClick={onClose}>
             Close Scorecard
           </Button>
         </div>

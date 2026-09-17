@@ -91,9 +91,18 @@ def get_monthly_sales_chart(db: Session = Depends(get_db), current_user: User = 
         month_dt = now - timedelta(days=i*30)
         m_str = month_dt.strftime("%b %Y")
         
+        year = month_dt.year
+        month = month_dt.month
+        start_of_month = datetime(year, month, 1, 0, 0, 0)
+        if month == 12:
+            start_of_next_month = datetime(year + 1, 1, 1, 0, 0, 0)
+        else:
+            start_of_next_month = datetime(year, month + 1, 1, 0, 0, 0)
+
         q = db.query(Booking).filter(
             Booking.is_deleted == False,
-            func.strftime("%Y-%m", Booking.booking_date) == month_dt.strftime("%Y-%m")
+            Booking.booking_date >= start_of_month,
+            Booking.booking_date < start_of_next_month
         )
         if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
             q = q.filter(Booking.organization_id == current_user.organization_id)

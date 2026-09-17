@@ -239,7 +239,7 @@ export const LeadManagement: React.FC = () => {
             phone={row.original.phone} 
             leadName={row.original.name} 
             variant="icon" 
-            onMessageSent={loadLeads}
+            onMessageSent={fetchLeads}
           />
           <button
             onClick={() => {

@@ -29,6 +29,8 @@ export interface CommissionItem {
 
   executive_commission_rate: number;
   executive_commission_amount: number;
+  broker_commission_rate?: number;
+  broker_commission_amount?: number;
   company_margin_amount: number;
 
   stage: string;

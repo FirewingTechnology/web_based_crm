@@ -175,7 +175,7 @@ export const MyLeads: React.FC = () => {
             phone={row.original.phone} 
             leadName={row.original.name} 
             variant="icon" 
-            onMessageSent={loadLeads}
+            onMessageSent={fetchMyLeads}
           />
           <button
             onClick={() => {

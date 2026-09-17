@@ -241,7 +241,7 @@ export const CommissionStageModal: React.FC<CommissionStageModalProps> = ({
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-            <Button variant="ghost" size="sm" type="button" onClick={onClose}>
+            <Button variant="outline" size="sm" type="button" onClick={onClose}>
               Cancel
             </Button>
             <Button variant="primary" size="sm" type="submit" disabled={loading}>

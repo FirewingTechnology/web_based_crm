@@ -31,6 +31,9 @@ class UserResponse(UserBase):
     trial_expires_at: datetime | None = None
     is_trial_expired: bool = False
     trial_seconds_remaining: int = 0
+    is_trial: bool = False
+    subscription_status: str | None = None
+    plan_code: str | None = None
 
 
     class Config:

@@ -75,7 +75,7 @@ export const MyFollowups: React.FC = () => {
             phone={row.original.lead_phone} 
             leadName={row.original.lead_name} 
             variant="icon" 
-            onMessageSent={loadFollowups}
+            onMessageSent={fetchMyFollowups}
           />
         </div>
       ),

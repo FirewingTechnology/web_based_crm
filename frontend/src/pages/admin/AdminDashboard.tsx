@@ -21,6 +21,7 @@ import { bookingsApi } from '../../api/bookings';
 import { Lead } from '../../types/lead';
 import { Followup } from '../../types/followup';
 import { Booking } from '../../types/booking';
+import { DashboardStats, MonthlySalesChart, LeadSourceDistribution } from '../../types/report';
 import { TodayPriorityBoard } from '../../components/dashboard/TodayPriorityBoard';
 import { LeadDrawer } from '../../components/modals/LeadDrawer';
 import { FollowupModal } from '../../components/modals/FollowupModal';

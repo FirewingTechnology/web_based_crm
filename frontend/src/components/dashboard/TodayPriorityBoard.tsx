@@ -305,7 +305,7 @@ export const TodayPriorityBoard: React.FC<TodayPriorityBoardProps> = ({
                       phone={item.lead_phone} 
                       leadName={item.lead_name} 
                       variant="icon" 
-                      onMessageSent={loadPriorities}
+                      onMessageSent={fetchPriorities}
                     />
                     <a
                       href={`tel:${item.lead_phone}`}

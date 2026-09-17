@@ -23,6 +23,7 @@ interface LeadDrawerProps {
   onAddNote: (leadId: number, noteText: string) => Promise<void>;
   onOpenFollowupModal: (lead: Lead) => void;
   onUpdateStatus?: (leadId: number, newStatus: string) => Promise<void>;
+  onLeadUpdated?: () => void;
 }
 
 export const LeadDrawer: React.FC<LeadDrawerProps> = ({
@@ -32,6 +33,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   onAddNote,
   onOpenFollowupModal,
   onUpdateStatus,
+  onLeadUpdated,
 }) => {
   const [activeLead, setActiveLead] = useState<Lead | null>(lead);
   const [advisorData, setAdvisorData] = useState<NextBestAction | null>(null);
@@ -42,6 +44,11 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
   const [selectedVisitProjectId, setSelectedVisitProjectId] = useState<number | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'advisor' | 'inventory' | 'kyc'>('advisor');
   const [isCostSheetModalOpen, setIsCostSheetModalOpen] = useState(false);
+
+  const handleLeadUpdated = () => {
+    fetchLeadData();
+    onLeadUpdated?.();
+  };
 
   const fetchLeadData = async () => {
     if (!lead?.id) return;
@@ -177,7 +184,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                     <Phone className="h-4 w-4 text-blue-400 shrink-0" />
                     <span className="font-semibold text-white truncate">{activeLead.phone}</span>
                   </div>
-                  <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="icon" onMessageSent={onLeadUpdated} />
+                  <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="icon" onMessageSent={handleLeadUpdated} />
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <Mail className="h-4 w-4 text-purple-400 shrink-0" />
@@ -213,7 +220,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="button" onMessageSent={onLeadUpdated} />
+                  <WhatsAppButton leadId={activeLead.id} phone={activeLead.phone} leadName={activeLead.name} variant="button" onMessageSent={handleLeadUpdated} />
                   <Button
                     size="sm"
                     variant="outline"
@@ -415,7 +422,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                               phone={activeLead.phone}
                               leadName={activeLead.name}
                               variant="compact"
-                              onMessageSent={onLeadUpdated}
+                              onMessageSent={handleLeadUpdated}
                             />
                           ) : (
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${

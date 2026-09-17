@@ -7,8 +7,9 @@ export const DemoBanner: React.FC = () => {
   const { user, logout } = useAuth();
 
   const isSuperAdmin = user?.role === 'Super Admin' || (user?.role as any) === 'SUPERADMIN' || user?.email === 'superadmin@realvion.com';
+  const isPaidActive = user?.subscription_status === 'Active' || user?.is_trial === false;
 
-  if (isSuperAdmin) {
+  if (isSuperAdmin || isPaidActive) {
     return null;
   }
 

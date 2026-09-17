@@ -83,8 +83,8 @@ export const CostSheetModal: React.FC<CostSheetModalProps> = ({
       }
     }).catch(console.error);
 
-    leadsApi.getLeads({ limit: 100 }).then((res) => {
-      setLeads(res.data);
+    leadsApi.getLeads().then((res) => {
+      setLeads(res);
     }).catch(console.error);
   }, [isOpen]);
 

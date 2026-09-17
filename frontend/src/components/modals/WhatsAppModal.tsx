@@ -7,12 +7,15 @@ import { whatsappApi } from '../../api/whatsapp';
 import { WhatsAppTemplate, WhatsAppMessage } from '../../types/whatsapp';
 import { normalizePhoneNumber } from '../common/WhatsAppButton';
 
-interface WhatsAppModalProps {
+export interface WhatsAppModalProps {
   isOpen: boolean;
   onClose: () => void;
   leadId: number;
   leadName: string;
-  phone: string;
+  phone?: string;
+  leadPhone?: string;
+  defaultTemplate?: string;
+  customText?: string;
   onMessageSent?: () => void;
 }
 
@@ -22,11 +25,14 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   leadId,
   leadName,
   phone,
+  leadPhone,
+  defaultTemplate,
+  customText,
   onMessageSent
 }) => {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([]);
-  const [selectedTemplateKey, setSelectedTemplateKey] = useState<string>('QUALIFICATION');
-  const [messageBody, setMessageBody] = useState<string>('');
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState<string>(defaultTemplate || 'QUALIFICATION');
+  const [messageBody, setMessageBody] = useState<string>(customText || '');
   const [history, setHistory] = useState<WhatsAppMessage[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
@@ -50,11 +56,15 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
       setTemplates(tplData);
       setHistory(histData);
 
-      // Default select qualification or first template
-      const defaultTpl = tplData.find(t => t.key === selectedTemplateKey) || tplData[0];
-      if (defaultTpl) {
-        setSelectedTemplateKey(defaultTpl.key);
-        setMessageBody(defaultTpl.rendered_body);
+      // Default select qualification or custom template
+      if (customText) {
+        setMessageBody(customText);
+      } else {
+        const defaultTpl = tplData.find(t => t.key === selectedTemplateKey) || tplData[0];
+        if (defaultTpl) {
+          setSelectedTemplateKey(defaultTpl.key);
+          setMessageBody(defaultTpl.rendered_body);
+        }
       }
     } catch (err: any) {
       console.error('Failed to load WhatsApp data:', err);

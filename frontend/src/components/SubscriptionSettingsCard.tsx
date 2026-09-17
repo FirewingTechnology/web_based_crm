@@ -8,12 +8,24 @@ export const SubscriptionSettingsCard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isSuperAdmin = user?.role === 'Super Admin' || (user?.role as any) === 'SUPERADMIN' || user?.email === 'superadmin@realvion.com';
-  const isDemo = localStorage.getItem('brokeros_is_demo') === 'true' || !!(user?.trial_expires_at);
-  const isExpired = user?.is_trial_expired === true;
-  const isTrialActive = !isSuperAdmin && (user?.trial_seconds_remaining || 0) > 0 && !isExpired;
+  const isPaidActive = user?.subscription_status === 'Active' || user?.is_trial === false;
+  const isDemo = !isPaidActive && (localStorage.getItem('brokeros_is_demo') === 'true' || (user?.is_trial === true && !!(user?.trial_expires_at)));
+  const isExpired = !isPaidActive && user?.is_trial_expired === true;
+  const isTrialActive = !isSuperAdmin && !isPaidActive && (user?.trial_seconds_remaining || 0) > 0 && !isExpired;
 
   const getExpirationText = () => {
     if (isSuperAdmin) return 'Lifetime SuperAdmin Master Access';
+    if (isPaidActive) {
+      if (user?.trial_expires_at) {
+        const expDate = new Date(user.trial_expires_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+        return `Active Subscription (Valid until ${expDate})`;
+      }
+      return 'Active Subscription (Annual Billing)';
+    }
     if (isExpired) return 'Trial Expired (Upgrade Required)';
     if (isTrialActive && user?.trial_seconds_remaining) {
       const mins = Math.floor(user.trial_seconds_remaining / 60);
@@ -34,6 +46,10 @@ export const SubscriptionSettingsCard: React.FC = () => {
   const getBadge = () => {
     if (isSuperAdmin) {
       return { text: 'SUPERADMIN SYSTEM LICENSE', style: 'bg-purple-500/20 text-purple-300 border-purple-500/30' };
+    }
+    if (isPaidActive) {
+      const planName = user?.plan_code ? user.plan_code.toUpperCase() : 'ENTERPRISE';
+      return { text: `ACTIVE ${planName} LICENSE`, style: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' };
     }
     if (isExpired) {
       return { text: 'TRIAL EXPIRED', style: 'bg-rose-500/20 text-rose-400 border-rose-500/30' };
@@ -67,7 +83,7 @@ export const SubscriptionSettingsCard: React.FC = () => {
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1">
           <span className="text-[11px] text-slate-400 font-medium">Current Active Plan</span>
           <p className="text-lg font-bold text-white">
-            {isSuperAdmin ? 'Platform Master Admin' : (isTrialActive || isDemo ? 'Professional 1-Hour Trial' : (isExpired ? 'Trial Expired' : 'Professional Plan'))}
+            {isSuperAdmin ? 'Platform Master Admin' : (isPaidActive ? `${(user?.plan_code || 'Professional').toUpperCase()} Plan` : (isTrialActive || isDemo ? 'Professional 1-Hour Trial' : (isExpired ? 'Trial Expired' : 'Professional Plan')))}
           </p>
           <span className="text-[10px] text-[#C8A45D] flex items-center gap-1">
             <Clock className="h-3 w-3 inline" /> {getExpirationText()}

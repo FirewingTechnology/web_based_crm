@@ -28,6 +28,37 @@ app = FastAPI(
     docs_url=f"{settings.API_V1_STR}/docs"
 )
 
+# CORS Middleware setup - Strict origins from config/env without wildcard when allow_credentials=True
+origins = [
+    settings.FRONTEND_URL,
+    settings.WEBSITE_URL,
+    settings.CRM_URL,
+    "https://web-based-crm-1.onrender.com",
+    "https://realvion-frontend.onrender.com",
+    "https://realvion-official-site.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+    "http://localhost:5176",
+    "http://127.0.0.1:5176",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# Filter duplicates and empty strings
+allowed_origins = list(set([o.strip() for o in origins if o and o.strip() and o != "*"]))
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from fastapi import Request
 from fastapi.responses import JSONResponse
 import traceback
@@ -37,10 +68,17 @@ async def global_exception_handler(request: Request, exc: Exception):
     error_msg = str(exc) or exc.__class__.__name__
     print(f"[UNHANDLED EXCEPTION] {request.method} {request.url.path}: {error_msg}")
     traceback.print_exc()
-    return JSONResponse(
+    response = JSONResponse(
         status_code=500,
         content={"detail": f"Internal Server Error: {error_msg}"}
     )
+    origin = request.headers.get("origin")
+    if origin and (origin in allowed_origins or "*" in allowed_origins):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 from app.middleware.auth_middleware import RequireRole
 from app.models.user import UserRole
@@ -76,37 +114,6 @@ def startup_db_seed():
         db.close()
     except Exception as e:
         print(f"[RENDER STARTUP] Seeding check: {e}")
-
-# CORS Middleware setup - Strict origins from config/env without wildcard when allow_credentials=True
-origins = [
-    settings.FRONTEND_URL,
-    settings.WEBSITE_URL,
-    settings.CRM_URL,
-    "https://web-based-crm-1.onrender.com",
-    "https://realvion-frontend.onrender.com",
-    "https://realvion-official-site.onrender.com",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-    "http://localhost:5175",
-    "http://127.0.0.1:5175",
-    "http://localhost:5176",
-    "http://127.0.0.1:5176",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
-# Filter duplicates and empty strings
-allowed_origins = list(set([o.strip() for o in origins if o and o.strip() and o != "*"]))
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 # Include API Routers

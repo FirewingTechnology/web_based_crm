@@ -150,7 +150,7 @@ export const CommissionManagement: React.FC = () => {
           {row.original.broker_name && (
             <div className="flex items-center justify-between text-[10px] text-amber-400/90">
               <span>CP ({row.original.broker_name}):</span>
-              <span>₹{row.original.broker_commission_amount.toLocaleString('en-IN')}</span>
+              <span>₹{(row.original.broker_commission_amount || 0).toLocaleString('en-IN')}</span>
             </div>
           )}
         </div>

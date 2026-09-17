@@ -44,7 +44,7 @@ class AlertEngine:
         # 1. High-Value Leads at Risk (CRITICAL)
         leads_q = db.query(Lead).filter(
             Lead.is_deleted == False,
-            Lead.status.notin_([LeadStatus.BOOKED, LeadStatus.LOST, "Booked", "Lost"])
+            Lead.status.notin_([LeadStatus.BOOKED, LeadStatus.LOST])
         )
         if target_org_id:
             leads_q = leads_q.filter(Lead.organization_id == target_org_id)
@@ -85,7 +85,7 @@ class AlertEngine:
         # 2. Overdue Site Visits (HIGH)
         one_hour_ago = now - timedelta(hours=1)
         visits_q = db.query(SiteVisit).filter(
-            SiteVisit.status.in_([SiteVisitStatus.SCHEDULED, "Scheduled", SiteVisitStatus.IN_TRANSIT, "In Transit"]),
+            SiteVisit.status.in_([SiteVisitStatus.SCHEDULED, SiteVisitStatus.IN_TRANSIT]),
             SiteVisit.scheduled_at <= one_hour_ago,
             SiteVisit.is_deleted == False
         )
@@ -122,7 +122,7 @@ class AlertEngine:
 
         # 3. Overdue Builder Commission Invoices (HIGH / CRITICAL)
         comm_q = db.query(Commission).filter(
-            Commission.stage.notin_([CommissionStage.PAID, "PAID", "Paid"]),
+            Commission.stage != CommissionStage.PAID,
             Commission.is_deleted == False
         )
         if target_org_id:
