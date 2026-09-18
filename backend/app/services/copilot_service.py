@@ -54,9 +54,9 @@ CURRENT SESSION CONTEXT:
 ====================================
 
 RESPONSE GUIDELINES:
-1. GROUNDING: Answer strictly based on the retrieved CRM records and real estate playbooks above. NEVER fabricate phone numbers, lead names, prices, or project specs.
-2. ACTIONABLE & PRECISE: If the user asks about a lead or project, provide specific details (Budget, Health Score, Last Interaction, Next Step).
-3. CONSULTATIVE SALES TONE: Speak like an elite real estate sales coach and strategist. Keep advice crisp, actionable, and formatted with bullet points and bold highlights.
+1. GROUNDING & ACCURACY: For questions about leads, clients, projects, or tasks, answer strictly based on the retrieved CRM records and real estate playbooks above. NEVER fabricate phone numbers, lead names, prices, or project specs.
+2. CONVERSATIONAL & PROFESSIONAL: For greetings (e.g. "hi", "hello", "hey"), respond warmly, introduce yourself as REALVION Copilot, and suggest 2-3 sales actions. For general knowledge queries outside the CRM, answer directly and concisely, then offer real estate CRM assistance.
+3. ACTIONABLE & PRECISE: When discussing leads or inventory, provide specific details (Budget, Health Score, Last Interaction, Next Step).
 4. ACTION DEEP-LINKS: Always provide appropriate clickable action deep-links in `suggested_actions` matching the user's workflow (e.g. Lead details, Projects list, Follow-up tracker, Site Visit manager, Automation rules).
 5. STRICT OUTPUT FORMAT: Return ONLY a valid JSON object without markdown fences or extraneous text.
 
@@ -570,6 +570,47 @@ Health Score (0 - 100):
                 seen_urls.add(act["url"])
                 actions.append(act)
 
+        # 0. Conversational Greeting Detection
+        q_strip = user_query.strip().lower()
+        if q_strip in ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good afternoon', 'good evening', 'hi there', 'hello copilot']:
+            answer = (
+                f"👋 **Hello! I am your REALVION Revenue Copilot.**\n\n"
+                f"I am connected to your live CRM data and ready to assist:\n\n"
+                f"- 👤 **Lead Search**: Ask about any client name, phone number, or stage\n"
+                f"- 🏢 **Property Matching**: Ask for available 2/3 BHK units, pricing, or locations\n"
+                f"- 📅 **Daily Priorities**: View overdue follow-ups and today's site visits\n"
+                f"- 🎯 **Sales Battlecards**: Objection scripts for pricing discounts or delay fears\n\n"
+                f"What would you like to work on right now?"
+            )
+            return {
+                "answer": answer,
+                "suggested_actions": [
+                    {"label": "Show Hot Leads", "url": "/admin/leads"},
+                    {"label": "Explore Projects", "url": "/admin/projects"},
+                    {"label": "Today's Follow-ups", "url": "/admin/followups"}
+                ],
+                "data_points": {"type": "greeting"}
+            }
+
+        # 0b. General Knowledge / Off-Topic Handling (Fallback mode)
+        general_indicators = ['pm of', 'prime minister', 'president', 'capital of', 'weather', 'movie', 'song', 'cricket', 'who is', 'what is']
+        if any(g in q_strip for g in general_indicators) and not (data_points.get("leads") or data_points.get("projects")):
+            answer = (
+                f"ℹ️ I am **REALVION Copilot**, focused on your real estate sales operations and CRM pipeline.\n\n"
+                f"For general questions like *\"{user_query}\"*, please ensure the OpenAI LLM connection is active on your server.\n\n"
+                f"Inside your CRM right now:\n\n"
+                f"{kpi_summary}\n\n"
+                f"You can ask me to search leads, match inventory, check overdue follow-ups, or help with buyer negotiations."
+            )
+            return {
+                "answer": answer,
+                "suggested_actions": [
+                    {"label": "View Leads Pipeline", "url": "/admin/leads"},
+                    {"label": "Explore Projects", "url": "/admin/projects"}
+                ],
+                "data_points": {"type": "off_topic"}
+            }
+
         # 1. Objection / Playbook Routing (Highest precedence when user asks how to handle objections or scripts)
         if entities.get("asks_playbook") and playbook_text and "[OBJECTION PLAYBOOK" in playbook_text:
             first_playbook = playbook_text.split("==========================================================")[0]
@@ -712,7 +753,8 @@ Health Score (0 - 100):
         kpi_summary = cls.build_pipeline_kpis(db, user)
 
         # 5. Check OpenAI Configuration
-        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        from app.config import settings
+        api_key = (os.getenv("OPENAI_API_KEY") or getattr(settings, "OPENAI_API_KEY", "") or "").strip()
         is_openai_configured = api_key and not api_key.startswith("sk-your-openai") and len(api_key) > 20
 
         if not is_openai_configured:

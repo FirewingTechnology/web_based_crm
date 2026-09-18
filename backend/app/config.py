@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
     WEBSITE_URL: str = os.getenv("WEBSITE_URL", "http://localhost:5173")
     CRM_URL: str = os.getenv("CRM_URL", "http://localhost:5173")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
 
     class Config:
         env_file = ".env"
