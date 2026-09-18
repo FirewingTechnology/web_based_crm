@@ -48,24 +48,26 @@ def ask_crm_copilot(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Real OpenAI GPT-4o-mini powered CRM Copilot with live data context injection.
-    Supports multi-turn conversation history.
+    Enterprise RAG (Retrieval-Augmented Generation) CRM Copilot:
+    - Extracts query entities (leads, projects, budgets, stages)
+    - Dynamically retrieves matched CRM records, dossiers, and tasks
+    - Augments with real estate objection playbooks and live KPIs
+    - Uses OpenAI GPT-4o-mini with seamless zero-downtime local RAG fallback
     """
-    system_prompt = CopilotService.get_system_prompt(db, current_user)
-
     history_dicts = [{"role": m.role, "content": m.content} for m in (payload.history or [])]
 
-    result = CopilotService.ask_openai(
-        system_prompt=system_prompt,
-        history=history_dicts,
-        user_query=payload.query
+    result = CopilotService.process_query(
+        db=db,
+        user=current_user,
+        user_query=payload.query,
+        history=history_dicts
     )
 
     return CopilotQueryResponse(
         query=payload.query,
-        answer=result["answer"],
+        answer=result.get("answer", "I couldn't process that query."),
         suggested_actions=result.get("suggested_actions", []),
-        data_points={}
+        data_points=result.get("data_points", {})
     )
 
 

@@ -20,23 +20,55 @@ interface UIMessage {
 
 type CopilotMode = 'AI' | 'SUPPORT_PENDING' | 'SUPPORT_ACTIVE' | 'SUPPORT_RESOLVED';
 
-// ─── Simple markdown renderer (no extra dependency) ──────────────────────────
+// ─── Simple markdown renderer (headers, bold, inline code, lists) ───────────
 
 const RenderMarkdown: React.FC<{ text: string }> = ({ text }) => {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5 text-xs leading-relaxed">
       {text.split('\n').map((line, i) => {
-        const parts = line.split(/(\*\*.*?\*\*)/g);
-        const isListItem = line.trimStart().startsWith('- ') || line.trimStart().startsWith('• ');
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={i} className="h-0.5" />;
+
+        // Header 3: ### Title
+        if (trimmed.startsWith('### ')) {
+          return (
+            <h4 key={i} className="text-xs font-bold text-blue-300 mt-2 mb-1 flex items-center gap-1.5 border-b border-slate-800 pb-1">
+              {trimmed.replace(/^###\s+/, '')}
+            </h4>
+          );
+        }
+
+        // Header 4: #### Subtitle
+        if (trimmed.startsWith('#### ')) {
+          return (
+            <h5 key={i} className="text-[11px] font-bold text-slate-200 mt-1.5 mb-0.5">
+              {trimmed.replace(/^####\s+/, '')}
+            </h5>
+          );
+        }
+
+        const isListItem = trimmed.startsWith('- ') || trimmed.startsWith('• ') || /^\d+\.\s/.test(trimmed);
+        const listContent = trimmed.replace(/^[-•]\s+/, '').replace(/^\d+\.\s+/, '');
+
+        // Parse inline bold **text** and inline code `code`
+        const parseInline = (str: string) => {
+          const parts = str.split(/(\*\*.*?\*\*|`.*?`)/g);
+          return parts.map((p, pi) => {
+            if (p.startsWith('**') && p.endsWith('**')) {
+              return <strong key={pi} className="text-white font-semibold">{p.slice(2, -2)}</strong>;
+            }
+            if (p.startsWith('`') && p.endsWith('`')) {
+              return <code key={pi} className="px-1 py-0.5 rounded bg-slate-800 text-blue-300 font-mono text-[10px]">{p.slice(1, -1)}</code>;
+            }
+            return p;
+          });
+        };
+
         return (
-          <div key={i} className={isListItem ? 'ml-3 flex gap-1.5' : ''}>
-            {isListItem && <span className="text-blue-400 mt-0.5 shrink-0">•</span>}
-            <span>
-              {parts.map((p, pi) =>
-                p.startsWith('**') && p.endsWith('**')
-                  ? <strong key={pi} className="text-white font-semibold">{p.slice(2, -2)}</strong>
-                  : p.replace(/^[-•]\s/, '')
-              )}
+          <div key={i} className={isListItem ? 'ml-2.5 flex gap-1.5 items-start' : ''}>
+            {isListItem && <span className="text-blue-400 mt-0.5 shrink-0 text-[10px]">•</span>}
+            <span className="text-slate-200">
+              {parseInline(isListItem ? listContent : trimmed)}
             </span>
           </div>
         );
@@ -62,7 +94,7 @@ export const CopilotDrawer: React.FC = () => {
   const [messages, setMessages] = useState<UIMessage[]>([
     {
       sender: 'assistant',
-      text: '👋 **Hello! I am your REALVION Revenue Copilot.**\n\nAsk me anything about today\'s outreach priorities, at-risk deals, marketing attribution ROI, or pending commission aging.\n\nI\'m powered by **GPT-4o** with live access to your CRM data.',
+      text: '👋 **Hello! I am your REALVION Revenue Copilot.**\n\nI am grounded directly with **live RAG intelligence** from your CRM database:\n\n- 🔍 **Live CRM Search**: Ask about any lead, phone number, or project\n- 🏢 **Inventory Matching**: Ask for 2/3 BHK units, prices, or locations\n- 📅 **Schedule Intelligence**: View today\'s follow-ups and site visits\n- 🎯 **Sales Playbooks**: Get battlecards for price objections or delay fears',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -73,10 +105,11 @@ export const CopilotDrawer: React.FC = () => {
   const navigate = useNavigate();
 
   const promptSuggestions = [
-    'Which leads should I call today?',
-    'Which deals are at risk?',
-    'Show my overdue follow-ups',
-    'Commission receivables aging?',
+    'Show hot high-priority leads',
+    'Show projects & inventory',
+    'Today\'s follow-ups & tasks',
+    'Objection: customer wants discount',
+    'Objection: fear of construction delay',
   ];
 
   // ── Auto-scroll ────────────────────────────────────────────────────────────
