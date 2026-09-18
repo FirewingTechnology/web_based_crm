@@ -21,6 +21,7 @@ from app.models.document import BuyerDocument, DocumentType, VerificationStatus
 from app.models.lead_source import LeadSourceIntegration, LeadSourceEvent, SourceType, EventProcessingStatus
 from app.models.call import CallRecord, CallDirection, CallStatus, CallOutcome
 from app.models.automation import AutomationRule, AutomationEventTrigger
+from app.models.support_ticket import SupportTicket, SupportMessage, TicketStatus, MessageSenderRole
 
 __all__ = [
     "Base",
@@ -65,6 +66,10 @@ __all__ = [
     "WhatsAppMessage",
     "SiteVisit",
     "SiteVisitStatus",
-    "BuyerInterestLevel"
+    "BuyerInterestLevel",
+    "SupportTicket",
+    "SupportMessage",
+    "TicketStatus",
+    "MessageSenderRole",
 ]
 

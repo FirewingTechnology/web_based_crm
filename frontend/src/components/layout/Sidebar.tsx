@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Car,
   Cpu,
+  HeadphonesIcon,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -54,6 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     { label: 'Sales Management', path: '/admin/sales', icon: Target },
     { label: 'Reports', path: '/admin/reports', icon: BarChart3 },
     { label: 'Automation Center', path: '/admin/automation', icon: Cpu },
+    { label: 'Support Center', path: '/admin/support', icon: HeadphonesIcon },
     { label: 'Notifications', path: '/admin/notifications', icon: Bell },
     { label: 'Settings & Logs', path: '/admin/settings', icon: Settings },
   ];
