@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
-from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route, registration, payments, saas_admin, whatsapp, site_visits, documents
+from app.routes import auth, users, builders, projects, leads, followups, brokers, sales, bookings, commissions, reports, notifications, activity_logs, settings as settings_route, registration, payments, saas_admin, whatsapp, site_visits, documents, ingest, lead_sources, calls, automation, copilot
 
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -138,6 +138,12 @@ app.include_router(saas_admin.router, prefix=api_v1)
 app.include_router(whatsapp.router, prefix=api_v1)
 app.include_router(site_visits.router, prefix=api_v1)
 app.include_router(documents.router, prefix=api_v1)
+app.include_router(ingest.router, prefix=api_v1)
+app.include_router(ingest.router)  # Also allow direct /ingest webhooks without api_v1 prefix
+app.include_router(lead_sources.router, prefix=api_v1)
+app.include_router(calls.router, prefix=api_v1)
+app.include_router(automation.router, prefix=api_v1)
+app.include_router(copilot.router, prefix=api_v1)
 
 @app.get("/")
 def root():

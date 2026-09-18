@@ -37,6 +37,10 @@ class SiteVisitStatusUpdate(BaseModel):
 class SiteVisitVerifyOtp(BaseModel):
     otp_code: str
 
+class SiteVisitCheckinRequest(BaseModel):
+    latitude: float
+    longitude: float
+
 class SiteVisitResponse(BaseModel):
     id: int
     lead_id: int
@@ -60,6 +64,14 @@ class SiteVisitResponse(BaseModel):
     buyer_interest_level: Optional[str] = None
     preferred_unit: Optional[str] = None
     discussion_notes: Optional[str] = None
+    
+    # Geofencing & Location Verification
+    checkin_latitude: Optional[float] = None
+    checkin_longitude: Optional[float] = None
+    checkin_at: Optional[datetime] = None
+    distance_from_project_meters: Optional[float] = None
+    geofence_status: Optional[str] = "NONE"
+
     created_at: datetime
 
     class Config:

@@ -10,10 +10,10 @@ from app.models.project import Project
 from app.middleware.auth_middleware import get_current_user
 from app.schemas.site_visit import (
     SiteVisitCreate, SiteVisitUpdate, SiteVisitStatusUpdate,
-    SiteVisitVerifyOtp, SiteVisitResponse
+    SiteVisitVerifyOtp, SiteVisitCheckinRequest, SiteVisitResponse
 )
 from app.services.site_visit_service import (
-    schedule_site_visit, verify_visit_otp, record_visit_completion
+    schedule_site_visit, verify_visit_otp, verify_geofence_checkin, record_visit_completion
 )
 
 router = APIRouter(prefix="/site-visits", tags=["Site Visit Operating System"])
@@ -101,6 +101,26 @@ def verify_otp_endpoint(
         "message": "OTP successfully verified. Client arrival confirmed.",
         "status": visit.status.value if hasattr(visit.status, "value") else str(visit.status)
     }
+
+@router.post("/{visit_id}/checkin")
+def checkin_site_visit(
+    visit_id: int,
+    payload: SiteVisitCheckinRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Verifies executive GPS check-in against the project geofence boundary."""
+    visit = db.query(SiteVisit).filter(SiteVisit.id == visit_id, SiteVisit.is_deleted == False).first()
+    if not visit:
+        raise HTTPException(status_code=404, detail="Site visit not found")
+
+    return verify_geofence_checkin(
+        db=db,
+        visit=visit,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        current_user=current_user
+    )
 
 @router.patch("/{visit_id}/status", response_model=SiteVisitResponse)
 def update_site_visit_status(

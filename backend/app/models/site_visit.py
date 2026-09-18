@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum, DateTime, Boolean, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.database import BaseModel
@@ -40,6 +40,13 @@ class SiteVisit(BaseModel):
     # Anti-fraud Security & On-Site OTP Verification
     otp_code = Column(String(10), nullable=False)
     is_otp_verified = Column(Boolean, default=False, nullable=False)
+
+    # Location Verification & Geofencing Intelligence
+    checkin_latitude = Column(Float, nullable=True)
+    checkin_longitude = Column(Float, nullable=True)
+    checkin_at = Column(DateTime, nullable=True)
+    distance_from_project_meters = Column(Float, nullable=True)
+    geofence_status = Column(String(50), default="NONE", nullable=False) # NONE, INSIDE_RADIUS, OUTSIDE_RADIUS
 
     # Execution Status & Post-Visit Feedback
     status = Column(Enum(SiteVisitStatus), default=SiteVisitStatus.SCHEDULED, nullable=False, index=True)

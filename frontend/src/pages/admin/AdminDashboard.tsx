@@ -23,8 +23,10 @@ import { Followup } from '../../types/followup';
 import { Booking } from '../../types/booking';
 import { DashboardStats, MonthlySalesChart, LeadSourceDistribution } from '../../types/report';
 import { TodayPriorityBoard } from '../../components/dashboard/TodayPriorityBoard';
+import { BusinessTodayCommandCenter } from '../../components/dashboard/BusinessTodayCommandCenter';
 import { LeadDrawer } from '../../components/modals/LeadDrawer';
 import { FollowupModal } from '../../components/modals/FollowupModal';
+import { CallLoggerModal } from '../../components/modals/CallLoggerModal';
 
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -36,6 +38,8 @@ export const AdminDashboard: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isFollowupModalOpen, setIsFollowupModalOpen] = useState(false);
+  const [callLoggerOpen, setCallLoggerOpen] = useState(false);
+  const [callLeadData, setCallLeadData] = useState<{ id: number; phone?: string; name?: string } | null>(null);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -82,6 +86,11 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleOpenCallLogger = (leadId: number, phone: string) => {
+    setCallLeadData({ id: leadId, phone });
+    setCallLoggerOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -89,6 +98,12 @@ export const AdminDashboard: React.FC = () => {
         <h1 className="text-2xl font-bold text-white tracking-tight">Executive Control Dashboard</h1>
         <p className="text-xs text-slate-400 mt-1">Real Estate Revenue Operating System • High-impact priorities & pipeline governance</p>
       </div>
+
+      {/* Business Today Command Center */}
+      <BusinessTodayCommandCenter
+        onOpenCallLogger={handleOpenCallLogger}
+        onOpenLead={handleOpenLeadDrawer}
+      />
 
       {/* KPI Stat Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -294,6 +309,22 @@ export const AdminDashboard: React.FC = () => {
         preselectedLead={selectedLead}
         leads={recentLeads}
       />
+
+      {callLeadData && (
+        <CallLoggerModal
+          isOpen={callLoggerOpen}
+          onClose={() => {
+            setCallLoggerOpen(false);
+            setCallLeadData(null);
+          }}
+          leadId={callLeadData.id}
+          leadPhone={callLeadData.phone}
+          onCallLogged={async () => {
+            const updatedFollowups = await followupsApi.getFollowups({ filter_period: 'today' });
+            setTodaysFollowups(updatedFollowups.slice(0, 5));
+          }}
+        />
+      )}
     </div>
   );
 };

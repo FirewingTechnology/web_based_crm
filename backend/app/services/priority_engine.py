@@ -250,3 +250,10 @@ def get_today_priorities(user: User, db: Session) -> Dict[str, Any]:
         "risk_count": risk_count,
         "items": deduped_items
     }
+
+
+class PriorityEngine:
+    @staticmethod
+    def get_today_priorities(db: Session, user: User) -> Dict[str, Any]:
+        return get_today_priorities(user, db)
+

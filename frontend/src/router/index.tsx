@@ -22,6 +22,7 @@ import { NotificationsPage } from '../pages/admin/NotificationsPage';
 import { SettingsPage } from '../pages/admin/SettingsPage';
 import { SuperAdminDashboard } from '../pages/admin/SuperAdminDashboard';
 import { SiteVisitManagement } from '../pages/admin/SiteVisitManagement';
+import { AutomationHub } from '../pages/admin/AutomationHub';
 
 // Sales Portal Pages
 import { SalesDashboard } from '../pages/sales/SalesDashboard';
@@ -62,6 +63,7 @@ export const AppRouter: React.FC = () => {
             <Route path="/admin/brokers" element={<BrokerManagement />} />
             <Route path="/admin/sales" element={<SalesManagement />} />
             <Route path="/admin/reports" element={<ReportManagement />} />
+            <Route path="/admin/automation" element={<AutomationHub />} />
             <Route path="/admin/notifications" element={<NotificationsPage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
           </Route>

@@ -28,6 +28,11 @@ class Project(BaseModel):
     brochure_url = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
 
+    # Location & Geofencing Intelligence
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    geofence_radius_meters = Column(Integer, default=300, nullable=False)
+
     # Relationships
     builder = relationship("Builder", back_populates="projects")
     bookings = relationship("Booking", back_populates="project")

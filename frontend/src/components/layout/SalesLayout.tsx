@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ReminderManager } from '../reminders/ReminderManager';
 import { DemoBanner } from '../DemoBanner';
+import { CopilotDrawer } from '../copilot/CopilotDrawer';
 
 export const SalesLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -21,6 +22,7 @@ export const SalesLayout: React.FC = () => {
         </div>
       </div>
       <ReminderManager />
+      <CopilotDrawer />
     </div>
   );
 };

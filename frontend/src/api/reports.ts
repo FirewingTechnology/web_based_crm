@@ -28,4 +28,13 @@ export const reportsApi = {
     link.click();
     link.remove();
   },
+  getRevenueAttribution: async (): Promise<any> => {
+    const res = await apiClient.get('/reports/revenue-attribution');
+    return res.data;
+  },
+  getBusinessToday: async (): Promise<any> => {
+    const res = await apiClient.get('/reports/business-today');
+    return res.data;
+  },
 };
+

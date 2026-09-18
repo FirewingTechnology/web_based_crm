@@ -114,6 +114,75 @@ def verify_visit_otp(
     db.refresh(visit)
     return True
 
+import math
+
+def calculate_haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculates distance in meters between two lat/lon coordinates using Haversine formula."""
+    R = 6371000.0  # Earth radius in meters
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+
+    a = math.sin(delta_phi / 2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0)**2
+    c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+    return R * c
+
+def verify_geofence_checkin(
+    db: Session,
+    visit: SiteVisit,
+    latitude: float,
+    longitude: float,
+    current_user: User
+) -> Dict[str, Any]:
+    """
+    Validates executive GPS check-in against the project geofence radius.
+    Records checkin coordinates, distance, and geofence verification status.
+    """
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    project = visit.project
+    
+    distance = None
+    radius = project.geofence_radius_meters if project and project.geofence_radius_meters else 300
+    is_inside = False
+
+    if project and project.latitude is not None and project.longitude is not None:
+        distance = calculate_haversine_distance(latitude, longitude, project.latitude, project.longitude)
+        is_inside = distance <= radius
+        status = "INSIDE_RADIUS" if is_inside else "OUTSIDE_RADIUS"
+    else:
+        # If project coordinates not yet configured, log location without blocking
+        status = "CHECKED_IN"
+        is_inside = True
+
+    visit.checkin_latitude = latitude
+    visit.checkin_longitude = longitude
+    visit.checkin_at = now
+    visit.distance_from_project_meters = round(distance, 1) if distance is not None else None
+    visit.geofence_status = status
+
+    dist_str = f"({round(distance)}m from site)" if distance is not None else ""
+    db.add(ActivityLog(
+        user_id=current_user.id,
+        user_name=current_user.name,
+        action="SITE_VISIT_GEOFENCE_CHECKIN",
+        module="Site Visits",
+        details=f"Executive check-in for visit #{visit.id} to {project.name if project else 'Project'}: {status} {dist_str}"
+    ))
+
+    db.commit()
+    db.refresh(visit)
+
+    return {
+        "visit_id": visit.id,
+        "is_inside_radius": is_inside,
+        "geofence_status": status,
+        "distance_meters": round(distance, 1) if distance is not None else None,
+        "distance_from_project_meters": round(distance, 1) if distance is not None else None,
+        "radius_meters": radius,
+        "checked_in_at": now.isoformat()
+    }
+
 def record_visit_completion(
     db: Session,
     visit: SiteVisit,
@@ -152,6 +221,25 @@ def record_visit_completion(
             lead.stage_entered_at = now
 
         update_lead_health(lead, db, commit=False)
+
+        # Automatically create post-visit next action follow-up
+        is_high_intent = buyer_interest_level in ["Hot", "Ready to Book", BuyerInterestLevel.HOT.value, BuyerInterestLevel.READY_TO_BOOK.value]
+        post_visit_notes = (
+            f"🎯 Post-Visit Closer: Draft cost sheet and booking token terms for {lead.name} (Unit: {preferred_unit or 'Preferred'})"
+            if is_high_intent else
+            f"📋 Post-Visit Follow-up: Review objections and present alternate options to {lead.name} within 24h."
+        )
+
+        db.add(Followup(
+            organization_id=lead.organization_id,
+            lead_id=lead.id,
+            assigned_to_id=visit.sales_executive_id or current_user.id if current_user else 1,
+            type=FollowupType.CALL,
+            status=FollowupStatus.PENDING,
+            title=f"Post-Visit: {lead.name}",
+            scheduled_at=now + (timedelta(hours=24) if is_high_intent else timedelta(hours=48)),
+            notes=post_visit_notes
+        ))
 
     # Sync calendar followup
     pending_followup = db.query(Followup).filter(

@@ -3,9 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database import get_db
-from app.models.lead import Lead, LeadStatus
+from app.models.site_visit import SiteVisit, SiteVisitStatus
+from app.models.commission import Commission, CommissionStage
+from app.models.lead import Lead, LeadStatus, LeadPriority
 from app.models.booking import Booking, BookingStatus
-from app.models.commission import Commission
 from app.models.followup import Followup, FollowupStatus
 from app.models.builder import Builder
 from app.models.project import Project
@@ -184,3 +185,224 @@ def export_report_csv(report_type: str, db: Session = Depends(get_db), current_u
 
     else:
         raise HTTPException(status_code=400, detail="Invalid report type specified")
+
+
+@router.get("/revenue-attribution")
+def get_revenue_attribution_report(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Computes end-to-end source-to-revenue attribution:
+    Ingestion source & campaign -> Leads -> Site Visits -> Bookings -> Closed Deal Value & Margin.
+    """
+    lead_q = db.query(Lead).filter(Lead.is_deleted == False)
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        lead_q = lead_q.filter(Lead.organization_id == current_user.organization_id)
+    if current_user.role == UserRole.SALES_EXECUTIVE:
+        lead_q = lead_q.filter(Lead.assigned_to_id == current_user.id)
+
+    leads = lead_q.all()
+    lead_ids = [l.id for l in leads]
+
+    # Site visits for these leads
+    site_visits = db.query(SiteVisit).filter(SiteVisit.lead_id.in_(lead_ids), SiteVisit.is_deleted == False).all() if lead_ids else []
+    visit_lead_ids = set(v.lead_id for v in site_visits)
+
+    # Bookings for these leads
+    bookings = db.query(Booking).filter(Booking.lead_id.in_(lead_ids), Booking.is_deleted == False).all() if lead_ids else []
+    booking_map = {b.lead_id: b for b in bookings}
+
+    # Commissions for these bookings
+    booking_ids = [b.id for b in bookings]
+    commissions = db.query(Commission).filter(Commission.booking_id.in_(booking_ids), Commission.is_deleted == False).all() if booking_ids else []
+    comm_map = {}
+    for c in commissions:
+        comm_map[c.booking_id] = comm_map.get(c.booking_id, 0.0) + float(c.company_margin_amount or 0.0)
+
+    # Aggregate by source
+    source_stats = {}
+    campaign_stats = {}
+
+    for lead in leads:
+        src = (lead.source or "Other").strip()
+        cmp = (lead.campaign_name or "Direct / Unassigned").strip()
+
+        if src not in source_stats:
+            source_stats[src] = {
+                "source": src,
+                "leads": 0,
+                "site_visits": 0,
+                "bookings": 0,
+                "deal_value": 0.0,
+                "revenue": 0.0
+            }
+        source_stats[src]["leads"] += 1
+        if lead.id in visit_lead_ids:
+            source_stats[src]["site_visits"] += 1
+        if lead.id in booking_map:
+            b = booking_map[lead.id]
+            source_stats[src]["bookings"] += 1
+            source_stats[src]["deal_value"] += float(b.total_deal_value or 0.0)
+            source_stats[src]["revenue"] += comm_map.get(b.id, 0.0)
+
+        if cmp not in campaign_stats:
+            campaign_stats[cmp] = {
+                "campaign": cmp,
+                "source": src,
+                "leads": 0,
+                "site_visits": 0,
+                "bookings": 0,
+                "deal_value": 0.0,
+                "revenue": 0.0
+            }
+        campaign_stats[cmp]["leads"] += 1
+        if lead.id in visit_lead_ids:
+            campaign_stats[cmp]["site_visits"] += 1
+        if lead.id in booking_map:
+            b = booking_map[lead.id]
+            campaign_stats[cmp]["bookings"] += 1
+            campaign_stats[cmp]["deal_value"] += float(b.total_deal_value or 0.0)
+            campaign_stats[cmp]["revenue"] += comm_map.get(b.id, 0.0)
+
+    # Compute conversion rates
+    sources_list = []
+    for s in source_stats.values():
+        s["conversion_rate"] = round((s["bookings"] / s["leads"] * 100), 2) if s["leads"] > 0 else 0.0
+        s["avg_deal_value"] = round((s["deal_value"] / s["bookings"]), 2) if s["bookings"] > 0 else 0.0
+        sources_list.append(s)
+
+    campaigns_list = []
+    for c in campaign_stats.values():
+        c["conversion_rate"] = round((c["bookings"] / c["leads"] * 100), 2) if c["leads"] > 0 else 0.0
+        campaigns_list.append(c)
+
+    sources_list.sort(key=lambda x: x["revenue"], reverse=True)
+    campaigns_list.sort(key=lambda x: x["revenue"], reverse=True)
+
+    total_leads = len(leads)
+    total_deal_value = sum(s["deal_value"] for s in sources_list)
+    total_revenue = sum(s["revenue"] for s in sources_list)
+    total_bookings = sum(s["bookings"] for s in sources_list)
+
+    return {
+        "summary": {
+            "total_leads": total_leads,
+            "total_bookings": total_bookings,
+            "overall_conversion_rate": round((total_bookings / total_leads * 100), 2) if total_leads > 0 else 0.0,
+            "total_deal_value": total_deal_value,
+            "total_realized_revenue": total_revenue
+        },
+        "sources": sources_list,
+        "campaigns": campaigns_list[:15]
+    }
+
+
+@router.get("/business-today")
+def get_business_today_command_center(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Executive & Management "Business Today" command center.
+    Surfaces active pipeline, at-risk revenue, site visits, SLA breaches, and prioritized action items.
+    """
+    from app.models.call import CallRecord
+
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    lead_q = db.query(Lead).filter(Lead.is_deleted == False)
+    visit_q = db.query(SiteVisit).filter(SiteVisit.is_deleted == False)
+    comm_q = db.query(Commission).filter(Commission.is_deleted == False)
+    call_q = db.query(CallRecord)
+
+    if current_user.role != UserRole.SUPERADMIN and current_user.organization_id:
+        lead_q = lead_q.filter(Lead.organization_id == current_user.organization_id)
+        visit_q = visit_q.filter(SiteVisit.organization_id == current_user.organization_id)
+        comm_q = comm_q.filter(Commission.organization_id == current_user.organization_id)
+        call_q = call_q.filter(CallRecord.organization_id == current_user.organization_id)
+
+    if current_user.role == UserRole.SALES_EXECUTIVE:
+        lead_q = lead_q.filter(Lead.assigned_to_id == current_user.id)
+        visit_q = visit_q.filter(SiteVisit.executive_id == current_user.id)
+
+    # 1. Active pipeline (leads not lost/booked)
+    active_leads = lead_q.filter(Lead.status.notin_([LeadStatus.BOOKED, LeadStatus.LOST])).all()
+    pipeline_sum = sum(float(l.deal_value or l.budget_max or l.budget_min or 0.0) for l in active_leads)
+    active_pipeline_cr = round(pipeline_sum / 10000000.0, 2)  # Convert to Crores
+
+    # 2. At-risk deals (health <= 40 or SLA breached or overdue follow-up)
+    at_risk_leads = [
+        l for l in active_leads
+        if (l.health_score is not None and l.health_score <= 40)
+        or l.sla_status == "BREACHED"
+        or (l.sla_deadline and l.sla_deadline < now and not l.first_response_at)
+    ]
+    at_risk_val = sum(float(l.deal_value or l.budget_max or l.budget_min or 0.0) for l in at_risk_leads)
+    at_risk_lakhs = round(at_risk_val / 100000.0, 2)  # Convert to Lakhs
+
+    # 3. Site visits today
+    visits_today = visit_q.filter(SiteVisit.scheduled_at >= today_start, SiteVisit.scheduled_at < today_end).all()
+    visits_verified = sum(1 for v in visits_today if v.geofence_status == "VERIFIED")
+    visits_pending = len(visits_today) - visits_verified
+
+    # 4. Pending commissions
+    pending_comms = comm_q.filter(Commission.stage != CommissionStage.PAID).all()
+    pending_comm_val = sum(float(c.company_margin_amount or 0.0) for c in pending_comms)
+    pending_comm_lakhs = round(pending_comm_val / 100000.0, 2)
+
+    # 5. SLA breaches today
+    sla_breaches = [
+        l for l in active_leads
+        if l.sla_status == "BREACHED"
+        or (l.sla_deadline and l.sla_deadline < now and not l.first_response_at)
+    ]
+
+    # 6. Ingested today & calls today
+    leads_today = lead_q.filter(Lead.created_at >= today_start).count()
+    calls_today = call_q.filter(CallRecord.created_at >= today_start).count()
+
+    # 7. Urgent action items (top 8 requiring immediate manager attention)
+    action_items = []
+    for l in at_risk_leads[:5]:
+        action_items.append({
+            "type": "SLA_OR_AT_RISK",
+            "title": f"At-Risk Deal: {l.name}".strip(),
+            "lead_id": l.id,
+            "phone": l.phone,
+            "project": (l.preferred_project.name if l.preferred_project else "General"),
+            "budget": f"₹{(l.deal_value or l.budget_max or 0):,.0f}",
+            "reason": "SLA Response Breached" if (l.sla_status == "BREACHED" or (l.sla_deadline and l.sla_deadline < now and not l.first_response_at)) else "Low Engagement Health Score",
+            "urgency": "HIGH"
+        })
+
+    for v in visits_today[:3]:
+        action_items.append({
+            "type": "SITE_VISIT_TODAY",
+            "title": f"Site Visit Today ({v.scheduled_at.strftime('%I:%M %p')})",
+            "lead_id": v.lead_id,
+            "phone": v.lead.phone if v.lead else "",
+            "project": v.project.name if v.project else "General",
+            "budget": "Site Visit",
+            "reason": f"Geofence: {v.geofence_status or 'PENDING_CHECKIN'}",
+            "urgency": "MEDIUM"
+        })
+
+    return {
+        "date": now.strftime("%A, %d %B %Y"),
+        "kpis": {
+            "active_pipeline_cr": active_pipeline_cr,
+            "at_risk_lakhs": at_risk_lakhs,
+            "site_visits_today": len(visits_today),
+            "site_visits_verified": visits_verified,
+            "site_visits_pending": visits_pending,
+            "pending_commissions_lakhs": pending_comm_lakhs,
+            "sla_breaches_count": len(sla_breaches),
+            "leads_ingested_today": leads_today,
+            "calls_logged_today": calls_today
+        },
+        "urgent_action_items": action_items
+    }
+

@@ -177,6 +177,70 @@ def run_auto_migrations(engine):
             except Exception as e:
                 logger.warning(f"Failed to auto-create 'buyer_documents' table: {e}")
 
+        # 8. Real Estate Revenue OS: Universal Ingestion, SLA & Requirement Columns for Leads
+        if "leads" in tables:
+            lead_cols = {col["name"] for col in inspector.get_columns("leads")}
+            dt_syntax = "DATETIME" if conn.dialect.name == "sqlite" else "TIMESTAMP"
+            rev_os_lead_cols = [
+                ("source_lead_id", "VARCHAR(100)"),
+                ("campaign_name", "VARCHAR(150)"),
+                ("ad_name", "VARCHAR(150)"),
+                ("normalized_phone", "VARCHAR(30)"),
+                ("sla_deadline", dt_syntax),
+                ("sla_status", "VARCHAR(30) DEFAULT 'PENDING'"),
+                ("first_response_at", dt_syntax),
+                ("assignment_rule", "VARCHAR(100)"),
+                ("assigned_at", dt_syntax),
+                ("deal_value", "FLOAT DEFAULT 0.0"),
+                ("booking_probability", "FLOAT DEFAULT 0.0"),
+                ("structured_requirements_json", "TEXT"),
+            ]
+            for col_name, col_type in rev_os_lead_cols:
+                if col_name not in lead_cols:
+                    try:
+                        conn.execute(text(f"ALTER TABLE leads ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Added column '{col_name}' to 'leads'")
+                    except Exception as e:
+                        logger.warning(f"Failed to add '{col_name}' to 'leads': {e}")
+
+        # 9. Projects Geofencing & Geo-Coordinates
+        if "projects" in tables:
+            proj_cols = {col["name"] for col in inspector.get_columns("projects")}
+            proj_new_cols = [
+                ("latitude", "FLOAT"),
+                ("longitude", "FLOAT"),
+                ("geofence_radius_meters", "INTEGER DEFAULT 300"),
+            ]
+            for col_name, col_type in proj_new_cols:
+                if col_name not in proj_cols:
+                    try:
+                        conn.execute(text(f"ALTER TABLE projects ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Added column '{col_name}' to 'projects'")
+                    except Exception as e:
+                        logger.warning(f"Failed to add '{col_name}' to 'projects': {e}")
+
+        # 10. Site Visits Location Verification & Geofence Status
+        if "site_visits" in tables:
+            visit_cols = {col["name"] for col in inspector.get_columns("site_visits")}
+            dt_syntax = "DATETIME" if conn.dialect.name == "sqlite" else "TIMESTAMP"
+            visit_new_cols = [
+                ("checkin_latitude", "FLOAT"),
+                ("checkin_longitude", "FLOAT"),
+                ("checkin_at", dt_syntax),
+                ("distance_from_project_meters", "FLOAT"),
+                ("geofence_status", "VARCHAR(50) DEFAULT 'NONE'"),
+            ]
+            for col_name, col_type in visit_new_cols:
+                if col_name not in visit_cols:
+                    try:
+                        conn.execute(text(f"ALTER TABLE site_visits ADD COLUMN {col_name} {col_type};"))
+                        conn.commit()
+                        logger.info(f"Added column '{col_name}' to 'site_visits'")
+                    except Exception as e:
+                        logger.warning(f"Failed to add '{col_name}' to 'site_visits': {e}")
+
 
 
 

@@ -50,6 +50,24 @@ class Lead(BaseModel):
     postponement_count = Column(Integer, default=0, nullable=False)
     lost_reason = Column(String(255), nullable=True)
 
+    # Universal Ingestion & Source Tracking
+    source_lead_id = Column(String(100), nullable=True, index=True)
+    campaign_name = Column(String(150), nullable=True)
+    ad_name = Column(String(150), nullable=True)
+    normalized_phone = Column(String(30), nullable=True, index=True)
+
+    # SLA & Escalation Engine
+    sla_deadline = Column(DateTime, nullable=True, index=True)
+    sla_status = Column(String(30), default="PENDING", nullable=False) # PENDING, MET, BREACHED
+    first_response_at = Column(DateTime, nullable=True)
+    assignment_rule = Column(String(100), nullable=True)
+    assigned_at = Column(DateTime, nullable=True)
+
+    # Deal & Requirement Intelligence
+    deal_value = Column(Float, default=0.0, nullable=False) # in Lakhs
+    booking_probability = Column(Float, default=0.0, nullable=False) # 0 to 100%
+    structured_requirements_json = Column(Text, nullable=True)
+
     # Relationships
     assigned_to = relationship("User", back_populates="assigned_leads", foreign_keys=[assigned_to_id])
     created_by = relationship("User", back_populates="created_leads", foreign_keys=[created_by_id])
