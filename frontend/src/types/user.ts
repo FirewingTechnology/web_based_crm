@@ -29,10 +29,10 @@ export const isSuperAdminRole = (role?: string | null): boolean => {
 
 export const isSuperAdminUser = (user?: { role?: string; email?: string } | null, role?: string | null): boolean => {
   if (!user && !role) return false;
-  if (role && isSuperAdminRole(role)) return true;
-  if (user?.role && isSuperAdminRole(user.role)) return true;
   const email = (user?.email || '').toLowerCase().trim();
-  return email === 'superadmin@realvion.com' || email === 'amol12@gmail.com' || email === 'amolbrand@gmail.com';
+  const effectiveRole = role || user?.role;
+  // Super Admin is ALWAYS AND ONLY ONE: superadmin@realvion.com
+  return email === 'superadmin@realvion.com' && isSuperAdminRole(effectiveRole);
 };
 
 export interface UserCreateInput {

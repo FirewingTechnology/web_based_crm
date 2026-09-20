@@ -45,6 +45,9 @@ def create_user(
             current_user.organization_id = org_id
             db.commit()
 
+    if user_in.role == UserRole.SUPERADMIN:
+        raise HTTPException(status_code=400, detail="There can only be one Super Admin in the system (Platform Owner).")
+
     user = User(
         organization_id=org_id,
         name=user_in.name,
@@ -87,6 +90,9 @@ def update_user(
     user = db.query(User).filter(User.id == user_id, User.is_deleted == False).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    if user_in.role == UserRole.SUPERADMIN and user.email.lower().strip() != "superadmin@realvion.com":
+        raise HTTPException(status_code=400, detail="There can only be one Super Admin in the system (Platform Owner).")
 
     for field, value in user_in.model_dump(exclude_unset=True).items():
         setattr(user, field, value)

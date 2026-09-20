@@ -493,13 +493,13 @@ def ensure_seed_users(db):
             superadmin.is_active = True
             superadmin.is_deleted = False
 
-        # 2. Platform Owner / Master Accounts
-        for owner_email in ["amol12@gmail.com", "amolbrand@gmail.com"]:
-            owner = db.query(User).filter(func.lower(User.email) == owner_email).first()
-            if owner:
-                owner.role = UserRole.SUPERADMIN
-                owner.is_active = True
-                owner.is_deleted = False
+        # 2. Ensure agency owner accounts are ADMIN
+        for agency_admin_email in ["amol12@gmail.com", "amolbrand@gmail.com"]:
+            admin_user = db.query(User).filter(func.lower(User.email) == agency_admin_email).first()
+            if admin_user:
+                admin_user.role = UserRole.ADMIN
+                admin_user.is_active = True
+                admin_user.is_deleted = False
 
         # 3. Admin User
         admin = db.query(User).filter(func.lower(User.email) == "admin@brokeros.com").first()
