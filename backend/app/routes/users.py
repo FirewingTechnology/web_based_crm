@@ -36,7 +36,7 @@ def create_user(
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    org_id = current_user.organization_id
+    org_id = current_user.organization_id or user_in.organization_id
     firm_name = user_in.firm_name or current_user.firm_name
     if not org_id and firm_name:
         org = db.query(Organization).filter(func.lower(Organization.name) == firm_name.lower().strip()).first()

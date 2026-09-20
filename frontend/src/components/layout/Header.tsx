@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, UserCircle, CheckCircle2, AlertCircle, Menu, Volume2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Bell, UserCircle, CheckCircle2, AlertCircle, Menu, Volume2, ShieldCheck, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { isSuperAdminUser } from '../../types/user';
 import { notificationsApi } from '../../api/notifications';
 import { NotificationItem } from '../../types/report';
 import { Badge } from '../ui/Badge';
@@ -12,6 +14,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
   const { user, role, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [showUserMenu, setShowUserMenu] = useState<boolean>(false);
@@ -40,6 +44,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
     }
   };
 
+  const isSuperAdmin = isSuperAdminUser(user, role);
+
   const roleColors: Record<string, 'purple' | 'blue' | 'emerald' | 'amber'> = {
     'Super Admin': 'amber',
     Admin: 'purple',
@@ -48,7 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
     Broker: 'amber',
   };
 
-  const roleDisplayName = role === 'Super Admin' ? 'Platform Owner' : role;
+  const roleDisplayName = isSuperAdmin ? 'Platform Owner' : role;
+  const isSaasPage = location.pathname.startsWith('/admin/saas');
 
   return (
     <header className="glass-card sticky top-0 z-20 h-16 border-b border-[#C8A45D]/12 px-4 sm:px-6 flex items-center justify-between">
@@ -65,8 +72,33 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
         <h2 className="text-base font-semibold text-white tracking-wide truncate">REALVION</h2>
         <span className="text-slate-700 hidden sm:inline">|</span>
         <div className="hidden sm:block">
-          <Badge variant={roleColors[role || 'Admin'] || 'blue'}>{roleDisplayName}</Badge>
+          <Badge variant={roleColors[role || 'Admin'] || 'amber'}>{roleDisplayName}</Badge>
         </div>
+
+        {/* SuperAdmin Quick Switcher Pill */}
+        {isSuperAdmin && (
+          <button
+            onClick={() => navigate(isSaasPage ? '/admin/dashboard' : '/admin/saas')}
+            className={`hidden md:inline-flex items-center gap-1.5 py-1 px-2.5 rounded-xl text-xs font-bold transition shadow-sm border ${
+              isSaasPage
+                ? 'bg-white/[0.06] hover:bg-white/[0.1] border-white/[0.12] text-slate-300 hover:text-white'
+                : 'bg-gradient-to-r from-amber-500/20 via-[#C8A45D]/20 to-yellow-500/20 hover:brightness-125 border-[#C8A45D]/40 text-[#C8A45D]'
+            }`}
+            title={isSaasPage ? 'Switch to Agency CRM Workspace' : 'Switch to Platform SaaS Control'}
+          >
+            {isSaasPage ? (
+              <>
+                <LayoutDashboard className="h-3.5 w-3.5 text-slate-400" />
+                <span>Agency CRM</span>
+              </>
+            ) : (
+              <>
+                <ShieldCheck className="h-3.5 w-3.5 text-[#C8A45D]" />
+                <span>👑 SaaS Control</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
@@ -193,6 +225,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               </div>
 
               <div className="space-y-1">
+                {isSuperAdmin && (
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      navigate(isSaasPage ? '/admin/dashboard' : '/admin/saas');
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-amber-300 hover:bg-amber-500/10 border border-amber-500/20 transition flex items-center gap-2 mb-2"
+                  >
+                    {isSaasPage ? '🏢 Switch to Agency Workspace' : '👑 Open SaaS Control Panel'}
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setShowUserMenu(false);

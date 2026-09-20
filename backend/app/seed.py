@@ -493,7 +493,15 @@ def ensure_seed_users(db):
             superadmin.is_active = True
             superadmin.is_deleted = False
 
-        # 2. Admin User
+        # 2. Platform Owner / Master Accounts
+        for owner_email in ["amol12@gmail.com", "amolbrand@gmail.com"]:
+            owner = db.query(User).filter(func.lower(User.email) == owner_email).first()
+            if owner:
+                owner.role = UserRole.SUPERADMIN
+                owner.is_active = True
+                owner.is_deleted = False
+
+        # 3. Admin User
         admin = db.query(User).filter(func.lower(User.email) == "admin@brokeros.com").first()
         if not admin:
             # Check or create default organization
@@ -528,7 +536,7 @@ def ensure_seed_users(db):
             admin.is_deleted = False
 
         db.commit()
-        print("[SEED CHECK] Ensured superadmin@realvion.com and admin@brokeros.com exist and credentials are active.")
+        print("[SEED CHECK] Ensured superadmin@realvion.com, amol12@gmail.com (SuperAdmin), and admin@brokeros.com exist and credentials are active.")
     except Exception as e:
         db.rollback()
         print(f"[SEED CHECK ERROR] {e}")

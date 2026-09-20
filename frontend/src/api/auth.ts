@@ -7,8 +7,9 @@ export const authApi = {
     const res = await apiClient.post<TokenResponse>('/auth/login', { email, password });
     return res.data;
   },
-  getMe: async (): Promise<User> => {
-    const res = await apiClient.get<User>('/auth/me');
+  getMe: async (tokenOverride?: string): Promise<User> => {
+    const headers = tokenOverride ? { Authorization: `Bearer ${tokenOverride}` } : undefined;
+    const res = await apiClient.get<User>('/auth/me', { headers });
     return res.data;
   },
 };

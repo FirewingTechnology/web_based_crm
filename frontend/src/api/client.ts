@@ -28,7 +28,7 @@ export const apiClient = axios.create({
 // Request Interceptor: Attach JWT Access Token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('realvion_access_token') || localStorage.getItem('brokeros_access_token');
-  if (token && config.headers) {
+  if (token && config.headers && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -63,6 +63,8 @@ apiClient.interceptors.response.use(
           localStorage.removeItem('realvion_refresh_token');
           localStorage.removeItem('brokeros_access_token');
           localStorage.removeItem('brokeros_refresh_token');
+          localStorage.removeItem('realvion_user');
+          localStorage.removeItem('brokeros_user');
           if (window.location.pathname !== '/login') {
             window.location.href = '/login';
           }
@@ -72,6 +74,8 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('realvion_refresh_token');
         localStorage.removeItem('brokeros_access_token');
         localStorage.removeItem('brokeros_refresh_token');
+        localStorage.removeItem('realvion_user');
+        localStorage.removeItem('brokeros_user');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }

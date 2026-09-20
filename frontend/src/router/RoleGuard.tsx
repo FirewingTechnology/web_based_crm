@@ -1,14 +1,14 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserRole } from '../types/user';
+import { UserRole, isSuperAdminUser } from '../types/user';
 
 interface RoleGuardProps {
   allowedRoles: UserRole[];
 }
 
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, role, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -26,17 +26,21 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
+  const isSuperAdmin = isSuperAdminUser(user, role);
+
+  // Super Admin has master authority to access both SaaS Control Panel and all Agency modules
+  if (isSuperAdmin) {
+    return <Outlet />;
+  }
+
   if (!allowedRoles.includes(user.role)) {
     // Redirect based on role if attempting to access forbidden portal
-    if (user.role === 'Super Admin') {
-      return <Navigate to="/admin/saas" replace />;
-    } else if (user.role === 'Admin' || user.role === 'Manager') {
+    if (user.role === 'Admin' || user.role === 'Manager') {
       return <Navigate to="/admin/dashboard" replace />;
     } else {
       return <Navigate to="/sales/dashboard" replace />;
     }
   }
-
 
   return <Outlet />;
 };

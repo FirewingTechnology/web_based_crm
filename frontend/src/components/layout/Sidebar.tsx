@@ -24,6 +24,7 @@ import {
   HeadphonesIcon,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { isSuperAdminUser } from '../../types/user';
 
 interface SidebarProps {
   mobileOpen?: boolean;
@@ -33,11 +34,24 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileClose }) => {
   const { user, role, logout } = useAuth();
 
-  const isSuperAdmin = role === 'Super Admin';
+  const isSuperAdmin = isSuperAdminUser(user, role);
   const isAdminOrManager = role === 'Admin' || role === 'Manager';
 
   const superAdminNavItems = [
-    { label: 'SaaS Control Panel', path: '/admin/saas', icon: ShieldCheck },
+    { label: '👑 SaaS Control Panel', path: '/admin/saas', icon: ShieldCheck, isMaster: true },
+    { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Lead Management', path: '/admin/leads', icon: Users },
+    { label: 'Site Visits', path: '/admin/site-visits', icon: Car },
+    { label: 'Followups', path: '/admin/followups', icon: CalendarCheck },
+    { label: 'Bookings', path: '/admin/bookings', icon: FileCheck2 },
+    { label: 'Commission', path: '/admin/commissions', icon: Coins },
+    { label: 'Projects', path: '/admin/projects', icon: FolderKanban },
+    { label: 'Builders', path: '/admin/builders', icon: Building2 },
+    { label: 'Broker Management', path: '/admin/brokers', icon: UserCheck },
+    { label: 'Sales Management', path: '/admin/sales', icon: Target },
+    { label: 'Reports', path: '/admin/reports', icon: BarChart3 },
+    { label: 'Automation Center', path: '/admin/automation', icon: Cpu },
+    { label: 'Support Center', path: '/admin/support', icon: HeadphonesIcon },
     { label: 'Notifications', path: '/admin/notifications', icon: Bell },
     { label: 'Settings & Logs', path: '/admin/settings', icon: Settings },
   ];
@@ -113,9 +127,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 to={item.path}
                 onClick={onMobileClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                    ? 'bg-[#C8A45D]/15 text-[#C8A45D] border border-[#C8A45D]/30 shadow-sm'
-                    : 'hover:bg-white/[0.04] hover:text-slate-100 text-slate-400'
+                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'bg-[#C8A45D]/20 text-[#C8A45D] border border-[#C8A45D]/40 shadow-sm font-semibold'
+                      : (item as any).isMaster
+                      ? 'bg-gradient-to-r from-amber-500/10 to-[#C8A45D]/10 text-amber-300 hover:text-white hover:from-amber-500/20 hover:to-[#C8A45D]/20 border border-[#C8A45D]/30 font-semibold'
+                      : 'hover:bg-white/[0.04] hover:text-slate-100 text-slate-400'
                   }`
                 }
               >
@@ -136,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-              <p className="text-[10px] text-[#C8A45D]/80 truncate font-medium">{role === 'Super Admin' ? 'Platform Owner' : role}</p>
+              <p className="text-[10px] text-[#C8A45D]/90 truncate font-medium">{isSuperAdmin ? 'Platform Owner' : (role || 'User')}</p>
             </div>
           </div>
           <button

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, Lock, Mail, ArrowRight, ShieldCheck, UserCheck, LockKeyhole, Info, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { isSuperAdminUser } from '../../types/user';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { PaymentCheckoutModal } from '../../components/PaymentCheckoutModal';
@@ -38,10 +39,10 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
     try {
       const user = await login(email, password);
-      const isSuperAdmin = user.role === 'Super Admin' || (user.role as any) === 'SUPERADMIN' || user.email === 'superadmin@realvion.com';
+      const isSuperAdmin = isSuperAdminUser(user, user.role);
       if (isSuperAdmin) {
         navigate('/admin/saas');
-      } else if (user.role === 'Sales Executive') {
+      } else if (user.role === 'Sales Executive' || user.role === 'Broker') {
         navigate('/sales/dashboard');
       } else {
         navigate('/admin/dashboard');
@@ -95,7 +96,7 @@ export const LoginPage: React.FC = () => {
                 : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
               }`}
           >
-            <ShieldCheck className="h-4 w-4" /> Admin Login
+            <ShieldCheck className="h-4 w-4" /> Admin / SuperAdmin
           </button>
           <button
             type="button"
@@ -142,7 +143,7 @@ export const LoginPage: React.FC = () => {
           <Input
             label="Registered Email Address"
             type="email"
-            placeholder={loginType === 'admin' ? 'admin@company.com' : 'executive@company.com'}
+            placeholder={loginType === 'admin' ? 'superadmin@realvion.com or admin@company.com' : 'executive@company.com'}
             icon={<Mail className="h-4 w-4" />}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -165,7 +166,7 @@ export const LoginPage: React.FC = () => {
             isLoading={isLoading}
             icon={<ArrowRight className="h-4 w-4" />}
           >
-            Sign In to {loginType === 'admin' ? 'Admin' : 'Sales Executive'} Portal
+            Sign In to {loginType === 'admin' ? 'Admin / SuperAdmin' : 'Sales Executive'} Portal
           </Button>
         </form>
 
