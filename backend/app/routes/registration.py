@@ -502,32 +502,52 @@ def get_plans(db: Session = Depends(get_db)):
             "code": "starter",
             "price_monthly": 1999.0,
             "price_yearly": 19990.0,
-            "platform_fee": 499.0,
-            "max_users": 3,
-            "max_leads": 1000,
-            "features": ["3 User Licenses", "Up to 1,000 Leads", "Basic Followup Reminders", "Standard Reports"]
+            "platform_fee": 0.0,
+            "max_users": 2,
+            "max_leads": 2000,
+            "features": [
+                "1 Admin + 1 Executive (2 Seats)",
+                "Up to 2,000 Leads",
+                "Lead Pipeline & Management",
+                "Voice & Audio Reminders",
+                "Standard Email Support"
+            ]
         },
         {
             "id": 2,
             "name": "Professional",
             "code": "professional",
-            "price_monthly": 4999.0,
-            "price_yearly": 49990.0,
-            "platform_fee": 499.0,
-            "max_users": 10,
+            "price_monthly": 2999.0,
+            "price_yearly": 29990.0,
+            "platform_fee": 0.0,
+            "max_users": 4,
             "max_leads": 10000,
-            "features": ["10 User Licenses", "Up to 10,000 Leads", "Real-Time Voice Alarms", "Commission Calculation Engine", "CSV Data Export", "Priority Support"]
+            "features": [
+                "1 Admin + 3 Executives (4 Seats)",
+                "Up to 10,000 Leads",
+                "Real-Time Voice Alarms",
+                "Commission Calculation Engine",
+                "CSV Data Import & Export",
+                "Priority 24/7 Support"
+            ]
         },
         {
             "id": 3,
             "name": "Enterprise",
             "code": "enterprise",
-            "price_monthly": 14999.0,
-            "price_yearly": 149990.0,
-            "platform_fee": 999.0,
-            "max_users": 50,
-            "max_leads": 100000,
-            "features": ["Unlimited User Licenses", "Unlimited Leads", "Dedicated Account Manager", "Custom Webhooks & API Integration", "Multi-Tenant Broker Network", "24/7 Phone & Email Support"]
+            "price_monthly": 4999.0,
+            "price_yearly": 49990.0,
+            "platform_fee": 0.0,
+            "max_users": 11,
+            "max_leads": 50000,
+            "features": [
+                "1 Admin + 10 Executives (11 Seats+)",
+                "Up to 50,000 Leads",
+                "Dedicated Account Manager",
+                "Custom Webhooks & API Integration",
+                "Multi-Tenant Broker Network",
+                "24/7 Phone & Email VIP Support"
+            ]
         }
     ]
     return plans

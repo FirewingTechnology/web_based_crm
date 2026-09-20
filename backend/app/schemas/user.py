@@ -34,6 +34,8 @@ class UserResponse(UserBase):
     is_trial: bool = False
     subscription_status: str | None = None
     plan_code: str | None = None
+    max_users: int | None = None
+    seats_used: int | None = None
 
 
     class Config:

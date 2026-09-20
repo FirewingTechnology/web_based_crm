@@ -19,6 +19,8 @@ export interface User {
   is_trial?: boolean;
   subscription_status?: string;
   plan_code?: string;
+  max_users?: number;
+  seats_used?: number;
 }
 
 export const isSuperAdminRole = (role?: string | null): boolean => {

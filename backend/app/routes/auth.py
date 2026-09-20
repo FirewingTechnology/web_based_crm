@@ -177,6 +177,17 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
             is_trial_expired = False
             trial_seconds_remaining = diff_seconds
 
+    max_users = 4
+    seats_used = 1
+    if org:
+        seats_used = db.query(User).filter(User.organization_id == org.id, User.is_deleted == False).count()
+        if sub and sub.max_users:
+            max_users = sub.max_users
+        elif plan_code == "starter":
+            max_users = 2
+        elif plan_code == "enterprise":
+            max_users = 11
+
     resp_data = UserResponse.from_orm(current_user).dict()
     resp_data["trial_expires_at"] = trial_expires_at
     resp_data["is_trial_expired"] = is_trial_expired
@@ -184,6 +195,8 @@ def get_me(current_user: User = Depends(get_current_user), db: Session = Depends
     resp_data["is_trial"] = is_trial
     resp_data["subscription_status"] = subscription_status
     resp_data["plan_code"] = plan_code
+    resp_data["max_users"] = max_users
+    resp_data["seats_used"] = seats_used
     return resp_data
 
 from pydantic import BaseModel

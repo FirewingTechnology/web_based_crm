@@ -244,29 +244,35 @@ def create_offline_tenant(
 
     # 4. Create Subscription
     now = datetime.now(timezone.utc)
+    plan_code = (req.plan_code or "professional").lower()
+    default_seats = 2 if plan_code == "starter" else (4 if plan_code == "professional" else 11)
+    default_leads = 2000 if plan_code == "starter" else (10000 if plan_code == "professional" else 50000)
+    assigned_seats = req.seats_limit if (req.seats_limit and req.seats_limit not in [4, 15]) else default_seats
+
     sub = Subscription(
         organization_id=org.id,
-        plan_code=req.plan_code,
+        plan_code=plan_code,
         status="Active",
         start_date=now,
         end_date=now + timedelta(days=365),
-        max_users=req.seats_limit,
-        max_leads=10000
+        max_users=assigned_seats,
+        max_leads=default_leads
     )
     db.add(sub)
     db.commit()
 
     # 5. Log Payment record (Offline Cash / Manual Sales Override)
+    base_price = 1999.0 if plan_code == "starter" else (2999.0 if plan_code == "professional" else 4999.0)
     pay = Payment(
         organization_id=org.id,
         workspace_id=workspace.id,
         subscription_id=sub.id,
         razorpay_order_id=f"order_offline_{int(now.timestamp())}",
         razorpay_payment_id=f"pay_offline_{int(now.timestamp())}",
-        amount=4999.0 if req.plan_code == "professional" else 14999.0,
-        platform_fee=499.0,
-        gst_amount=989.64,
-        total_amount=6487.64,
+        amount=base_price,
+        platform_fee=0.0,
+        gst_amount=0.0,
+        total_amount=base_price,
         status="Captured",
         payment_method=req.payment_method
     )
@@ -364,21 +370,27 @@ def upgrade_admin_plan(
         Subscription.organization_id == org.id
     ).order_by(Subscription.id.desc()).first()
 
+    clean_plan = req.plan_code.lower()
+    default_seats = 2 if clean_plan == "starter" else (4 if clean_plan == "professional" else 11)
+    default_leads = 2000 if clean_plan == "starter" else (10000 if clean_plan == "professional" else 50000)
+    assigned_seats = req.seats_limit if (req.seats_limit and req.seats_limit not in [0, 4, 15]) else default_seats
+    assigned_leads = req.max_leads if (req.max_leads and req.max_leads not in [0, 5000, 10000]) else default_leads
+
     if sub:
-        sub.plan_code = req.plan_code
+        sub.plan_code = clean_plan
         sub.status = "Active"
-        sub.max_users = req.seats_limit
-        sub.max_leads = req.max_leads
+        sub.max_users = assigned_seats
+        sub.max_leads = assigned_leads
         sub.end_date = now + timedelta(days=req.extend_days)
     else:
         sub = Subscription(
             organization_id=org.id,
-            plan_code=req.plan_code,
+            plan_code=clean_plan,
             status="Active",
             start_date=now,
             end_date=now + timedelta(days=req.extend_days),
-            max_users=req.seats_limit,
-            max_leads=req.max_leads,
+            max_users=assigned_seats,
+            max_leads=assigned_leads,
             auto_renew=True
         )
         db.add(sub)

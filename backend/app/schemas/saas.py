@@ -190,7 +190,7 @@ class CreateOfflineTenantRequest(BaseModel):
     company_type: str = "Channel Partner"
     plan_code: str = "professional"
     payment_method: str = "Offline Cash / Bank Transfer"
-    seats_limit: int = 15
+    seats_limit: int = 4
     city: Optional[str] = "Mumbai"
     state: Optional[str] = "Maharashtra"
 
@@ -201,8 +201,8 @@ class UpdateQuotaRequest(BaseModel):
 
 class UpgradePlanRequest(BaseModel):
     plan_code: str  # starter | professional | enterprise
-    seats_limit: int = 15
-    max_leads: int = 5000
+    seats_limit: int = 4
+    max_leads: int = 10000
     extend_days: int = 365  # how many days from today to set end_date
 
 

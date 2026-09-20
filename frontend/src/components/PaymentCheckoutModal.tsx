@@ -32,9 +32,9 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
   if (!isOpen) return null;
 
   const planPricing = {
-    starter: { name: 'Starter CP Plan', price: 999 },
-    professional: { name: 'Professional Agency Plan', price: 4999 },
-    enterprise: { name: 'Enterprise Plan', price: 14999 },
+    starter: { name: 'Starter Duo Plan', price: 1999, seatsDesc: '1 Admin + 1 Executive (2 seats)' },
+    professional: { name: 'Professional Team Plan', price: 2999, seatsDesc: '1 Admin + 3 Executives (4 seats)' },
+    enterprise: { name: 'Enterprise Growth Plan', price: 4999, seatsDesc: '1 Admin + 10 Executives (11 seats+)' },
   };
 
   const planObj = planPricing[selectedPlan];
@@ -275,13 +275,16 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({ isOp
                   onClick={() => setSelectedPlan(code)}
                   className={`p-3 rounded-xl border text-left transition ${
                     selectedPlan === code
-                      ? 'bg-[#C8A45D]/10 border-[#C8A45D] text-white'
+                      ? 'bg-[#C8A45D]/10 border-[#C8A45D] text-white shadow-md shadow-[#C8A45D]/10'
                       : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
                   }`}
                 >
                   <div className="text-xs font-bold capitalize">{code}</div>
                   <div className="text-sm font-extrabold text-[#C8A45D] mt-1">
                     ₹{planPricing[code].price.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-1 leading-tight font-light">
+                    {planPricing[code].seatsDesc}
                   </div>
                 </button>
               ))}

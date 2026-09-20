@@ -48,6 +48,40 @@ def create_user(
     if user_in.role == UserRole.SUPERADMIN:
         raise HTTPException(status_code=400, detail="There can only be one Super Admin in the system (Platform Owner).")
 
+    # Enforce package seat limit and role limits for tenant organizations
+    if current_user.role != UserRole.SUPERADMIN and org_id:
+        from app.models.saas import Subscription
+        sub = db.query(Subscription).filter(Subscription.organization_id == org_id).order_by(Subscription.id.desc()).first()
+
+        max_seats = 4  # Default to professional
+        if sub:
+            if sub.max_users:
+                max_seats = sub.max_users
+            elif sub.plan_code == "starter":
+                max_seats = 2
+            elif sub.plan_code == "enterprise":
+                max_seats = 11
+
+        current_seats = db.query(User).filter(User.organization_id == org_id, User.is_deleted == False).count()
+        if current_seats >= max_seats:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Team seat limit reached ({current_seats}/{max_seats} seats used). Please upgrade your subscription plan to add more team members."
+            )
+
+        # Enforce 1 Admin account per organization
+        if user_in.role == UserRole.ADMIN:
+            existing_admins = db.query(User).filter(
+                User.organization_id == org_id,
+                User.role == UserRole.ADMIN,
+                User.is_deleted == False
+            ).count()
+            if existing_admins >= 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Your subscription plan includes 1 Admin account. Additional members must be created as Sales Executive or Manager."
+                )
+
     user = User(
         organization_id=org_id,
         name=user_in.name,
@@ -93,6 +127,21 @@ def update_user(
 
     if user_in.role == UserRole.SUPERADMIN and user.email.lower().strip() != "superadmin@realvion.com":
         raise HTTPException(status_code=400, detail="There can only be one Super Admin in the system (Platform Owner).")
+
+    if user_in.role == UserRole.ADMIN and user.role != UserRole.ADMIN and current_user.role != UserRole.SUPERADMIN:
+        org_id = user.organization_id or current_user.organization_id
+        if org_id:
+            existing_admins = db.query(User).filter(
+                User.organization_id == org_id,
+                User.role == UserRole.ADMIN,
+                User.is_deleted == False,
+                User.id != user.id
+            ).count()
+            if existing_admins >= 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Your subscription plan includes 1 Admin account. Additional members must be created as Sales Executive or Manager."
+                )
 
     for field, value in user_in.model_dump(exclude_unset=True).items():
         setattr(user, field, value)

@@ -93,10 +93,30 @@ export const SubscriptionSettingsCard: React.FC = () => {
         <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
           <div className="flex justify-between text-xs">
             <span className="text-slate-400 flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#C8A45D]" /> User Licenses</span>
-            <span className="font-bold text-white">{isSuperAdmin ? 'Unlimited Seats' : '4 / 10 Seats Used'}</span>
+            <span className="font-bold text-white">
+              {isSuperAdmin
+                ? 'Unlimited Seats'
+                : `${user?.seats_used || 1} / ${user?.max_users || (user?.plan_code === 'starter' ? 2 : (user?.plan_code === 'enterprise' ? 11 : 4))} Seats Used`}
+            </span>
           </div>
           <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div className="h-full bg-[#C8A45D] w-[40%]" />
+            <div
+              className={`h-full ${
+                !isSuperAdmin && (user?.seats_used || 1) >= (user?.max_users || (user?.plan_code === 'starter' ? 2 : (user?.plan_code === 'enterprise' ? 11 : 4)))
+                  ? 'bg-amber-400'
+                  : 'bg-[#C8A45D]'
+              }`}
+              style={{
+                width: isSuperAdmin
+                  ? '100%'
+                  : `${Math.min(
+                      Math.round(
+                        ((user?.seats_used || 1) / (user?.max_users || (user?.plan_code === 'starter' ? 2 : (user?.plan_code === 'enterprise' ? 11 : 4)))) * 100
+                      ),
+                      100
+                    )}%`,
+              }}
+            />
           </div>
         </div>
 

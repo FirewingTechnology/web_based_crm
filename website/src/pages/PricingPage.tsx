@@ -5,26 +5,28 @@ import { Link } from 'react-router-dom';
 export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
   const plans = [
     {
-      name: "Starter CP",
-      price: "₹999",
+      name: "Starter Duo",
+      price: "₹1,999",
       period: "/ month",
-      desc: "Perfect for independent single brokers & small agencies.",
+      desc: "Perfect for independent single brokers & duo partner teams.",
       features: [
-        "Up to 3 Sales Executives",
+        "1 Admin + 1 Sales Executive (2 Seats)",
+        "Up to 2,000 Leads",
         "Lead Pipeline Engine",
         "Voice & Audio Reminders",
         "Projects & Builders Catalog",
-        "Standard Email Support"
+        "Standard Email & WhatsApp Support"
       ],
       popular: false
     },
     {
-      name: "Professional Agency",
-      price: "₹4,999",
+      name: "Professional Team",
+      price: "₹2,999",
       period: "/ month",
       desc: "For growing channel partner firms and brokerage teams.",
       features: [
-        "Up to 15 Sales Executives",
+        "1 Admin + 3 Sales Executives (4 Seats)",
+        "Up to 10,000 Leads",
         "Lead Drawer & Notes History",
         "Automatic Monthly Target Engine",
         "Broker Network Commission Shares",
@@ -34,16 +36,17 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
       popular: true
     },
     {
-      name: "Enterprise Builder",
-      price: "Custom",
-      period: "Pricing",
-      desc: "For large real estate developers and pan-India CPs.",
+      name: "Enterprise Growth",
+      price: "₹4,999+",
+      period: "/ month",
+      desc: "For large real estate agencies and high-volume CP networks.",
       features: [
-        "Unlimited Sales Executives",
+        "1 Admin + 10 Sales Executives (11 Seats+)",
+        "Up to 50,000 Leads",
         "Dedicated Account Manager",
-        "Custom API Integrations",
-        "Custom SLA & Uptime Guarantee",
-        "On-Premise / Isolated Cloud Deploy"
+        "Custom API & Webhook Integrations",
+        "Advanced Role Hierarchy & Permissions",
+        "24/7 Priority Phone & VIP SLA"
       ],
       popular: false
     }

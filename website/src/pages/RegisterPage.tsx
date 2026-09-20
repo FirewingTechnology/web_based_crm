@@ -137,9 +137,9 @@ export const RegisterPage: React.FC = () => {
   };
 
   const plans = [
-    { code: 'starter', name: 'Starter CP', price: 999, seats: 3, desc: 'Solo agents & small teams' },
-    { code: 'professional', name: 'Professional Agency', price: 4999, seats: 15, popular: true, desc: 'Growing brokerage firms' },
-    { code: 'enterprise', name: 'Enterprise', price: 14999, seats: 50, desc: 'Large CPs & enterprise teams' },
+    { code: 'starter', name: 'Starter Duo', price: 1999, seats: 2, desc: '1 Admin + 1 Executive (2 seats)' },
+    { code: 'professional', name: 'Professional Team', price: 2999, seats: 4, popular: true, desc: '1 Admin + 3 Executives (4 seats)' },
+    { code: 'enterprise', name: 'Enterprise Growth', price: 4999, seats: 11, desc: '1 Admin + 10 Executives (11 seats+)' },
   ];
 
 

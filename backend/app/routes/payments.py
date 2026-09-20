@@ -27,9 +27,9 @@ from app.middleware.auth_middleware import get_current_user, get_optional_curren
 router = APIRouter(prefix="/payments", tags=["Razorpay Payments & Webhooks"])
 
 PLAN_PRICES = {
-    "starter": {"name": "Starter CP Plan", "subtotal": 999.0},
-    "professional": {"name": "Professional Agency Plan", "subtotal": 4999.0},
-    "enterprise": {"name": "Enterprise Plan", "subtotal": 14999.0},
+    "starter": {"name": "Starter Duo Plan", "subtotal": 1999.0, "max_users": 2, "max_leads": 2000},
+    "professional": {"name": "Professional Team Plan", "subtotal": 2999.0, "max_users": 4, "max_leads": 10000},
+    "enterprise": {"name": "Enterprise Growth Plan", "subtotal": 4999.0, "max_users": 11, "max_leads": 50000},
 }
 
 @router.post("/create-order", response_model=CreateOrderResponse)
@@ -38,7 +38,8 @@ def create_order(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ):
-    plan_info = PLAN_PRICES.get(req.plan_code.lower(), PLAN_PRICES["professional"])
+    plan_code_clean = req.plan_code.lower() if req.plan_code.lower() in PLAN_PRICES else "professional"
+    plan_info = PLAN_PRICES[plan_code_clean]
     subtotal = plan_info["subtotal"]
     
     if req.coupon_code and req.coupon_code.upper() == "REALVION20":
@@ -321,10 +322,33 @@ def _activate_tenant_post_payment(payment: Optional[Payment], email: Optional[st
         org.is_active = True
         payment.organization_id = org.id
         
+        # Determine plan details and quota limits based on payment / plan
+        plan_code = "professional"
+        if payment.plan_id:
+            p_rec = db.query(Plan).filter(Plan.id == payment.plan_id).first()
+            if p_rec and p_rec.code and p_rec.code.lower() in PLAN_PRICES:
+                plan_code = p_rec.code.lower()
+
+        if plan_code not in PLAN_PRICES or not payment.plan_id:
+            amt = payment.amount or 0.0
+            if amt >= 4000.0:
+                plan_code = "enterprise"
+            elif amt >= 2500.0:
+                plan_code = "professional"
+            else:
+                plan_code = "starter"
+
+        plan_info = PLAN_PRICES.get(plan_code, PLAN_PRICES["professional"])
+        max_users_assigned = plan_info.get("max_users", 4)
+        max_leads_assigned = plan_info.get("max_leads", 10000)
+
         sub = db.query(Subscription).filter(Subscription.organization_id == org.id).order_by(Subscription.id.desc()).first()
         if not sub:
             sub = Subscription(
                 organization_id=org.id,
+                plan_code=plan_code,
+                max_users=max_users_assigned,
+                max_leads=max_leads_assigned,
                 status="Active",
                 start_date=datetime.utcnow(),
                 end_date=datetime.utcnow() + timedelta(days=365),
@@ -332,6 +356,9 @@ def _activate_tenant_post_payment(payment: Optional[Payment], email: Optional[st
             )
             db.add(sub)
         else:
+            sub.plan_code = plan_code
+            sub.max_users = max_users_assigned
+            sub.max_leads = max_leads_assigned
             sub.status = "Active"
             sub.start_date = datetime.utcnow()
             sub.end_date = datetime.utcnow() + timedelta(days=365)

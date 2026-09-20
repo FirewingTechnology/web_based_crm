@@ -168,9 +168,9 @@ interface RecentPayment {
 }
 
 const PLAN_CONFIG: Record<string, { label: string; seats: number; leads: number; color: string }> = {
-  starter:      { label: 'Starter',      seats: 5,   leads: 1000,  color: 'text-blue-400'   },
-  professional: { label: 'Professional', seats: 15,  leads: 5000,  color: 'text-[#C8A45D]'  },
-  enterprise:   { label: 'Enterprise',   seats: 50,  leads: 25000, color: 'text-purple-400' },
+  starter:      { label: 'Starter',      seats: 2,   leads: 2000,  color: 'text-blue-400'   },
+  professional: { label: 'Professional', seats: 4,   leads: 10000, color: 'text-[#C8A45D]'  },
+  enterprise:   { label: 'Enterprise',   seats: 11,  leads: 50000, color: 'text-purple-400' },
 };
 
 export const SuperAdminDashboard: React.FC = () => {
@@ -198,8 +198,8 @@ export const SuperAdminDashboard: React.FC = () => {
   const [upgradeTarget, setUpgradeTarget] = useState<TenantAdmin | null>(null);
   const [upgradeForm, setUpgradeForm] = useState({
     plan_code: 'professional',
-    seats_limit: 15,
-    max_leads: 5000,
+    seats_limit: 4,
+    max_leads: 10000,
     extend_days: 365,
   });
   const [upgradeLoading, setUpgradeLoading] = useState(false);
@@ -221,7 +221,7 @@ export const SuperAdminDashboard: React.FC = () => {
     company_type: 'Channel Partner',
     plan_code: 'professional',
     payment_method: 'Offline Cash / Direct Bank Transfer',
-    seats_limit: 15,
+    seats_limit: 4,
     city: 'Mumbai',
     state: 'Maharashtra',
   });
@@ -1220,9 +1220,9 @@ export const SuperAdminDashboard: React.FC = () => {
                   onChange={e => handlePlanChange(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-[#C8A45D]"
                 >
-                  <option value="starter">Starter — 5 seats · 1,000 leads</option>
-                  <option value="professional">Professional — 15 seats · 5,000 leads</option>
-                  <option value="enterprise">Enterprise — 50 seats · 25,000 leads</option>
+                  <option value="starter">Starter — ₹1,999/mo (1 Admin + 1 Exec · 2 seats · 2,000 leads)</option>
+                  <option value="professional">Professional — ₹2,999/mo (1 Admin + 3 Exec · 4 seats · 10,000 leads)</option>
+                  <option value="enterprise">Enterprise — ₹4,999+/mo (1 Admin + 10 Exec · 11 seats · 50,000 leads)</option>
                 </select>
               </div>
 
@@ -1402,11 +1402,15 @@ export const SuperAdminDashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <label className="text-slate-300 font-semibold">Plan</label>
-                  <select value={newAdmin.plan_code} onChange={e => setNewAdmin({ ...newAdmin, plan_code: e.target.value })}
+                  <select value={newAdmin.plan_code} onChange={e => {
+                    const code = e.target.value;
+                    const seats = code === 'starter' ? 2 : (code === 'professional' ? 4 : 11);
+                    setNewAdmin({ ...newAdmin, plan_code: code, seats_limit: seats });
+                  }}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-[#C8A45D]">
-                    <option value="starter">Starter (₹1,999/mo)</option>
-                    <option value="professional">Professional (₹4,999/mo)</option>
-                    <option value="enterprise">Enterprise (Custom)</option>
+                    <option value="starter">Starter — ₹1,999/mo (1 Admin + 1 Exec)</option>
+                    <option value="professional">Professional — ₹2,999/mo (1 Admin + 3 Exec)</option>
+                    <option value="enterprise">Enterprise — ₹4,999+/mo (1 Admin + 10 Exec)</option>
                   </select>
                 </div>
                 <div className="space-y-1">
