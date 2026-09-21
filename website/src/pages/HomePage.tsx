@@ -68,6 +68,9 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
 
   const comparisonFeatures = [
     { name: "Real Estate Revenue Operating System (Full Lifecycle)", realvion: true, legacy: false },
+    { name: "AI Copilot Real Estate RAG Assistant (Powered by OpenAI)", realvion: true, legacy: false },
+    { name: "Visual Workflow Automation Engine & Portal Lead Ingest", realvion: true, legacy: false },
+    { name: "Instant Razorpay Online Subscriptions & GST Tax Invoices", realvion: true, legacy: false },
     { name: "Lead Health & Revenue Leakage Detection (0-100 Score)", realvion: true, legacy: false },
     { name: "VIP Site Visit Operating System & OTP Verification", realvion: true, legacy: false },
     { name: "Intelligent Inventory Matchmaking (BHK/Budget/Location)", realvion: true, legacy: false },
@@ -76,12 +79,21 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
     { name: "Sales Gamification & Live Team Leaderboard", realvion: true, legacy: false },
     { name: "Buyer KYC Vault (PAN/Aadhaar/RERA Agreement)", realvion: true, legacy: false },
     { name: "Voice & Audio Follow-Up Alarm Engine", realvion: true, legacy: false },
+    { name: "99.9% Uptime SLA with Continuous Sentry Observability", realvion: true, legacy: false },
   ];
 
   const faqs = [
     {
       q: "Why is REALVION different from Salesforce, Zoho, or LeadSquared?",
       a: "Generic CRMs simply store contact details. REALVION is a complete Revenue Operating System purpose-built for Indian Real Estate Channel Partners and Developers—uniting lead health scoring, VIP site visits, unit inventory matching, Indian RERA cost sheets, and commission aging ledgers."
+    },
+    {
+      q: "How does the AI Copilot (OpenAI RAG) assist sales executives?",
+      a: "The integrated AI Copilot analyzes developer inventory against buyer requirements in real time. It answers pricing and RERA queries, crafts personalized WhatsApp follow-ups, and drafts instant objection-handling pitches tailored to Indian real estate buyers."
+    },
+    {
+      q: "How does online payment, subscription activation, and billing work?",
+      a: "Subscriptions are activated instantly through our PCI-DSS compliant Razorpay gateway supporting UPI, Credit/Debit cards, and NetBanking. You can apply promotional coupon codes and immediately access downloadable GST tax invoices for 100% input credit."
     },
     {
       q: "How does the Lead Health & Revenue Leakage Engine work?",
@@ -207,12 +219,20 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
                 <span className="text-xs font-bold text-[#C8A45D]">10:41 AM</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/60 to-purple-950/60 border border-blue-500/40 flex items-center justify-between text-xs animate-pulse">
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/60 to-purple-950/60 border border-blue-500/40 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-blue-400" />
                   <span className="font-semibold text-slate-200">Voice Reminder Alarm Active</span>
                 </div>
                 <span className="text-[10px] text-blue-300 font-mono">SPEECH_SYNTH_ON</span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/20 border border-[#C8A45D]/40 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[#C8A45D] animate-pulse" />
+                  <span className="font-semibold text-slate-200">AI Copilot (OpenAI RAG)</span>
+                </div>
+                <span className="text-[10px] text-[#C8A45D] font-mono">AUTO_OBJECTION_READY</span>
               </div>
             </motion.div>
           </div>

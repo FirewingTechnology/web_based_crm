@@ -47,8 +47,20 @@ export const FeaturesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo 
       desc: "Full conversion analytics from Lead → Contacted → Qualified → Site Visit → Booking → Commission with bottleneck diagnostics." 
     },
     { 
-      title: "Intelligent Real-Time Priority Alert Engine", 
-      desc: "Automated real-time alert evaluation scanning for high-value leads at risk, overdue site visits, and aged commission invoices." 
+      title: "AI Copilot & Real Estate RAG Assistant", 
+      desc: "Context-aware AI Copilot powered by OpenAI—answering inventory specs, auto-drafting personalized WhatsApp follow-ups, and handling client objections in real time." 
+    },
+    { 
+      title: "Visual Workflow Automation & Portal Ingest", 
+      desc: "Dynamic trigger-action automation rules with multi-portal lead ingestion (99acres, MagicBricks, Meta Ads) and automated round-robin lead allocation." 
+    },
+    { 
+      title: "Automated Razorpay Subscriptions & Billing", 
+      desc: "Instant PCI-DSS compliant checkout with Razorpay for UPI/Cards/NetBanking, automated seat quota scaling, promotional coupons, and GST invoices." 
+    },
+    { 
+      title: "Enterprise Sentry Observability & Reliability", 
+      desc: "Continuous distributed error tracing and high-availability telemetry powered by Sentry SDK 2.0 ensuring 99.9% uptime and zero data leakage." 
     }
   ];
 
@@ -63,7 +75,7 @@ export const FeaturesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo 
             Engineered Capabilities Overview
           </h1>
           <p className="text-base text-slate-400 font-light max-w-2xl mx-auto">
-            From first inquiry to commission realization: Explore the 12 specialized modules driving predictable real estate revenue.
+            From first inquiry to commission realization: Explore the 16 specialized modules driving predictable real estate revenue.
           </p>
         </div>
 

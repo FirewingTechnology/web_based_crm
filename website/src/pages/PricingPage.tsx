@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Sparkles, CreditCard, ShieldCheck, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
@@ -12,9 +12,10 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
       features: [
         "1 Admin + 1 Sales Executive (2 Seats)",
         "Up to 2,000 Leads",
-        "Lead Pipeline Engine",
+        "Lead Pipeline & Health Engine",
         "Voice & Audio Reminders",
-        "Projects & Builders Catalog",
+        "Standard AI Copilot Queries",
+        "Instant Razorpay Online Activation (UPI/Cards)",
         "Standard Email & WhatsApp Support"
       ],
       popular: false
@@ -27,10 +28,12 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
       features: [
         "1 Admin + 3 Sales Executives (4 Seats)",
         "Up to 10,000 Leads",
-        "Lead Drawer & Notes History",
+        "AI Copilot Real Estate Intelligence (OpenAI)",
+        "Visual Workflow Automation Rule Engine",
+        "Multi-Portal Ingest (99acres, MagicBricks, Meta)",
         "Automatic Monthly Target Engine",
         "Broker Network Commission Shares",
-        "Inline Developer Auto-Creation",
+        "Instant Razorpay Activation + GST Invoices",
         "Priority 24/7 Support"
       ],
       popular: true
@@ -43,10 +46,11 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
       features: [
         "1 Admin + 10 Sales Executives (11 Seats+)",
         "Up to 50,000 Leads",
-        "Dedicated Account Manager",
-        "Custom API & Webhook Integrations",
-        "Advanced Role Hierarchy & Permissions",
-        "24/7 Priority Phone & VIP SLA"
+        "Unlimited AI Copilot Intelligence (OpenAI RAG)",
+        "Enterprise Workflow Automation & Webhooks",
+        "Custom Seat Scaling & Multi-Tenant Support",
+        "99.9% Sentry High-Availability SLA",
+        "Dedicated Account Manager & VIP Phone Support"
       ],
       popular: false
     }
@@ -61,7 +65,7 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
             Predictable Plans for Growing Brokerages
           </h1>
           <p className="text-base text-slate-400 font-light max-w-xl mx-auto">
-            No hidden setup fees. Scale your sales team with complete confidence.
+            No hidden setup fees. Instant online Razorpay activation with complete GST input credit.
           </p>
         </div>
 
@@ -109,6 +113,38 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
               </Link>
             </div>
           ))}
+        </div>
+
+        {/* Enterprise Trust & Payment Guarantees */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 border-t border-white/10">
+          <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
+            <CreditCard className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-white">PCI-DSS Razorpay Gateway</h4>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">UPI, Cards, NetBanking, and corporate billing.</p>
+            </div>
+          </div>
+          <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
+            <Sparkles className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-white">OpenAI RAG Copilot</h4>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">Instant property Q&A and WhatsApp follow-up replies.</p>
+            </div>
+          </div>
+          <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
+            <Zap className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-white">Workflow Automation</h4>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">Rule-based assignment, alerts, and lead decay triggers.</p>
+            </div>
+          </div>
+          <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
+            <ShieldCheck className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-white">99.9% Sentry SLA</h4>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">Continuous telemetry and automated tax invoices.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -32,6 +32,16 @@ export const SecuritySpecsPage: React.FC = () => {
       icon: <Cpu className="h-6 w-6 text-[#C8A45D]" />,
       title: "PCI-DSS Level 1 Payment Gateway",
       desc: "Payment processing is offloaded to Razorpay's PCI-DSS compliant infrastructure. REALVION does not store raw credit card credentials."
+    },
+    {
+      icon: <RefreshCw className="h-6 w-6 text-[#C8A45D]" />,
+      title: "Continuous Sentry Error Observability",
+      desc: "Real-time distributed tracing and exception isolation powered by Sentry SDK 2.0 ensuring 99.9% uptime and immediate incident alerts."
+    },
+    {
+      icon: <Server className="h-6 w-6 text-[#C8A45D]" />,
+      title: "Enterprise AI Zero Data Retention",
+      desc: "OpenAI RAG requests operate under enterprise zero-data-retention terms. Buyer inquiries and private brokerage notes are never used to train AI models."
     }
   ];
 
