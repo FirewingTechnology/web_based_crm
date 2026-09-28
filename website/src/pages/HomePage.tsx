@@ -450,42 +450,43 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
       {/* ─────────────────────────────────────────────────────────────
           1. HERO SECTION
           ───────────────────────────────────────────────────────────── */}
-      <section className="relative pt-36 pb-20 px-6 lg:px-12 max-w-7xl mx-auto overflow-hidden">
-        {/* Luxury Architectural Skyline Background with Obsidian Vignette */}
-        <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
+      <section className="relative pt-36 pb-24 w-full overflow-hidden border-b border-white/[0.08]">
+        {/* Full-Width Luxury Architectural Skyline Background - Pristine & Completely Visible */}
+        <div className="absolute inset-0 pointer-events-none select-none z-0">
           <img
             src="/images/hero-bg.jpg"
-            alt="Real estate skyline at dusk"
-            className="w-full h-full object-cover object-top opacity-20 filter contrast-125 scale-105"
+            alt="Real estate modern skyline at dusk"
+            className="w-full h-full object-cover object-center opacity-85 filter contrast-110 saturate-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/75 to-[#050505]/95" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]" />
+          {/* Subtle top & bottom blending only, leaving the cityscape bright and visible */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/75 via-black/20 to-[#050505]" />
         </div>
 
         {/* Ambient background glows */}
-        <div className="absolute top-10 right-1/4 w-[500px] h-[500px] bg-[#C8A45D]/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-blue-600/[0.08] rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute top-10 right-1/4 w-[500px] h-[500px] bg-[#C8A45D]/15 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-blue-600/[0.12] rounded-full blur-[130px] pointer-events-none" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+          {/* Left Text Column - Transparent & Box Removed for Proper Background View */}
           <div className="lg:col-span-7 space-y-6 text-left">
             
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C8A45D]/30 bg-[#C8A45D]/10 text-[#C8A45D] text-xs font-semibold tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C8A45D]/40 bg-black/60 backdrop-blur-sm text-[#C8A45D] text-xs font-semibold tracking-wide shadow-lg">
               <Sparkles className="h-3.5 w-3.5 animate-pulse" />
               <span>THE REAL ESTATE REVENUE OPERATING SYSTEM</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08] drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
               Turn Every Real Estate Lead Into a{' '}
               <span className="bg-gradient-to-r from-white via-slate-100 to-[#C8A45D] bg-clip-text text-transparent">
                 Managed Revenue Opportunity.
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl font-light">
+            <p className="text-base sm:text-lg text-slate-200 leading-relaxed max-w-2xl font-normal drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
               Connect lead generation, intelligent assignment, follow-ups, property matching, site visits, bookings, commissions, and revenue intelligence in one powerful platform.
             </p>
 
-            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] max-w-xl text-xs sm:text-sm text-slate-300 font-medium flex items-center gap-3">
+            <div className="p-3.5 rounded-2xl bg-black/60 backdrop-blur-sm border border-white/15 max-w-xl text-xs sm:text-sm text-slate-200 font-medium flex items-center gap-3 shadow-xl">
               <div className="h-2 w-2 rounded-full bg-[#C8A45D] animate-ping shrink-0" />
               <span>Every Lead. Every Follow-up. Every Site Visit. Every Booking. One Intelligent System.</span>
             </div>
@@ -1016,22 +1017,23 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
       {/* ─────────────────────────────────────────────────────────────
           9. SITE VISIT OS SPOTLIGHT
           ───────────────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto border-t border-white/[0.08] relative rounded-3xl overflow-hidden my-6">
-        {/* Luxury Real Estate Porte-Cochère Background */}
+      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto border border-white/[0.12] relative rounded-3xl overflow-hidden my-10 shadow-2xl">
+        {/* Luxury Real Estate Porte-Cochère Background - Vivid & Clearly Visible */}
         <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
           <img
             src="/images/sitevisit-bg.jpg"
             alt="Luxury residential high-rise porte-cochère"
-            className="w-full h-full object-cover object-center opacity-15 filter saturate-125 contrast-110"
+            className="w-full h-full object-cover object-center opacity-70 filter saturate-125 contrast-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/85 to-[#050505]/95" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-transparent to-[#050505]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/85 via-black/30 to-[#050505]/75" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/60" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+          {/* Left Text - Transparent & Box Removed */}
           <div className="lg:col-span-6 space-y-6 text-left">
-            <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Ground Operations Suite</span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+            <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest bg-black/60 px-3 py-1 rounded-full border border-[#C8A45D]/30 inline-block shadow">Ground Operations Suite</span>
+            <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
               From Lead to Site Visit — Without the Operational Chaos.
             </h2>
             <p className="text-sm sm:text-base text-slate-300 font-light leading-relaxed">
@@ -1362,19 +1364,19 @@ export const HomePage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo }) =
           16. FINAL CONVERSION LOCKUP & CTA
           ───────────────────────────────────────────────────────────── */}
       <section className="py-24 px-6 lg:px-12 max-w-5xl mx-auto border-t border-white/[0.08]">
-        <div className="p-10 sm:p-14 rounded-3xl border border-[#C8A45D]/40 text-center space-y-6 shadow-2xl relative overflow-hidden">
-          {/* Panoramic Metropolis Skyline Background with Golden Light Trails */}
+        <div className="p-10 sm:p-14 rounded-3xl border border-[#C8A45D]/50 text-center space-y-6 shadow-2xl relative overflow-hidden">
+          {/* Panoramic Metropolis Skyline Background with Golden Light Trails - Vivid & Clear */}
           <div className="absolute inset-0 pointer-events-none select-none z-0">
             <img
               src="/images/cta-bg.jpg"
               alt="Panoramic city skyline lights"
-              className="w-full h-full object-cover object-center opacity-25 filter contrast-125"
+              className="w-full h-full object-cover object-center opacity-70 filter contrast-120 saturate-120"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0f0e0b]/90 via-[#141412]/85 to-[#0a0a09]/95" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0e0d0a]/85 via-[#121210]/65 to-[#0a0a09]/90" />
           </div>
 
           <div className="relative z-10 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C8A45D]/15 border border-[#C8A45D]/30 text-[#C8A45D] text-xs font-bold tracking-wide uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C8A45D]/20 border border-[#C8A45D]/40 text-[#C8A45D] text-xs font-bold tracking-wide uppercase shadow-lg">
               <Sparkles className="h-4 w-4" /> Ready to See Your Real Estate Sales Operation Differently?
             </div>
 
