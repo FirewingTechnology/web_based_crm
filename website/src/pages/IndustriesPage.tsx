@@ -29,10 +29,13 @@ export const IndustriesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDem
     <div className="bg-[#050505] text-slate-100 min-h-screen pt-32 pb-24 px-6 lg:px-12 selection:bg-[#C8A45D] selection:text-black">
       <div className="max-w-6xl mx-auto space-y-16">
         <div className="text-center space-y-4">
-          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Industry Focus</span>
+          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">THE REAL ESTATE REVENUE OPERATING SYSTEM</span>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight">
-            Tailored for Every Real Estate Segment
+            Engineered for Every Real Estate Sales Model
           </h1>
+          <p className="text-base text-slate-400 font-light max-w-2xl mx-auto">
+            Bring fragmented enquiries, visits, bookings, and commissions into one connected revenue pipeline.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -48,12 +51,15 @@ export const IndustriesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDem
         </div>
 
         <div className="p-10 rounded-3xl bg-[#0a0a0a] border border-white/10 text-center space-y-6">
-          <h2 className="text-3xl font-bold text-white">See how REALVION fits your exact business model.</h2>
+          <h2 className="text-3xl font-bold text-white">Ready to See Your Real Estate Sales Operation Differently?</h2>
+          <p className="text-xs text-slate-400 max-w-lg mx-auto font-light">
+            Bring leads, sales activity, property intelligence, site visits, bookings and revenue operations into one connected system.
+          </p>
           <button
             onClick={onOpenDemo}
-            className="px-8 py-3.5 rounded-xl text-xs font-bold text-black bg-[#C8A45D] hover:bg-yellow-400 transition mx-auto flex items-center gap-2"
+            className="px-8 py-3.5 rounded-xl text-xs font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 transition mx-auto flex items-center gap-2"
           >
-            Book Industry Demo <ArrowRight className="h-4 w-4" />
+            BOOK A REALVION DEMO <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </div>

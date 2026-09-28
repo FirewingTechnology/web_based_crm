@@ -32,13 +32,13 @@ export const WebsiteFooter: React.FC = () => {
         <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#0d0d0d] via-[#15130b] to-[#0d0d0d] border border-[#C8A45D]/40 shadow-2xl shadow-black flex flex-col lg:flex-row items-center justify-between gap-8 backdrop-blur-md">
           <div className="space-y-3 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C8A45D]/15 border border-[#C8A45D]/30 text-[#C8A45D] text-xs font-bold tracking-wide uppercase">
-              <Sparkles className="h-4 w-4 animate-pulse" /> Next-Gen Brokerage CRM
+              <Sparkles className="h-4 w-4 animate-pulse" /> Real Estate Revenue Operating System
             </div>
             <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-              Ready to automate your real estate agency?
+              Ready to connect your complete sales operation?
             </h3>
             <p className="text-sm sm:text-base text-slate-300 font-light max-w-xl leading-relaxed">
-              Get instant access with pre-seeded sample leads, voice follow-up alarms, and developer catalog.
+              From Lead to Revenue — Connected, Automated, Intelligent. Every Lead. Every Follow-up. Every Site Visit. Every Booking.
             </p>
           </div>
 
@@ -47,13 +47,13 @@ export const WebsiteFooter: React.FC = () => {
               onClick={() => navigate('/register')}
               className="px-8 py-4 rounded-2xl text-sm font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 shadow-xl shadow-[#C8A45D]/30 transition transform hover:-translate-y-0.5 flex items-center gap-2"
             >
-              Start Free Account <ArrowRight className="h-4 w-4" />
+              Book a Demo <ArrowRight className="h-4 w-4" />
             </button>
             <button
               onClick={() => navigate('/contact')}
               className="px-7 py-4 rounded-2xl text-sm font-semibold text-slate-100 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-[#C8A45D]/50 transition flex items-center gap-2"
             >
-              <MessageSquare className="h-4 w-4 text-[#C8A45D]" /> Talk to Sales
+              <MessageSquare className="h-4 w-4 text-[#C8A45D]" /> Talk to Revenue Specialist
             </button>
           </div>
         </div>
@@ -76,7 +76,7 @@ export const WebsiteFooter: React.FC = () => {
               <div className="absolute -inset-2 bg-gradient-to-r from-[#C8A45D]/20 to-transparent rounded-2xl blur-lg opacity-40 group-hover:opacity-80 transition duration-300" />
               <img
                 src="/logo.png"
-                alt="REALVION"
+                alt="REALVION – Real Estate Revenue Operating System"
                 className="relative h-24 sm:h-28 md:h-32 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 style={{ maxWidth: '380px', maxHeight: '110px' }}
               />
@@ -84,7 +84,7 @@ export const WebsiteFooter: React.FC = () => {
           </div>
 
           <p className="text-slate-300 text-sm font-light leading-relaxed max-w-sm">
-            The official Real Estate Sales Operating System engineered specifically for Channel Partners, Brokerage Firms, and Agency Leaders across India.
+            The official Real Estate Revenue Operating System engineered specifically for Channel Partners, Brokerage Firms, Sales Teams, and Builders across India.
           </p>
 
           <div className="space-y-3 pt-2">

@@ -9,10 +9,10 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
 
   const navLinks = [
     { name: 'Solutions', path: '/solutions' },
-    { name: 'Features', path: '/features' },
+    { name: 'Platform Engines', path: '/features' },
     { name: 'Pricing', path: '/pricing' },
     { name: 'Industries', path: '/industries' },
-    { name: 'Blog', path: '/blog' },
+    { name: 'Insights', path: '/blog' },
     { name: 'FAQ', path: '/faq' },
     { name: 'Contact', path: '/contact' },
   ];
@@ -23,15 +23,17 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
 
   return (
     <nav className="fixed top-0 inset-x-0 z-40 h-24 border-b border-white/[0.08] bg-[#050505]/90 backdrop-blur-xl px-6 lg:px-12 flex items-center justify-between">
-      <div className="flex items-center cursor-pointer py-1" onClick={() => navigate('/')}>
+      <div className="flex items-center gap-3 cursor-pointer py-1" onClick={() => navigate('/')}>
         <img
           src="/logo.png"
-          alt="REALVION"
-          className="h-20 sm:h-22 w-auto object-contain transition-transform hover:scale-105"
-          style={{ maxWidth: '420px', maxHeight: '76px' }}
+          alt="REALVION – Real Estate Revenue Operating System"
+          className="h-16 sm:h-20 w-auto object-contain transition-transform hover:scale-105"
+          style={{ maxWidth: '380px', maxHeight: '72px' }}
         />
+        <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full bg-[#C8A45D]/10 border border-[#C8A45D]/30 text-[#C8A45D]">
+          Revenue OS
+        </span>
       </div>
-
 
       <div className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
         {navLinks.map((link) => (
@@ -67,7 +69,7 @@ export const WebsiteNavbar: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo
           onClick={() => navigate('/register')}
           className="px-5 py-2.5 rounded-xl text-xs font-bold text-black bg-gradient-to-r from-amber-500 via-[#C8A45D] to-yellow-400 hover:brightness-110 shadow-lg shadow-[#C8A45D]/25 transition flex items-center gap-1.5"
         >
-          <Sparkles className="h-3.5 w-3.5" /> Start Free <ArrowRight className="h-4 w-4" />
+          <Sparkles className="h-3.5 w-3.5" /> Book a Demo <ArrowRight className="h-4 w-4" />
         </button>
       </div>
 

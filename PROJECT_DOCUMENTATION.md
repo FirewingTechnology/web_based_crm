@@ -198,10 +198,18 @@ Public self-registration creates either a **Free 1-Hour Sandbox Demo** or a **Pa
 22. **SalesTarget** (`sales_targets`): Monthly revenue targets (INR Lakhs) and deal quotas per executive.
 23. **ActivityLog** (`activity_logs`): System-wide audit trail of user actions & lead note history.
 24. **Notification** (`notifications`): In-app alert notifications for task reminders and system messages.
+25. **SiteVisit** (`site_visits`): VIP site tour schedules, chauffeur details, and 4-digit pickup/check-in OTPs.
+26. **BuyerDocument** (`buyer_documents`): Buyer KYC repository (PAN, Aadhaar, Agreements) and verification status.
+27. **LeadSourceIntegration** & **LeadSourceEvent** (`lead_sources`): Webhook attribution and portal ingestion adapters.
+28. **CallRecord** (`call_records`): Telephony call logs, durations, recordings, and AI-generated call summaries.
+29. **AutomationRule** (`automation_rules`): Visual rule builder definitions (triggers, conditions, and automated actions).
+30. **SupportTicket** & **SupportMessage** (`support_tickets`): AI Copilot escalation to human support agents.
+
+For full granular product feature specifications and workflow breakdowns, refer to [docs/PRODUCT_FEATURES.md](./docs/PRODUCT_FEATURES.md).
 
 ---
 
-## 📡 API Endpoint Reference (17 Routers)
+## 📡 API Endpoint Reference (25 Routers)
 
 ### 1. Auth Service (`/api/v1/auth`)
 * `POST /login` – Authenticate user credentials & issue JWT tokens.
@@ -230,7 +238,7 @@ Public self-registration creates either a **Free 1-Hour Sandbox Demo** or a **Pa
 ### 5. Lead Pipeline (`/api/v1/leads`)
 * `GET /` – List buyer leads (scoped by user role).
 * `POST /` – Create new buyer lead.
-* `GET /{id}` – Get lead details and activity timeline.
+* `GET /{id}` – Get lead details, health score, and activity timeline.
 * `PUT /{id}` – Update lead status, budget, or assigned agent.
 * `POST /{id}/notes` – Add activity note to lead.
 * `DELETE /{id}` – Remove lead record.
@@ -261,6 +269,7 @@ Public self-registration creates either a **Free 1-Hour Sandbox Demo** or a **Pa
 ### 10. Commission Engine (`/api/v1/commissions`)
 * `GET /` – List commission records.
 * `POST /calculate` – Trigger commission override calculation for booking.
+* `PUT /{id}/stage` – Advance milestone payout status (Initiated ➔ Invoiced ➔ Paid).
 
 ### 11. Reporting & Analytics (`/api/v1/reports`)
 * `GET /dashboard-stats` – Retrieve executive dashboard KPIs.
@@ -291,12 +300,50 @@ Public self-registration creates either a **Free 1-Hour Sandbox Demo** or a **Pa
 * `POST /verify` – Verify HMAC-SHA256 signature and convert tenant to Active subscription.
 * `POST /webhook` – Asynchronous Razorpay webhook processing.
 
-### 17. Platform Super Admin (`/api/v1/superadmin`)
+### 17. Platform Super Admin (`/api/v1/superadmin` / `/api/v1/saas_admin`)
 * `GET /analytics` – Global platform KPIs (MRR, ARR, MoM Growth, Total Revenue).
 * `GET /organizations` – List all tenant organizations and subscription health.
 * `POST /create-tenant` – Provision offline tenant with custom credentials.
 * `POST /update-quota` – Modify tenant user/lead quota limits.
 * `POST /extend-subscription` – Manually extend tenant subscription duration.
+
+### 18. VIP Site Visits (`/api/v1/site-visits`)
+* `GET /` – List scheduled and completed VIP property visits.
+* `POST /` – Schedule site visit with chauffeur details and 4-digit verification OTP.
+* `POST /{id}/verify-otp` – Verify client pickup and arrival OTP code.
+* `POST /{id}/feedback` – Record post-visit buyer interest level and feedback.
+
+### 19. Buyer Documents & KYC Vault (`/api/v1/documents`)
+* `GET /` – List uploaded buyer KYC documents.
+* `POST /` – Upload new document (PAN, Aadhaar, Agreement, Cheque).
+* `PUT /{id}/verify` – Approve or reject document with audit rationale.
+
+### 20. Universal Lead Ingestion (`/api/v1/ingest` & `/ingest`)
+* `POST /` – Generic ingestion webhook for Meta Ads, Housing.com, 99acres, MagicBricks, and Zapier.
+* `POST /csv` – Batch import leads from CSV data.
+
+### 21. Lead Source Attribution (`/api/v1/lead-sources`)
+* `GET /` – List active lead source integrations and event logs.
+* `POST /configure` – Connect and configure external portal webhooks.
+
+### 22. Telephony & Call Logs (`/api/v1/calls`)
+* `GET /` – List recorded VoIP/telephony calls and outcomes.
+* `POST /log` – Record inbound/outbound call, duration, outcome, and AI call summary.
+
+### 23. Automation Hub (`/api/v1/automation`)
+* `GET /rules` – List visual automation rules.
+* `POST /rules` – Create automated IF-THEN workflow rule.
+* `PUT /rules/{id}/toggle` – Activate or pause automation rule.
+
+### 24. AI Copilot & Live Support (`/api/v1/copilot`)
+* `POST /query` – RAG natural language inquiry with objection playbooks and local fallback.
+* `POST /support/request` – Escalate query to a human support agent.
+* `GET /support/tickets` – List open/assigned support tickets.
+* `POST /support/tickets/{id}/message` – Send message in support ticket thread.
+
+### 25. WhatsApp Omnichannel Workflow (`/api/v1/whatsapp`)
+* `POST /send` – Send template-based WhatsApp message (qualification, visit confirmation, price sheet).
+* `GET /templates` – Retrieve available WhatsApp templates with variable interpolation.
 
 ---
 

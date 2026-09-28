@@ -62,5 +62,6 @@ npx playwright test
 
 ---
 
-## 📖 Full Technical Documentation
-For full architecture overview, database schemas, 17 API endpoints reference, and QA testing structure, see [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md).
+## 📖 Full Technical & Product Documentation
+- **Product Features Manual**: For complete functional specifications, workflows, and business modules, see [docs/PRODUCT_FEATURES.md](./docs/PRODUCT_FEATURES.md).
+- **Master Technical Architecture**: For architecture diagrams, database schemas, all 25 API endpoints reference, and QA testing structure, see [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md).

@@ -60,12 +60,12 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
     <div className="bg-[#050505] text-slate-100 min-h-screen pt-32 pb-24 px-6 lg:px-12 selection:bg-[#C8A45D] selection:text-black">
       <div className="max-w-6xl mx-auto space-y-16">
         <div className="text-center space-y-4">
-          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">Transparent Pricing</span>
+          <span className="text-xs font-bold text-[#C8A45D] uppercase tracking-widest">THE REAL ESTATE REVENUE OPERATING SYSTEM</span>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight">
-            Predictable Plans for Growing Brokerages
+            Predictable Investment in Your Revenue Operations
           </h1>
           <p className="text-base text-slate-400 font-light max-w-xl mx-auto">
-            No hidden setup fees. Instant online Razorpay activation with complete GST input credit.
+            Transparent subscription plans designed for growing real estate teams. Instant online Razorpay activation with automated GST input tax credit.
           </p>
         </div>
 
@@ -121,14 +121,14 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
             <CreditCard className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
             <div>
               <h4 className="text-xs font-bold text-white">PCI-DSS Razorpay Gateway</h4>
-              <p className="text-[11px] text-slate-400 font-light mt-0.5">UPI, Cards, NetBanking, and corporate billing.</p>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">UPI, Cards, NetBanking, and automated GST tax invoices.</p>
             </div>
           </div>
           <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
             <Sparkles className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
             <div>
               <h4 className="text-xs font-bold text-white">OpenAI RAG Copilot</h4>
-              <p className="text-[11px] text-slate-400 font-light mt-0.5">Instant property Q&A and WhatsApp follow-up replies.</p>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">Contextual real estate objection playbooks and local fallback.</p>
             </div>
           </div>
           <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
@@ -141,10 +141,18 @@ export const PricingPage: React.FC<{ onOpenDemo: () => void }> = () => {
           <div className="p-5 rounded-2xl bg-[#0c0c0c] border border-white/5 flex items-start gap-3 text-left">
             <ShieldCheck className="h-5 w-5 text-[#C8A45D] shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-bold text-white">99.9% Sentry SLA</h4>
-              <p className="text-[11px] text-slate-400 font-light mt-0.5">Continuous telemetry and automated tax invoices.</p>
+              <h4 className="text-xs font-bold text-white">Enterprise Compliance</h4>
+              <p className="text-[11px] text-slate-400 font-light mt-0.5">Configurable Indian cost sheets & tenant-isolated databases.</p>
             </div>
           </div>
+        </div>
+
+        {/* Regulatory & Safe Usage Clarification */}
+        <div className="p-6 rounded-2xl bg-[#0b0b0b] border border-white/5 text-slate-400 text-[11px] space-y-1.5 leading-relaxed text-left">
+          <p className="text-slate-300 font-medium">Compliance & Integration Notes:</p>
+          <p>• <span className="text-slate-300">Tax & Cost Sheets:</span> REALVION provides configurable cost-sheet workflows (including base area, floor rise, PLC, parking, and standard GST treatments) and does not provide formal legal or tax counsel.</p>
+          <p>• <span className="text-slate-300">Telephony & Call Recording:</span> Where supported by the connected telephony platform and applicable consent and legal requirements, call recordings can be associated with CRM records.</p>
+          <p>• <span className="text-slate-300">Location Verification:</span> All site-visit arrival checkpoints and chauffeur dispatches operate under permission-based verification workflows.</p>
         </div>
       </div>
     </div>
