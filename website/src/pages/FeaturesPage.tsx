@@ -237,13 +237,23 @@ export const FeaturesPage: React.FC<{ onOpenDemo: () => void }> = ({ onOpenDemo 
     : engines.filter(e => e.category === selectedCategory);
 
   return (
-    <div className="bg-[#050505] text-slate-100 min-h-screen pt-36 pb-24 px-6 lg:px-12 selection:bg-[#C8A45D] selection:text-black">
-      <div className="max-w-7xl mx-auto space-y-16">
+    <div className="bg-[#050505] text-slate-100 min-h-screen pt-36 pb-24 px-6 lg:px-12 selection:bg-[#C8A45D] selection:text-black relative overflow-hidden">
+      {/* Background Architectural Skyline */}
+      <div className="absolute top-0 left-0 right-0 h-[480px] pointer-events-none select-none z-0 overflow-hidden">
+        <img
+          src="/images/hero-bg.jpg"
+          alt="Architectural skyline background"
+          className="w-full h-full object-cover object-top opacity-15 filter contrast-125 scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/90 to-[#050505]" />
+      </div>
+
+      <div className="max-w-7xl mx-auto space-y-16 relative z-10">
         
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C8A45D]/30 bg-[#C8A45D]/10 text-[#C8A45D] text-xs font-semibold tracking-wide">
-            Real Estate Revenue Operating System
+            THE REAL ESTATE REVENUE OPERATING SYSTEM
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight">
             12 Revenue Engines. One Platform.
